@@ -120,7 +120,7 @@ class LoadGroup(DeepDict):
         LoadGroup
         """
         dtype = LoadGroup if blocktype is None else blocktype
-        return self.containers(self, inclusive=inclusive, dtype=dtype, deep=deep)
+        return self.containers(inclusive=inclusive, dtype=dtype, deep=deep)
 
     def cases(self, *args, inclusive: Optional[bool] = True, **kwargs) -> Iterable["LoadGroup"]:
         """
