@@ -1,5 +1,7 @@
-import numpy as np
 from typing import Union, Iterable, Optional
+
+import numpy as np
+import xarray as xr
 
 from sigmaepsilon.deepdict import DeepDict
 from sigmaepsilon.math import atleast1d
@@ -46,6 +48,15 @@ class NavierBeam(NavierProblem):
     >>> beam = NavierBeam(10.0, 100, EI=2000.0, GA=1500.0)
     """
 
+    postproc_components = [
+        "UY",
+        "ROTZ",
+        "CZ",
+        "EXY",
+        "MZ",
+        "SY",
+    ]
+
     def __init__(
         self,
         length: float,
@@ -80,8 +91,9 @@ class NavierBeam(NavierProblem):
 
         Returns
         -------
-        LinkedDeepDict
-            A nested dictionary with a same layout as the input.
+        DeepDict
+            A nested dictionary with a same layout as the input, but as an instance
+            of the `DeepDict` class in `sigmaepsilon.deepdict`.
         """
         # STIFFNESS
         LHS = lhs_Navier(self.length, self.N, D=self.EI, S=self.GA)
@@ -113,6 +125,6 @@ class NavierBeam(NavierProblem):
         # (nLHS, nRHS, nP, nX)
         result = DeepDict()
         for i, lc in enumerate(LC):
-            result[lc.address] = res[0, i, :, :]
+            result[lc.address] = self._postproc_result_to_xarray_2d(res[0, i, :, :])
         result.lock()
         return result

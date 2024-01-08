@@ -1,6 +1,7 @@
 from typing import Tuple, Union, Iterable, Optional
 
 import numpy as np
+import xarray as xr
 
 from sigmaepsilon.deepdict import DeepDict
 from sigmaepsilon.math import atleast2d
@@ -27,6 +28,22 @@ class RectangularPlate(NavierProblem):
     shape: Tuple[int]
         Numbers of harmonic terms involved in both directions.
     """
+
+    postproc_components = [
+        "UZ",
+        "ROTX",
+        "ROTY",
+        "CX",
+        "CY",
+        "CXY",
+        "EXZ",
+        "EYZ",
+        "MX",
+        "MY",
+        "MXY",
+        "QX",
+        "QY",
+    ]
 
     def __init__(
         self,
@@ -113,6 +130,6 @@ class RectangularPlate(NavierProblem):
         # (nLHS, nRHS, nP, nX)
         result = DeepDict()
         for i, lc in enumerate(LC):
-            result[lc.address] = res[0, i, :, :]
+            result[lc.address] = self._postproc_result_to_xarray_2d(res[0, i, :, :])
         result.lock()
         return result
