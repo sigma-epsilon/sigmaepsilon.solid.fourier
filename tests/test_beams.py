@@ -6,11 +6,11 @@ from sigmaepsilon.core.testing import SigmaEpsilonTestCase
 from sigmaepsilon.solid.fourier import LoadGroup, PointLoad, LineLoad, NavierBeam
 
 
-class TestBernoulliBeam(SigmaEpsilonTestCase):
+class TestBeams(SigmaEpsilonTestCase):
     def test_bernoulli_beam(self):
         L = 1000.0  # geometry
         w, h = 20.0, 80.0  # rectangular cross-section
-        E, nu = 210000.0, 0.25  # material
+        E = 210000.0  # material
 
         I = w * h**3 / 12
         EI = E * I
@@ -31,8 +31,8 @@ class TestBernoulliBeam(SigmaEpsilonTestCase):
         x = np.linspace(0, L, 2)
 
         beam = NavierBeam(L, 2, EI=EI)
-        solution = beam.solve(loads, x)
-        
+        beam.solve(loads, x)
+
     def test_timoshenko_beam(self):
         L = 1000.0  # geometry
         w, h = 20.0, 80.0  # rectangular cross-section
@@ -60,7 +60,7 @@ class TestBernoulliBeam(SigmaEpsilonTestCase):
         x = np.linspace(0, L, 2)
 
         beam = NavierBeam(L, 2, EI=EI, GA=GA)
-        solution = beam.solve(loads, x)
+        beam.solve(loads, x)
 
 
 if __name__ == "__main__":
