@@ -12,6 +12,9 @@
    API Reference <api>
    Development <development>
 
+.. image:: logo.png
+    :align: center
+
 **Version**: |version|
 
 **Useful links**:
@@ -27,6 +30,13 @@
 .. _Numba: https://numba.pydata.org/
 .. _SciPy: https://scipy.org/
 .. _SymPy: https://www.sympy.org/en/index.html
+
+.. warning::
+
+   This project is currently in an **alpha stage**. It's important to note that the authors are 
+   aware of certain areas in the documentation that require improvement. As this is an early stage 
+   project, some features and functionalities might be incomplete or subject to change. We appreciate 
+   your understanding and welcome any feedback to enhance the project.
 
 The `sigmaepsilon.solid.fourier`_ library offers semi-analytic solutions to some beam and plate 
 bending problems, where the boundary conditions are a-priori satisfied by careful selection of the 
@@ -47,13 +57,15 @@ using `Numba`_.
 Highlights
 ==========
 
-* Classes to handle linear elastic materials of all kinds.
-* Elastic stiffness calculations for all kinds of models like Uflyand-Mindlin shells, 
-  Kirchhoff-Love shells, Timoshenko-Ehrenfest and Euler-Bernoulli beams, 3d bodies, etc.
-* Utilization calculations.
-* Fitting of failure models to observed data.
-* NumPy-compilant data classes to handle stiffness, strains and stresses.
-* Fast and efficient code with GPU support.
+* Semi-analytic, Navier solutions of beam and plate problems.
+* Easy to use, high level interface to define various kinds of loads.
+* Support for arbitrary loads using Monte-Carlo based coefficient determination.
+* Industry-grade performance based on highly parallel, performant code.
+* Tight integration with popular Python libraries like NumPy, SciPy, xarray, etc.
+* A gallery of examples for plotting with Matplotlib for all types of problems.
+* A collection of downloadable Jupyter Notebooks ready for execution covering all available functionality.
+* Getting Started, User Guide and API Reference in the documentation.
+* The library is intensively tested on CircleCI and has a high coverage level.
 
 Installation
 ============

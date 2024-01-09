@@ -16,7 +16,7 @@ from datetime import date
 import warnings
 
 
-import sigmaepsilon.mesh as library
+import sigmaepsilon.solid.fourier as library
 
 from sphinx.config import Config
 
@@ -188,7 +188,9 @@ html_theme_options = {
     ],
     "logo": {
         # Because the logo is also a homepage link, including "home" in the alt text is good practice
-        "text": "SigmaEpsilon.Solid.Material",
+        "text": ".Solid.Fourier",
+        'image_light': '_static/sigmaepsilon_logo.png',  # Path to the logo for light mode
+        'image_dark': '_static/sigmaepsilon_logo.png',   # Path to the logo for dark mode (if different)
     },
 }
 html_js_files = [

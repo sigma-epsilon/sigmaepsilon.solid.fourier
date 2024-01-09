@@ -1,5 +1,7 @@
 # **SigmaEpsilon.Solid.Fourier** - Fourier solutions of some plate and beam bending problems in Python
 
+![ ](logo.png)
+
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/sigma-epsilon/sigmaepsilon.solid.fourier/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/sigma-epsilon/sigmaepsilon.solid.fourier/tree/main)
 [![codecov](https://codecov.io/gh/sigma-epsilon/sigmaepsilon.solid.fourier/graph/badge.svg?token=7JKJ3HHSX3)](https://codecov.io/gh/sigma-epsilon/sigmaepsilon.solid.fourier)
 [![Documentation Status](https://readthedocs.org/projects/sigmaepsilonsolidfourier/badge/?version=latest)](https://sigmaepsilonsolidfourier.readthedocs.io/en/latest/?badge=latest)
