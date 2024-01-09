@@ -1,3 +1,3 @@
 sigmaepsilon.mesh >= 2.3.1
-sigmaepsilon.solid.material
+sigmaepsilon.solid.material >= 0.0.2a0
 xarray
