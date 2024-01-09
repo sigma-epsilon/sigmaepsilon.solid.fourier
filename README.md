@@ -14,21 +14,25 @@
 
 ## What is sigmaepsilon.solid.fourier?
 
-The `sigmaepsilon.solid.fourier` library offers semi alanztic solutions to some pupular beam and plate bending problems, where the boundary conditions are a-priori satisfied by careful selection of the approximating functions. Although the calculations only cover a handful of boundary conditions, when they are applicable, they are significantly faster than let say a finite element solution. For this reason, it is very useful for a couple of things:
+The `sigmaepsilon.solid.fourier` library offers semi-analytic solutions to some beam and plate bending problems, where the boundary conditions are a-priori satisfied by careful selection of the approximating functions. Although the calculations only cover a handful of boundary conditions, when they are applicable, they are significantly faster than let say a finite element solution. For this reason, it is very useful for a couple of things:
 
 * experimentation
 * verification
 * concept validation
 * education
+* publication
 
 ### Highlights
 
 * Semi-analytic, Navier solutions of beam and plate problems.
-* High level interface to define various kinds of loads.
+* Easy to use, high level interface to define various kinds of loads.
 * Support for arbitrary loads using Monte-Carlo based coefficient determination.
 * Industry-grade performance based on highly parallel, performant code.
 * Tight integration with popular Python libraries like NumPy, SciPy, xarray, etc.
-* Documentation and lots of examples.
+* A gallery of examples for plotting with Matplotlib for all types of problems.
+* A collection of downloadable Jupyter Notebooks ready for execution covering all available functionality.
+* Getting Started, User Guide and API Reference in the documentation.
+* The library is intensively tested on CircleCI and has a high coverage level (read more about testing below).
 
 ## Documentation
 
