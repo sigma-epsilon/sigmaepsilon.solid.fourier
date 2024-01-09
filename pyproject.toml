@@ -8,12 +8,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sigmaepsilon.solid.fourier"
-version = "1.0.0"
-description = "Benchmark solutions for beams and plates based on Fourier series"
+version = "0.0.1a"
+description = "Fourier solutions of some plate and beam bending problems in Python"
 classifiers=[
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
@@ -31,9 +30,10 @@ license = { file = "LICENSE" }
 keywords = [
     "engineering", "fourier", "benchmark", "mechanics", 
     "solid mechanics", "elasticity", "mindlin", "kirchhoff", "euler",
-    "timoshenko", "beam", "plate"
+    "timoshenko", "beam", "plate", "uflyand", "bernoulli", "bensys",
+    "programming", "Python"
 ]
-requires-python = ">=3.7, <3.11"
+requires-python = ">=3.8, <3.11"
 dynamic = ["dependencies", "optional-dependencies"]
 
 [tool.setuptools.packages.find]
@@ -47,4 +47,4 @@ optional-dependencies.devops = { file = ["requirements-devops.txt"] }
 optional-dependencies.docs = { file = ["docs/requirements.txt"] }
 
 [project.urls]
-Homepage = "https://github.com/sigma-epsilon/sigmaepsilon.solid"
+Homepage = "https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier"
