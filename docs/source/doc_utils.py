@@ -30,7 +30,8 @@ def generate_examples_gallery_rst(
         f.write("\n")
 
         for nb in notebook_names:
-            f.write(r"    {foldername}/".format(foldername=foldername) + nb + "\n")
+            if not f[0] == "_":
+                f.write(r"    {foldername}/".format(foldername=foldername) + nb + "\n")
 
 
 def generate_user_guide_rst(
@@ -63,4 +64,5 @@ def generate_user_guide_rst(
         f.write("\n")
 
         for nb in notebook_names:
-            f.write(r"    {foldername}/".format(foldername=foldername) + nb + "\n")
+            if not f[0] == "_":
+                f.write(r"    {foldername}/".format(foldername=foldername) + nb + "\n")
