@@ -36,6 +36,11 @@ class LoadGroup(DeepDict):
 
     This class is also the base class of all other load types.
 
+    Parameters
+    ----------
+    exclusive: bool, Optional
+        If `True`, load cases of this group can't interact. Default is `True`.
+    
     See Also
     --------
     :class:`DeepDict`
@@ -68,18 +73,21 @@ class LoadGroup(DeepDict):
 
     _typestr_ = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, cooperative:bool=False, **kwargs):
         super().__init__(*args, **kwargs)
         self.__problem = None
+        self._cooperative = cooperative
 
     @property
     def problem(self) -> NavierProblem:
         """
         Returns the attached problem.
         """
-        if self.is_root():
+        if self.__problem is not None:
             return self.__problem
-        return self.root.problem
+        elif self.is_root():
+            return self.__problem
+        return self.parent.problem
 
     @problem.setter
     def problem(self, value: NavierProblem):
@@ -91,8 +99,21 @@ class LoadGroup(DeepDict):
         value: NavierProblem
             The problem the loads are defined for.
         """
-        assert self.is_root(), "The problem can only be set on the top-level object."
         self.__problem = value
+        
+    @property
+    def cooperative(self) -> bool:
+        """
+        Returns `True` if the load cases of this group can interact.
+        """
+        return self._cooperative
+
+    @cooperative.setter
+    def cooperative(self, value: bool):
+        """
+        Sets the cooperativity of the cases in the group.
+        """
+        self._cooperative = value
 
     def blocks(
         self,
