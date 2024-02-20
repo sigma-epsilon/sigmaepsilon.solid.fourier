@@ -1,3 +1,8 @@
 {
-    "julia.environmentPath": "f:\\GitHub\\SigmaEpsilon\\sigmaepsilon.solid.fourier"
+    "julia.environmentPath": "f:\\GitHub\\SigmaEpsilon\\sigmaepsilon.solid.fourier",
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }
