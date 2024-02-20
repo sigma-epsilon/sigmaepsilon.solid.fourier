@@ -16,7 +16,7 @@ class NavierProblem:
         nP = len(data)
         components = self.__class__.postproc_components
         coords = [np.arange(nP), components]
-        xarr = xr.DataArray(data, coords=coords, dims=["point", "component"])
+        xarr = xr.DataArray(data, coords=coords, dims=["index", "component"])
         return xarr
 
     @abstractmethod
