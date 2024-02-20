@@ -7,7 +7,7 @@
 [![Documentation Status](https://readthedocs.org/projects/sigmaepsilonsolidfourier/badge/?version=latest)](https://sigmaepsilonsolidfourier.readthedocs.io/en/latest/?badge=latest)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI](https://badge.fury.io/py/sigmaepsilon.solid.fourier.svg)](https://pypi.org/project/sigmaepsilon.solid.fourier)
-[![Python 3.8‒3.10](https://img.shields.io/badge/python-3.7%E2%80%923.10-blue)](https://www.python.org)
+[![Python](https://img.shields.io/badge/python-3.10%E2%80%923.11-blue)](https://www.python.org)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Requirements Status](https://dependency-dash.repo-helper.uk/github/sigma-epsilon/sigmaepsilon.solid.fourier/badge.svg)](https://dependency-dash.repo-helper.uk/github/sigma-epsilon/sigmaepsilon.solid.fourier)
 
@@ -42,7 +42,7 @@ The [documentation](https://sigmaepsilonsolidfourier.readthedocs.io/en/latest/) 
 
 ## Installation
 
-sigmaepsilon.solid.fourier can be installed from PyPI using `pip` on Python >= 3.8:
+sigmaepsilon.solid.fourier can be installed from PyPI using `pip` on Python >= 3.10:
 
 ```console
 >>> pip install sigmaepsilon.solid.fourier
@@ -86,7 +86,7 @@ Python 3.10.2 (tags/v3.10.2:3d8993a, May  3 2023, 11:48:03) [MSC v.1928 64 bit (
 Type "help", "copyright", "credits" or "license" for more information.
 >>> import sigmaepsilon.solid.fourier
 >>> sigmaepsilon.solid.fourier.__version__
-'0.0.1a'
+'1.0.0'
 ```
 
 ## Testing and coverage
