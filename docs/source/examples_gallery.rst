@@ -5,7 +5,7 @@ Gallery
     :maxdepth: 1
     :reversed:
 
-    examples/bernoulli_metplotlib.ipynb
-    examples/Kirchhoff_Love_matplotlib.ipynb
-    examples/timoshenko_matplotlib.ipynb
-    examples/Uflyand_Mindlin_matplotlib.ipynb
+    gallery/bernoulli_metplotlib.ipynb
+    gallery/Kirchhoff_Love_matplotlib.ipynb
+    gallery/timoshenko_matplotlib.ipynb
+    gallery/Uflyand_Mindlin_matplotlib.ipynb

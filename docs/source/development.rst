@@ -1,18 +1,20 @@
-Installation for development
-============================
+.. _development:
 
-If you are a developer and want to install the library in development mode, the suggested way is by using this command:
+===========
+Development
+===========
 
-.. code-block:: sh
+This section is intended for developers who want to contribute to the project.
 
-    $ pip install "-e .[test, dev]"
+.. note::
 
-Testing
-=======
+   This page is under construction.
 
-To test the library, we use `pytest`. Run the following command to run all tests:
-
-.. code-block:: sh
-
-    $ pytest tests
+.. toctree::
+    :maxdepth: 1
+    :titlesonly:
+    
+    developer_guide/installation
+    developer_guide/testing
+    developer_guide/documenting
     

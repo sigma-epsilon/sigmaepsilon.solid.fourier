@@ -26,23 +26,10 @@ from sphinx.config import Config
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath("../../src"))
 
-from doc_utils import generate_examples_gallery_rst, generate_user_guide_rst
+from doc_utils import generate_examples_gallery_rst
 
 generate_examples_gallery_rst(
-    title="Gallery", filename="examples_gallery", foldername="examples", reversed=True
-)
-
-user_guide_description = """
-The user guide provides in-depth information on the key concepts of the library with 
-useful background information and explanation.
-"""
-
-generate_user_guide_rst(
-    title="User Guide",
-    filename="user_guide",
-    foldername="notebooks",
-    reversed=False,
-    description=user_guide_description,
+    title="Gallery", filename="examples_gallery", foldername="gallery", reversed=True
 )
 
 # -- Project information -----------------------------------------------------
@@ -53,6 +40,9 @@ copyright = "2024-%s, Bence Balogh" % date.today().year
 author = "Bence Balogh"
 version = library.__version__
 release = "v" + library.__version__
+
+def setup(app: Config):
+    app.add_config_value("project_name", project, "html")
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -75,7 +65,6 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx.ext.coverage",
     "sphinx.ext.extlinks",
-    "sphinx.ext.mathjax",
     "sphinx_design",
     "sphinx_inline_tabs",
     # "pyvista.ext.plot_directive",
@@ -131,6 +120,13 @@ intersphinx_mapping = {
         None,
     ),
 }
+
+# sphinx_copybutton configuration --------------------------------------------
+
+copybutton_exclude = '.linenos, .gp, .go'
+copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
+copybutton_prompt_is_regexp = True
+copybutton_only_copy_prompt_lines = True
 
 # napoleon config ---------------------------------------------------------
 
@@ -188,9 +184,7 @@ html_theme_options = {
     ],
     "logo": {
         # Because the logo is also a homepage link, including "home" in the alt text is good practice
-        "text": ".Solid.Fourier",
-        'image_light': '_static/sigmaepsilon_logo.png',  # Path to the logo for light mode
-        'image_dark': '_static/sigmaepsilon_logo.png',   # Path to the logo for dark mode (if different)
+        "text": "SigmaEpsilon.Solid.Fourier",
     },
 }
 html_js_files = [
@@ -198,7 +192,7 @@ html_js_files = [
     "custom.js",
 ]
 html_css_files = ["custom.css"]
-html_context = {"default_mode": "dark"}
+html_context = {"default_mode": "light"}
 html_static_path = ["_static"]
 
 # -- nbsphinx configuration -------------------------------------------------
@@ -208,6 +202,13 @@ nbsphinx_prolog = r"""
 {% set docname = "docs\\source\\" + env.doc2path(env.docname, base=None) %}
 
 .. raw:: html
+
+    <style>
+        .nbinput .prompt,
+        .nboutput .prompt {
+            display: none;
+        }
+    </style>
 
     <div class="admonition note">
       This page was generated from
@@ -230,7 +231,3 @@ nbsphinx_epilog = r"""
     \textcolor{gray}{\dotfill\ \sphinxcode{\sphinxupquote{\strut
     {{ docname | escape_latex }}}} ends here.}}
 """
-
-
-def setup(app: Config):
-    app.add_config_value("project_name", project, "html")

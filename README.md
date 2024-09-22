@@ -1,6 +1,6 @@
 # **SigmaEpsilon.Solid.Fourier** - Fourier solutions of some plate and beam bending problems in Python
 
-![ ](logo.png)
+![ ](https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier/blob/main/logo.png?raw=true)
 
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/sigma-epsilon/sigmaepsilon.solid.fourier/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/sigma-epsilon/sigmaepsilon.solid.fourier/tree/main)
 [![codecov](https://codecov.io/gh/sigma-epsilon/sigmaepsilon.solid.fourier/graph/badge.svg?token=7JKJ3HHSX3)](https://codecov.io/gh/sigma-epsilon/sigmaepsilon.solid.fourier)
@@ -9,12 +9,6 @@
 [![PyPI](https://badge.fury.io/py/sigmaepsilon.solid.fourier.svg)](https://pypi.org/project/sigmaepsilon.solid.fourier)
 [![Python](https://img.shields.io/badge/python-3.10%E2%80%923.11-blue)](https://www.python.org)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Requirements Status](https://dependency-dash.repo-helper.uk/github/sigma-epsilon/sigmaepsilon.solid.fourier/badge.svg)](https://dependency-dash.repo-helper.uk/github/sigma-epsilon/sigmaepsilon.solid.fourier)
-
-> **Note**
-> Here and there, implementation of the performance critical parts of the library rely on the JIT-compilation capabilities of Numba. This means that the library performs well even for large scale problems, on the expense of a longer first call.
-
-## What is sigmaepsilon.solid.fourier?
 
 The `sigmaepsilon.solid.fourier` library offers semi-analytic solutions to some beam and plate bending problems, where the boundary conditions are a-priori satisfied by careful selection of the approximating functions. Although the calculations only cover a handful of boundary conditions, when they are applicable, they are significantly faster than let say a finite element solution. For this reason, it is very useful for a couple of things:
 
@@ -24,9 +18,9 @@ The `sigmaepsilon.solid.fourier` library offers semi-analytic solutions to some 
 * education
 * publication
 
-### Highlights
+## Highlights
 
-* Semi-analytic, Navier solutions of beam and plate problems.
+* Semi-analytic solutions of beam and plate problems.
 * Easy to use, high level interface to define various kinds of loads.
 * Support for arbitrary loads using Monte-Carlo based coefficient determination.
 * Industry-grade performance based on highly parallel, performant code.
@@ -48,33 +42,13 @@ sigmaepsilon.solid.fourier can be installed from PyPI using `pip` on Python >= 3
 >>> pip install sigmaepsilon.solid.fourier
 ```
 
-or chechkout with the following command using GitHub CLI
-
-```console
-gh repo clone sigma-epsilon/sigmaepsilon.solid.fourier
-```
-
-and install from source by typing
-
-```console
->>> pip install .
-```
-
 If you want to run the tests, you can install the package along with the necessary optional dependencies like this
 
 ```console
 >>> pip install ".[test]"
 ```
 
-If want to execute on the GPU, you need to manually install the necessary requirements. Numba is a direct dependency, so even in this case you have to care about having the prover version of the cuda toolkit installed. For this, you need to know the version of the cuda compute engine, which depends on the version of GPU card you are having.
-
-### Development mode
-
-If you are a developer and want to install the library in development mode, the suggested way is by using this command:
-
-```console
->>> pip install "-e .[test, dev]"
-```
+If want to execute on the GPU, you need to manually install the necessary requirements. Numba is a direct dependency, so even in this case you have to care about having the proper version of the cuda toolkit installed. For this, you need to know the version of the cuda compute engine, which depends on the version of GPU card you are having.
 
 ### Checking your installation
 
@@ -86,7 +60,7 @@ Python 3.10.2 (tags/v3.10.2:3d8993a, May  3 2023, 11:48:03) [MSC v.1928 64 bit (
 Type "help", "copyright", "credits" or "license" for more information.
 >>> import sigmaepsilon.solid.fourier
 >>> sigmaepsilon.solid.fourier.__version__
-'1.0.0'
+'x.y.z'
 ```
 
 ## Testing and coverage
@@ -94,7 +68,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 The following command runs all tests and creates a html report in a folder named `htmlcov` (the settings are governed by the `.coveragerc` file):
 
 ```console
-python -m pytest --cov-report html --cov-config=.coveragerc --cov sigmaepsilon.solid.fourier
+python -m pytest --cov-report=html --cov-config=.coveragerc --cov=sigmaepsilon.solid.fourier
 ```
 
 Open `htmlcov/index.html` to see the results.
