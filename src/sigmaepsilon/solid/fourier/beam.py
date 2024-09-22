@@ -1,7 +1,6 @@
-from typing import Union, Iterable, Optional
+from typing import Iterable
 
 import numpy as np
-import xarray as xr
 
 from sigmaepsilon.deepdict import DeepDict
 from sigmaepsilon.math import atleast1d
@@ -19,7 +18,8 @@ __all__ = ["NavierBeam"]
 class NavierBeam(NavierProblem):
     """
     A class to handle simply-supported plates and their solution
-    using Navier's approach.
+    using Navier's approach. The beam is either Euler-Bernoulli or
+    Timoshenko, depending on the presence of the shear stiffness.
 
     Parameters
     ----------
@@ -29,7 +29,7 @@ class NavierBeam(NavierProblem):
         The number of harmonic terms involved in the approximation.
         Default is 100.
     EI: float
-        Bending stiffness. Default is None.
+        Bending stiffness.
     GA: float, Optional
         Shear stiffness. Only for Timoshenko beams. Default is None.
 
@@ -46,6 +46,7 @@ class NavierBeam(NavierProblem):
 
     >>> from sigmaepsilon.solid.fourier import NavierBeam
     >>> beam = NavierBeam(10.0, 100, EI=2000.0, GA=1500.0)
+
     """
 
     postproc_components = [
@@ -60,10 +61,10 @@ class NavierBeam(NavierProblem):
     def __init__(
         self,
         length: float,
-        N: Optional[int] = 100,
+        N: int = 100,
         *,
-        EI: Optional[Union[float, None]] = None,
-        GA: Optional[Union[float, None]] = None,
+        EI: float,
+        GA: float | None = None,
     ):
         super().__init__()
         self.length = length
@@ -71,17 +72,15 @@ class NavierBeam(NavierProblem):
         self.GA = GA
         self.N = N
 
-    def solve(
-        self, loads: Union[dict, LoadGroup], points: Union[float, Iterable]
-    ) -> DeepDict:
+    def solve(self, loads: LoadGroup, points: float | Iterable) -> DeepDict:
         """
         Solves the problem and calculates all postprocessing quantities at
         one ore more points.
 
         Parameters
         ----------
-        loads: Union[dict, LoadGroup]
-            The loads. If it is an array, it should be a 2d float array.
+        loads: LoadGroup
+            The loads.
         points: float or Iterable
             A float or an 1d iterable of coordinates, where the results are
             to be evaluated. If it is a scalar, the resulting dictionary
@@ -92,39 +91,39 @@ class NavierBeam(NavierProblem):
         Returns
         -------
         DeepDict
-            A nested dictionary with a same layout as the input, but as an instance
-            of the `DeepDict` class in `sigmaepsilon.deepdict`.
+            A nested dictionary with a same layout as the loads, but as an instance
+            of :class:`~sigmaepsilon.deepdict.DeepDict`.
         """
-        # STIFFNESS
-        LHS = lhs_Navier(self.length, self.N, D=self.EI, S=self.GA)
-
-        # LOADS
         if isinstance(loads, LoadGroup):
             _loads = loads
-        elif isinstance(loads, dict):
-            _loads = LoadGroup.from_dict(loads)
         else:
             raise NavierLoadError()
+        
+        # STIFFNESS
+        lhs = lhs_Navier(self.length, self.N, D=self.EI, S=self.GA)
+
+        # LOADS
         _loads.problem = self
-        LC = list(_loads.cases())
-        RHS = np.vstack(list(lc.rhs() for lc in LC))
+        load_cases = list(_loads.cases())
+        rhs = np.vstack(list(lc.rhs() for lc in load_cases))
 
         # SOLUTION
         if self.GA is None:
-            _RHS = rhs_Bernoulli(RHS, self.length)
-            coeffs = linsolve_Bernoulli(LHS, _RHS)
+            _RHS = rhs_Bernoulli(rhs, self.length)
+            coeffs = linsolve_Bernoulli(lhs, _RHS)
             del _RHS
             # (nLHS, nRHS, nMN)
         else:
-            coeffs = linsolve_Timoshenko(LHS, RHS)
+            coeffs = linsolve_Timoshenko(lhs, rhs)
             # (nLHS, nRHS, nMN, 2)
 
         # POSTPROCESSING
         points = atleast1d(points)
-        res = postproc(self.length, self.N, points, coeffs, RHS, self.EI, self.GA)
+        res = postproc(self.length, self.N, points, coeffs, rhs, self.EI, self.GA)
         # (nLHS, nRHS, nP, nX)
         result = DeepDict()
-        for i, lc in enumerate(LC):
+        for i, lc in enumerate(load_cases):
             result[lc.address] = self._postproc_result_to_xarray_2d(res[0, i, :, :])
         result.lock()
+
         return result

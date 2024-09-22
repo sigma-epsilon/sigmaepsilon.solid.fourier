@@ -4,10 +4,11 @@ import numpy as np
 
 from sigmaepsilon.core.testing import SigmaEpsilonTestCase
 from sigmaepsilon.solid.fourier import LoadGroup, PointLoad, LineLoad, NavierBeam
+from sigmaepsilon.solid.fourier.loads import NavierLoadError
 
 
-class TestBeams(SigmaEpsilonTestCase):
-    def test_bernoulli_beam(self):
+class TestBernoulliBeam(SigmaEpsilonTestCase):
+    def test_bernoulli_beam_smoke(self):
         L = 1000.0  # geometry
         w, h = 20.0, 80.0  # rectangular cross-section
         E = 210000.0  # material
@@ -33,7 +34,16 @@ class TestBeams(SigmaEpsilonTestCase):
         beam = NavierBeam(L, 2, EI=EI)
         beam.solve(loads, x)
 
-    def test_timoshenko_beam(self):
+    def test_invalid_load(self):
+        L, EI = 1000.0, 1.0
+        beam = NavierBeam(L, 2, EI=EI)
+        x = np.linspace(0, L, 2)
+        with self.assertRaises(NavierLoadError):
+            beam.solve(None, x)
+
+
+class TestTimoshenkoBeam(SigmaEpsilonTestCase):
+    def test_timoshenko_beam_smoke(self):
         L = 1000.0  # geometry
         w, h = 20.0, 80.0  # rectangular cross-section
         E, nu = 210000.0, 0.25  # material

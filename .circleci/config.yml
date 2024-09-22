@@ -2,14 +2,15 @@ version: 2.1
 
 orbs:
   python: circleci/python@2.1.1
+  codecov: codecov/codecov@4.1.0
 
 executors:
   my-executor:
     docker:
-      - image: cimg/python:3.10
+      - image: cimg/python:3.12
 
 jobs:
-  run_tests_3_10:
+  run_tests:
     executor: my-executor
     steps:
       - checkout
@@ -21,18 +22,11 @@ jobs:
             poetry install --with test
       - run:
           name: Run tests and generate coverage report
-          command: |
-            chmod +x ./run_tests_with_coverage.sh
-            ./run_tests_with_coverage.sh
-      - run:
-          name: Upload coverage reports to Codecov
-          command: |
-            curl -Os https://uploader.codecov.io/latest/linux/codecov
-            chmod +x codecov
-            ./codecov -t ${CODECOV_TOKEN}
+          command: poetry run pytest --cov-report=xml --cov-config=.coveragerc --cov=sigmaepsilon.solid.fourier
       - store_artifacts:
           name: Store coverage report as artifact
-          path: htmlcov
+          path: coverage.xml
+      - codecov/upload
       - store_test_results:
           name: Store test results
           path: test-results
@@ -87,13 +81,13 @@ jobs:
 workflows:
   test_and_deploy:
     jobs:
-      - run_tests_3_10
+      - run_tests
 
       - deploy_to_test_pypi:
           context:
             - TestPyPI deploy
           requires:
-            - run_tests_3_10
+            - run_tests
           filters:
             branches:
               only:
@@ -103,9 +97,8 @@ workflows:
           context:
             - PyPI deploy
           requires:
-            - run_tests_3_10
+            - run_tests
           filters:
             branches:
               only:
                 - main
-                
