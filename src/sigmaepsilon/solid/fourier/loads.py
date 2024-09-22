@@ -1,12 +1,10 @@
-import json
 from typing import Union, Iterable, Any, Optional
 from numbers import Number
 
 import numpy as np
 from numpy import ndarray, average as avg
 
-from sigmaepsilon.core.formatting import float_to_str_sig
-from sigmaepsilon.deepdict import DeepDict, parsedicts_addr
+from sigmaepsilon.deepdict import DeepDict
 from sigmaepsilon.math.function import Function
 
 from .problem import NavierProblem
@@ -19,12 +17,11 @@ class NavierLoadError(Exception):
     Exception raised for invalid load inputs.
     """
 
-    def __init__(self, message:Optional[Union[str, None]]=None):
+    def __init__(self, message: Optional[Union[str, None]] = None):
         if message is None:
             message = (
                 "Invalid input for loads. "
-                "It must be a dictionary, a NumPy array, or "
-                "an instance of `sigmaepsilon.solid.fourier.LoadGroup`."
+                "It must be an instance of `sigmaepsilon.solid.fourier.LoadGroup`."
             )
         super().__init__(message)
 
@@ -40,14 +37,15 @@ class LoadGroup(DeepDict):
     ----------
     exclusive: bool, Optional
         If `True`, load cases of this group can't interact. Default is `True`.
-    
+
     See Also
     --------
-    :class:`DeepDict`
+    :class:`~sigmaepsilon.deepdict.DeepDict`
 
     Examples
     --------
     >>> from sigmaepsilon.solid.fourier import LoadGroup, PointLoad
+    >>>
     >>> loads = LoadGroup(
     >>>     group1 = LoadGroup(
     >>>         case1 = PointLoad(x=L/3, v=[1.0, 0.0]),
@@ -71,9 +69,7 @@ class LoadGroup(DeepDict):
     >>> loads.lock()
     """
 
-    _typestr_ = None
-
-    def __init__(self, *args, cooperative:bool=False, **kwargs):
+    def __init__(self, *args, cooperative: bool = False, **kwargs):
         super().__init__(*args, **kwargs)
         self.__problem = None
         self._cooperative = cooperative
@@ -85,8 +81,10 @@ class LoadGroup(DeepDict):
         """
         if self.__problem is not None:
             return self.__problem
-        elif self.is_root():
+
+        if self.is_root():
             return self.__problem
+
         return self.parent.problem
 
     @problem.setter
@@ -100,7 +98,7 @@ class LoadGroup(DeepDict):
             The problem the loads are defined for.
         """
         self.__problem = value
-        
+
     @property
     def cooperative(self) -> bool:
         """
@@ -143,7 +141,9 @@ class LoadGroup(DeepDict):
         dtype = LoadGroup if blocktype is None else blocktype
         return self.containers(inclusive=inclusive, dtype=dtype, deep=deep)
 
-    def cases(self, *args, inclusive: Optional[bool] = True, **kwargs) -> Iterable["LoadGroup"]:
+    def cases(
+        self, *args, inclusive: Optional[bool] = True, **kwargs
+    ) -> Iterable["LoadGroup"]:
         """
         Returns a generator that yields the load cases in the group.
 
@@ -163,133 +163,9 @@ class LoadGroup(DeepDict):
         LoadGroup
         """
         return filter(
-            lambda i: i.__class__._typestr_ is not None,
+            lambda i: isinstance(i, LoadGroup) and hasattr(i, "rhs"),
             self.blocks(*args, inclusive=inclusive, **kwargs),
         )
-
-    @staticmethod
-    def _string_to_dtype_(string: Optional[Union[str, None]] = None):
-        if string == "group":
-            return LoadGroup
-        elif string == "rectangle":
-            return RectangleLoad
-        elif string == "point":
-            return PointLoad
-        elif string == "line":
-            return LineLoad
-        else:
-            raise NotImplementedError()
-
-    def dump(self, path: str, *, mode: Optional[str] = "w", indent: Optional[int] = 4):
-        """
-        Dumps the content of the object to a file.
-
-        Parameters
-        ----------
-        path: str
-            The path of the file on your filesystem.
-        mode: str, Optional
-            https://www.programiz.com/python-programming/file-operation
-        indent: int, Optional
-            Governs the level to which members will be pretty-printed.
-            Default is 4.
-        """
-        with open(path, mode) as f:
-            json.dump(self.to_dict(), f, indent=indent)
-
-    @classmethod
-    def from_json(cls, path: Optional[Union[str, None]] = None) -> "LoadGroup":
-        """
-        Loads a loadgroup from a JSON file.
-
-        Parameters
-        ----------
-        path: str
-            The path to a file on your filesystem.
-
-        Returns
-        -------
-        LoadGroup
-        """
-        if path is not None:
-            with open(path, "r") as f:
-                d = json.load(f)
-            return cls.from_dict(d)
-
-    def _encode_(self, *_, **__) -> dict:
-        """
-        Returns the group as a dictionary. Overwrite this in child
-        implementations.
-        """
-        res = {}
-        cls = type(self)
-        res = {
-            "type": cls._typestr_,
-            "key": self.key,
-        }
-        return res
-
-    @classmethod
-    def _decode_(cls, d: Optional[Union[dict, None]] = None, *_, **kwargs):
-        """
-        Returns a LoadGroup object from a dictionary.
-        Overwrite this in child implementations.
-
-        Parameters
-        ----------
-        d: dict, Optional
-            A dictionary.
-        **kwargs : dict, Optional
-            Keyword arguments defining a load group.
-        """
-        if d is None:
-            d = kwargs
-            kwargs = None
-        if kwargs is not None:
-            d.update(kwargs)
-        clskwargs = {
-            "key": d.pop("key", None),
-        }
-        clskwargs.update(d)
-        return cls(**clskwargs)
-
-    def to_dict(self) -> dict:
-        """
-        Returns the group as a dictionary.
-        """
-        res = self._encode_()
-        for key, value in self.items():
-            if isinstance(value, LoadGroup):
-                res[key] = value.to_dict()
-            else:
-                res[key] = value
-        return res
-
-    @staticmethod
-    def from_dict(d: Optional[Union[dict, None]] = None, **kwargs) -> "LoadGroup":
-        """
-        Reads a LoadGroup from a dictionary. The keys in the dictionaries
-        must match the parameters of the corresponding load types and a type
-        indicator.
-        """
-        if "type" in d:
-            cls = LoadGroup._string_to_dtype_(d["type"])
-        else:
-            cls = LoadGroup
-        res = cls(**d)
-        for addr, value in parsedicts_addr(d, inclusive=True):
-            if len(addr) == 0:
-                continue
-            if "type" in value:
-                cls = LoadGroup._string_to_dtype_(value["type"])
-            else:
-                cls = LoadGroup
-            value["key"] = addr[-1]
-            res[addr] = cls(**value)
-        return res
-
-    def __repr__(self):
-        return "LoadGroup(%s)" % (dict.__repr__(self))
 
 
 class RectangleLoad(LoadGroup):
@@ -305,37 +181,10 @@ class RectangleLoad(LoadGroup):
        where the load is applied. Default is None.
     """
 
-    _typestr_ = "rectangle"
-
     def __init__(self, *args, x: Iterable = None, v: Iterable = None, **kwargs):
         super().__init__(*args, x=x, v=v, **kwargs)
 
-    @classmethod
-    def _decode_(cls, d: dict = None, *args, **kwargs):
-        if d is None:
-            d = kwargs
-            kwargs = None
-        if kwargs is not None:
-            d.update(kwargs)
-        clskwargs = {
-            "key": d.pop("key", None),
-            "x": np.array(d.pop("x")),
-            "v": np.array(d.pop("v")),
-        }
-        clskwargs.update(d)
-        return cls(**clskwargs)
-
-    def _encode_(self, *args, **kwargs) -> dict:
-        res = {}
-        cls = type(self)
-        res = {
-            "type": cls._typestr_,
-            "key": self.key,
-            "x": float_to_str_sig(self["x"], sig=6),
-            "v": float_to_str_sig(self["v"], sig=6),
-        }
-        return res
-
+    @property
     def region(self) -> Iterable:
         """
         Returns the region as a list of 4 values x0, y0, w, and h, where x0 and y0 are
@@ -343,9 +192,9 @@ class RectangleLoad(LoadGroup):
         of the region.
         """
         assert "x" in self, "There are no points defined."
-        return points_to_rectangle_region(self["x"])
+        return points_to_rectangle_region(np.array(self["x"]))
 
-    def rhs(self, *, problem: NavierProblem = None) -> ndarray:
+    def rhs(self, *, problem: NavierProblem | None = None) -> ndarray:
         """
         Returns the coefficients as a NumPy array.
 
@@ -385,38 +234,10 @@ class LineLoad(LoadGroup):
         is [F, M], for a plate it is [F, Mx, My].
     """
 
-    _typestr_ = "line"
-
     def __init__(self, *args, x: Iterable = None, v: Iterable = None, **kwargs):
         super().__init__(*args, x=x, v=v, **kwargs)
 
-    @classmethod
-    def _decode_(cls, d: dict = None, *_, **kwargs):
-        if d is None:
-            d = kwargs
-            kwargs = None
-        if kwargs is not None:
-            d.update(kwargs)
-        clskwargs = {
-            "key": d.pop("key", None),
-            "x": np.array(d.pop("x")),
-            "v": np.array(d.pop("v")),
-        }
-        clskwargs.update(d)
-        return cls(**clskwargs)
-
-    def _encode_(self, *args, **kwargs) -> dict:
-        res = {}
-        cls = type(self)
-        res = {
-            "type": cls._typestr_,
-            "key": self.key,
-            "x": float_to_str_sig(self["x"], sig=6),
-            "v": float_to_str_sig(self["v"], sig=6),
-        }
-        return res
-
-    def rhs(self, *, problem: NavierProblem = None) -> ndarray:
+    def rhs(self, *, problem: NavierProblem | None = None) -> ndarray:
         """
         Returns the coefficients as a NumPy array.
 
@@ -490,7 +311,7 @@ class PointLoad(LoadGroup):
 
     Parameters
     ----------
-    x: Union[float, Iterable]
+    x: float or Iterable
         The point of application. A scalar for a beam, an iterable of
         length 2 for a plate.
     v: Iterable
@@ -498,40 +319,10 @@ class PointLoad(LoadGroup):
         is [F, M], for a plate it is [F, Mx, My].
     """
 
-    _typestr_ = "point"
-
-    def __init__(
-        self, *args, x: Union[float, Iterable] = None, v: Iterable = None, **kwargs
-    ):
+    def __init__(self, *args, x: float | Iterable = None, v: Iterable = None, **kwargs):
         super().__init__(*args, x=x, v=v, **kwargs)
 
-    @classmethod
-    def _decode_(cls, d: dict = None, *_, **kwargs):
-        if d is None:
-            d = kwargs
-            kwargs = None
-        if kwargs is not None:
-            d.update(kwargs)
-        clskwargs = {
-            "key": d.pop("key", None),
-            "x": np.array(d.pop("x")),
-            "v": np.array(d.pop("v")),
-        }
-        clskwargs.update(d)
-        return cls(**clskwargs)
-
-    def _encode_(self, *args, **kwargs) -> dict:
-        res = {}
-        cls = type(self)
-        res = {
-            "type": cls._typestr_,
-            "key": self.key,
-            "x": float_to_str_sig(self["x"], sig=6),
-            "v": float_to_str_sig(self["v"], sig=6),
-        }
-        return res
-
-    def rhs(self, *, problem: NavierProblem = None) -> ndarray:
+    def rhs(self, *, problem: NavierProblem | None = None) -> ndarray:
         """
         Returns the coefficients as a NumPy array.
 
