@@ -23,5 +23,7 @@ please refer to the :doc:`api`.
 .. toctree::
     :maxdepth: 1
     :caption: Examples
+    :numbered:
     
     examples/plate_utils_pyvista
+    examples/mindlin_vs_kirchhoff
