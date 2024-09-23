@@ -26,12 +26,6 @@ from sphinx.config import Config
 sys.path.insert(0, os.path.abspath("."))
 sys.path.insert(0, os.path.abspath("../../src"))
 
-from doc_utils import generate_examples_gallery_rst
-
-generate_examples_gallery_rst(
-    title="Gallery", filename="examples_gallery", foldername="gallery", reversed=True
-)
-
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -111,6 +105,7 @@ intersphinx_mapping = {
     "k3d": (r"http://k3d-jupyter.org/", None),
     "sphinx": (r"https://www.sphinx-doc.org/en/master", None),
     "pandas": (r"https://pandas.pydata.org/pandas-docs/stable/", None),
+    "xarray": (r"https://docs.xarray.dev/en/stable/", None),
     "sigmaepsilon.core": (r"https://sigmaepsiloncore.readthedocs.io/en/latest/", None),
     "sigmaepsilon.math": (r"https://sigmaepsilonmath.readthedocs.io/en/latest/", None),
     "sigmaepsilon.mesh": (r"https://sigmaepsilonmesh.readthedocs.io/en/latest/", None),

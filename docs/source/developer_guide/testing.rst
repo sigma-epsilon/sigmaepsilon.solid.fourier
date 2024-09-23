@@ -1,5 +1,5 @@
 ====================
-Testing and Coverage
+Testing and coverage
 ====================
 
 The following command runs all tests and creates a html report in a folder named `htmlcov` 

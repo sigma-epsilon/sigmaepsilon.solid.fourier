@@ -1,5 +1,5 @@
 ===========================
-Installation for Developers
+Installation for developers
 ===========================
 
 For developers, the installation process is a little bit more complicated. We use `Poetry` to
@@ -13,9 +13,14 @@ steps below:
 .. code-block:: shell
    
    pip install poetry
-   
 
-3. Install the library with the necessary optional depencencies by issuing the following command:
+3. Upgrade `pip`
+   
+.. code-block:: shell
+   
+   poetry run pip install --upgrade pip
+
+4. Install the library with the necessary optional depencencies by issuing the following command:
 
 .. code-block:: shell
    
