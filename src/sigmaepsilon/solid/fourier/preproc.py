@@ -101,28 +101,23 @@ def lhs_Navier_Mindlin(size: tuple, shape: tuple, D: ndarray, S: ndarray) -> nda
                 iMN = (m - 1) * N + n - 1
                 # sum Fx
                 res[iLHS, iMN, 0, 0] = (
-                    PI ** 2 * S44 * n ** 2 / Ly ** 2 + PI ** 2 * S55 * m ** 2 / Lx ** 2
+                    PI**2 * S44 * n**2 / Ly**2 + PI**2 * S55 * m**2 / Lx**2
                 )
                 res[iLHS, iMN, 0, 1] = -PI * S44 * n / Ly
                 res[iLHS, iMN, 0, 2] = PI * S55 * m / Lx
                 # sum Mx
                 res[iLHS, iMN, 1, 0] = res[iLHS, iMN, 0, 1]
                 res[iLHS, iMN, 1, 1] = (
-                    (PI ** 2) * D22 * n ** 2 / Ly ** 2
-                    + PI ** 2 * D66 * m ** 2 / Lx ** 2
-                    + S44
+                    (PI**2) * D22 * n**2 / Ly**2 + PI**2 * D66 * m**2 / Lx**2 + S44
                 )
-                res[iLHS, iMN, 1, 2] = (
-                    - PI ** 2 * D12 * m * n / (Lx * Ly) 
-                    - PI ** 2 * D66 * m * n / (Lx * Ly)
-                    )
+                res[iLHS, iMN, 1, 2] = -(PI**2) * D12 * m * n / (
+                    Lx * Ly
+                ) - PI**2 * D66 * m * n / (Lx * Ly)
                 # sum My
                 res[iLHS, iMN, 2, 0] = res[iLHS, iMN, 0, 2]
                 res[iLHS, iMN, 2, 1] = res[iLHS, iMN, 1, 2]
                 res[iLHS, iMN, 2, 2] = (
-                    PI ** 2 * D11 * m ** 2 / Lx ** 2
-                    + PI ** 2 * D66 * n ** 2 / Ly ** 2
-                    + S55
+                    PI**2 * D11 * m**2 / Lx**2 + PI**2 * D66 * n**2 / Ly**2 + S55
                 )
     return res
 
@@ -158,10 +153,10 @@ def lhs_Navier_Kirchhoff(size: tuple, shape: tuple, D: ndarray) -> ndarray:
             for n in prange(1, N + 1):
                 iMN = (m - 1) * N + n - 1
                 res[iLHS, iMN] = (
-                    PI ** 4 * D11 * m ** 4 / Lx ** 4
-                    + 2 * PI ** 4 * D12 * m ** 2 * n ** 2 / (Lx ** 2 * Ly ** 2)
-                    + PI ** 4 * D22 * n ** 4 / Ly ** 4
-                    + 4 * PI ** 4 * D66 * m ** 2 * n ** 2 / (Lx ** 2 * Ly ** 2)
+                    PI**4 * D11 * m**4 / Lx**4
+                    + 2 * PI**4 * D12 * m**2 * n**2 / (Lx**2 * Ly**2)
+                    + PI**4 * D22 * n**4 / Ly**4
+                    + 4 * PI**4 * D66 * m**2 * n**2 / (Lx**2 * Ly**2)
                 )
     return res
 
@@ -190,7 +185,7 @@ def lhs_Navier_Bernoulli(L: float, N: int, EI: ndarray) -> ndarray:
     res = np.zeros((nLHS, N), dtype=EI.dtype)
     for iLHS in prange(nLHS):
         for n in prange(1, N + 1):
-            res[iLHS, n - 1] = PI ** 4 * EI[iLHS] * n ** 4 / L ** 4
+            res[iLHS, n - 1] = PI**4 * EI[iLHS] * n**4 / L**4
     return res
 
 
@@ -250,7 +245,7 @@ def rhs_Kirchhoff(coeffs: ndarray, size: tuple) -> ndarray:
     for i in prange(nRHS):
         for n in prange(N):
             res[i, n] = (
-                coeffs[i, n, 0] 
+                coeffs[i, n, 0]
                 - coeffs[i, n, 1] * cy * (n + 1)
                 - coeffs[i, n, 2] * cx * (n + 1)
             )
@@ -323,21 +318,21 @@ def __rect_const__(
             * sin(PI * m * xc / Lx)
             * sin((1 / 2) * PI * h * n / Ly)
             * sin(PI * n * yc / Ly)
-            / (PI ** 2 * m * n),
+            / (PI**2 * m * n),
             16
             * mx
             * sin((1 / 2) * PI * m * w / Lx)
             * sin((1 / 2) * PI * h * n / Ly)
             * sin(PI * n * yc / Ly)
             * cos(PI * m * xc / Lx)
-            / (PI ** 2 * m * n),
+            / (PI**2 * m * n),
             16
             * my
             * sin((1 / 2) * PI * m * w / Lx)
             * sin(PI * m * xc / Lx)
             * sin((1 / 2) * PI * h * n / Ly)
             * cos(PI * n * yc / Ly)
-            / (PI ** 2 * m * n),
+            / (PI**2 * m * n),
         ]
     )
 
