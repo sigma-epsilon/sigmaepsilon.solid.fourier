@@ -19,7 +19,7 @@ from sigmaepsilon.solid.fourier import (
     PointLoad,
     RectangleLoad,
 )
-from sigmaepsilon.solid.fourier.loads import NavierLoadError
+from sigmaepsilon.solid.fourier.exceptions import NavierLoadError
 
 
 class TestKirchhoffPlate(SigmaEpsilonTestCase):
@@ -52,14 +52,12 @@ class TestKirchhoffPlate(SigmaEpsilonTestCase):
 
         loads = LoadGroup(
             LG1=LoadGroup(
-                LC1=RectangleLoad(x=[[0, 0], [Lx, Ly]], v=[-0.1, 0, 0]),
-                LC2=RectangleLoad(
-                    x=[[Lx / 3, Ly / 2], [Lx / 2, 2 * Ly / 3]], v=[-1, 0, 0]
-                ),
+                LC1=RectangleLoad([[0, 0], [Lx, Ly]], [-0.1, 0, 0]),
+                LC2=RectangleLoad([[Lx / 3, Ly / 2], [Lx / 2, 2 * Ly / 3]], [-1, 0, 0]),
             ),
             LG2=LoadGroup(
-                LC3=PointLoad(x=[Lx / 3, Ly / 2], v=[-100.0, 0, 0]),
-                LC4=PointLoad(x=[2 * Lx / 3, Ly / 2], v=[100.0, 0, 0]),
+                LC3=PointLoad([Lx / 3, Ly / 2], [-100.0, 0, 0]),
+                LC4=PointLoad([2 * Lx / 3, Ly / 2], [100.0, 0, 0]),
             ),
         )
         loads.lock()
@@ -70,7 +68,7 @@ class TestKirchhoffPlate(SigmaEpsilonTestCase):
 
         plate = RectangularPlate(size, (20, 20), D=D)
         plate.solve(loads, coords)
-        
+
     def test_invalid_load(self):
         size = (600.0, 800.0)
         E = 2890.0
@@ -99,7 +97,7 @@ class TestKirchhoffPlate(SigmaEpsilonTestCase):
         D = ascont(ABDS[:3, :3])
 
         plate = RectangularPlate(size, (20, 20), D=D)
-        
+
         with self.assertRaises(NavierLoadError):
             plate.solve(None, None)
 
@@ -134,14 +132,12 @@ class TestMindlinPlate(SigmaEpsilonTestCase):
 
         loads = LoadGroup(
             LG1=LoadGroup(
-                LC1=RectangleLoad(x=[[0, 0], [Lx, Ly]], v=[-0.1, 0, 0]),
-                LC2=RectangleLoad(
-                    x=[[Lx / 3, Ly / 2], [Lx / 2, 2 * Ly / 3]], v=[-1, 0, 0]
-                ),
+                LC1=RectangleLoad([[0, 0], [Lx, Ly]], [-0.1, 0, 0]),
+                LC2=RectangleLoad([[Lx / 3, Ly / 2], [Lx / 2, 2 * Ly / 3]], [-1, 0, 0]),
             ),
             LG2=LoadGroup(
-                LC3=PointLoad(x=[Lx / 3, Ly / 2], v=[-100.0, 0, 0]),
-                LC4=PointLoad(x=[2 * Lx / 3, Ly / 2], v=[100.0, 0, 0]),
+                LC3=PointLoad([Lx / 3, Ly / 2], [-100.0, 0, 0]),
+                LC4=PointLoad([2 * Lx / 3, Ly / 2], [100.0, 0, 0]),
             ),
         )
         loads.lock()

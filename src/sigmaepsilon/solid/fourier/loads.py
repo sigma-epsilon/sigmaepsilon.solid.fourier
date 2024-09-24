@@ -1,5 +1,6 @@
-from typing import Union, Iterable, Any, Optional
+from typing import Iterable, Any, Optional, TypeVar, Generic, TypeAlias
 from numbers import Number
+from abc import abstractmethod
 
 import numpy as np
 from numpy import ndarray, average as avg
@@ -12,18 +13,11 @@ from .preproc import rhs_rect_const, rhs_conc_1d, rhs_conc_2d, rhs_line_const
 from .utils import points_to_rectangle_region, sin1d, cos1d
 
 
-class NavierLoadError(Exception):
-    """
-    Exception raised for invalid load inputs.
-    """
+__all__ = ["LoadGroup", "LoadCase", "RectangleLoad", "LineLoad", "PointLoad"]
 
-    def __init__(self, message: Optional[Union[str, None]] = None):
-        if message is None:
-            message = (
-                "Invalid input for loads. "
-                "It must be an instance of `sigmaepsilon.solid.fourier.LoadGroup`."
-            )
-        super().__init__(message)
+
+Float1d: TypeAlias = Iterable[float]
+Float2d: TypeAlias = Iterable[Float1d]
 
 
 class LoadGroup(DeepDict):
@@ -57,7 +51,7 @@ class LoadGroup(DeepDict):
     >>>     ),
     >>> )
 
-    Since the LoadGroup is a subclass of LinkedDeepDict,
+    Since the LoadGroup is a subclass of :class:`~sigmaepsilon.deepdict.DeepDict`,
     a case is accessible as
 
     >>> loads['group1', 'case1']
@@ -71,33 +65,7 @@ class LoadGroup(DeepDict):
 
     def __init__(self, *args, cooperative: bool = False, **kwargs):
         super().__init__(*args, **kwargs)
-        self.__problem = None
         self._cooperative = cooperative
-
-    @property
-    def problem(self) -> NavierProblem:
-        """
-        Returns the attached problem.
-        """
-        if self.__problem is not None:
-            return self.__problem
-
-        if self.is_root():
-            return self.__problem
-
-        return self.parent.problem
-
-    @problem.setter
-    def problem(self, value: NavierProblem):
-        """
-        Sets the attached problem.
-
-        Parameters
-        ----------
-        value: NavierProblem
-            The problem the loads are defined for.
-        """
-        self.__problem = value
 
     @property
     def cooperative(self) -> bool:
@@ -113,7 +81,7 @@ class LoadGroup(DeepDict):
         """
         self._cooperative = value
 
-    def blocks(
+    def groups(
         self,
         *,
         inclusive: Optional[bool] = False,
@@ -126,13 +94,13 @@ class LoadGroup(DeepDict):
         Parameters
         ----------
         inclusive: bool, Optional
-            If True, returns the object the call is made upon.
+            If ``True``, returns the object the call is made upon.
             Default is False.
         blocktype: Any, Optional
-            The type of the load groups to return. Default is None, that
+            The type of the load groups to return. Default is ``None``, that
             returns all types.
         deep: bool, Optional
-            If True, all deep groups are returned separately. Default is True.
+            If ``True``, all deep groups are returned separately. Default is ``True``.
 
         Yields
         ------
@@ -142,47 +110,81 @@ class LoadGroup(DeepDict):
         return self.containers(inclusive=inclusive, dtype=dtype, deep=deep)
 
     def cases(
-        self, *args, inclusive: Optional[bool] = True, **kwargs
-    ) -> Iterable["LoadGroup"]:
+        self,
+        case_type: Any = None,
+    ) -> Iterable["LoadCase"]:
         """
         Returns a generator that yields the load cases in the group.
 
         Parameters
         ----------
-        inclusive: bool, Optional
-            If True, returns the object the call is made upon.
-            Default is True.
-        blocktype: Any, Optional
-            The type of the load groups to return. Default is None, that
+        case_type: Any, Optional
+            The type of the load cases to return. Default is None, that
             returns all types.
-        deep: bool, Optional
-            If True, all deep groups are returned separately. Default is True.
 
         Yields
         ------
-        LoadGroup
+        :class:`~sigmaepsilon.solid.fourier.loads.LoadCase`
         """
+        case_type = LoadCase if case_type is None else case_type
         return filter(
-            lambda i: isinstance(i, LoadGroup) and hasattr(i, "rhs"),
-            self.blocks(*args, inclusive=inclusive, **kwargs),
+            lambda i: isinstance(i, case_type),
+            self.values(deep=True),
         )
 
 
-class RectangleLoad(LoadGroup):
+LoadDomainType = TypeVar("LoadDomainType")
+LoadValueType = TypeVar("LoadValueType")
+
+
+class LoadCase(Generic[LoadDomainType, LoadValueType]):
+
+    def __init__(
+        self,
+        domain: LoadDomainType,
+        value: LoadValueType,
+    ):
+        super().__init__()
+        self._domain = domain
+        self._value = value
+
+    @property
+    def domain(self) -> LoadDomainType:
+        """Returns the domain of the load."""
+        return self._domain
+
+    @domain.setter
+    def domain(self, value: LoadDomainType) -> None:
+        """Sets the domain of the load."""
+        self._domain = value
+
+    @property
+    def value(self) -> LoadValueType:
+        """Returns the value of the load."""
+        return self._value
+
+    @value.setter
+    def value(self, value: LoadValueType) -> None:
+        """Sets the value of the load."""
+        self._value = value
+
+    @abstractmethod
+    def rhs(self, *, problem: NavierProblem) -> ndarray:
+        raise NotImplementedError("The method 'rhs' must be implemented.")
+
+
+class RectangleLoad(LoadCase[Float2d, Float1d]):
     """
     A class to handle rectangular loads.
 
     Parameters
     ----------
-    v: Iterable
-       Load intensities for each dof in the order :math:`fz, mx, my`.
-    x: Iterable, Optional
+    domain: Float2d
+       Load intensities for each dof in the order :math:`f_z, m_x, m_y`.
+    value: Float1d
        The coordinates of the lower-left and upper-right points of the region
-       where the load is applied. Default is None.
+       where the load is applied. Default is ``None``.
     """
-
-    def __init__(self, *args, x: Iterable = None, v: Iterable = None, **kwargs):
-        super().__init__(*args, x=x, v=v, **kwargs)
 
     @property
     def region(self) -> Iterable:
@@ -191,16 +193,15 @@ class RectangleLoad(LoadGroup):
         the coordinates of the bottom-left corner, w and h are the width and height
         of the region.
         """
-        assert "x" in self, "There are no points defined."
-        return points_to_rectangle_region(np.array(self["x"]))
+        return points_to_rectangle_region(np.array(self.domain))
 
-    def rhs(self, *, problem: NavierProblem | None = None) -> ndarray:
+    def rhs(self, *, problem: NavierProblem) -> ndarray:
         """
         Returns the coefficients as a NumPy array.
 
         Parameters
         ----------
-        problem: NavierProblem, Optional
+        problem: NavierProblem
             A problem the coefficients are generated for. If not specified,
             the attached problem of the object is used. Default is None.
 
@@ -210,40 +211,33 @@ class RectangleLoad(LoadGroup):
             2d float array of shape (H, 3), where H is the total number
             of harmonic terms involved (defined for the problem).
         """
-        p = problem if problem is not None else self.problem
-        x = np.array(self["x"], dtype=float)
-        v = np.array(self["v"], dtype=float)
-        return rhs_rect_const(p.size, p.shape, x, v)
-
-    def __repr__(self):
-        return "RectangleLoad(%s)" % (dict.__repr__(self))
+        x = np.array(self.domain, dtype=float)
+        v = np.array(self.value, dtype=float)
+        return rhs_rect_const(problem.size, problem.shape, x, v)
 
 
-class LineLoad(LoadGroup):
+class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
     """
     A class to handle loads over lines for both beam and plate problems.
 
     Parameters
     ----------
-    x: Iterable
+    domain: Float1d | Float2d
         The point of application as an 1d iterable for a beam, a 2d iterable
         for a plate. In the latter case, the first row is the first point, the
         second row is the second point.
-    v: Iterable
+    value: Float1d
         Load intensities for each dof. The order of the dofs for a beam
-        is [F, M], for a plate it is [F, Mx, My].
+        is :math:`[F, M]`, for a plate it is :math:`[F, M_x, M_y]`.
     """
 
-    def __init__(self, *args, x: Iterable = None, v: Iterable = None, **kwargs):
-        super().__init__(*args, x=x, v=v, **kwargs)
-
-    def rhs(self, *, problem: NavierProblem | None = None) -> ndarray:
+    def rhs(self, *, problem: NavierProblem) -> ndarray:
         """
         Returns the coefficients as a NumPy array.
 
         Parameters
         ----------
-        problem: NavierProblem, Optional
+        problem: NavierProblem
             A problem the coefficients are generated for. If not specified,
             the attached problem of the object is used. Default is None.
 
@@ -253,19 +247,18 @@ class LineLoad(LoadGroup):
             2d float array of shape (H, 3), where H is the total number
             of harmonic terms involved (defined for the problem).
         """
-        p = problem if problem is not None else self.problem
-        x = np.array(self["x"], dtype=float)
-        v = self["v"]
+        x = np.array(self.domain, dtype=float)
+        v = self.value
         if len(x.shape) == 1:
             assert len(v) == 2, f"Invalid shape {v.shape} for load intensities."
             if isinstance(v[0], Number) and isinstance(v[1], Number):
                 v = np.array(v, dtype=float)
-                return rhs_line_const(p.length, p.N, v, x)
+                return rhs_line_const(problem.length, problem.N, v, x)
             else:
-                rhs = np.zeros((1, p.N, 2), dtype=x.dtype)
+                rhs = np.zeros((1, problem.N, 2), dtype=x.dtype)
                 if isinstance(v[0], str):
                     f = Function(v[0], variables=["x"], dim=1)
-                    L = p.length
+                    L = problem.length
                     points = np.linspace(x[0], x[1], 1000)
                     d = x[1] - x[0]
                     rhs[0, :, 0] = list(
@@ -273,15 +266,17 @@ class LineLoad(LoadGroup):
                             lambda i: (2 / L)
                             * d
                             * avg(sin1d(points, i, L) * f([points])),
-                            np.arange(1, p.N + 1),
+                            np.arange(1, problem.N + 1),
                         )
                     )
                 elif isinstance(v[0], Number):
                     _v = np.array([v[0], 0], dtype=float)
-                    rhs[0, :, 0] = rhs_line_const(p.length, p.N, _v, x)[0, :, 0]
+                    rhs[0, :, 0] = rhs_line_const(problem.length, problem.N, _v, x)[
+                        0, :, 0
+                    ]
                 if isinstance(v[1], str):
                     f = Function(v[1], variables=["x"], dim=1)
-                    L = p.length
+                    L = problem.length
                     points = np.linspace(x[0], x[1], 1000)
                     d = x[1] - x[0]
                     rhs[0, :, 1] = list(
@@ -289,48 +284,44 @@ class LineLoad(LoadGroup):
                             lambda i: (2 / L)
                             * d
                             * avg(cos1d(points, i, L) * f([points])),
-                            np.arange(1, p.N + 1),
+                            np.arange(1, problem.N + 1),
                         )
                     )
                 elif isinstance(v[1], Number):
                     _v = np.array([0, v[1]], dtype=float)
-                    rhs[0, :, 1] = rhs_line_const(p.length, p.N, _v, x)[0, :, 1]
+                    rhs[0, :, 1] = rhs_line_const(problem.length, problem.N, _v, x)[
+                        0, :, 1
+                    ]
                 return rhs
         else:
             raise NotImplementedError(
                 "Line loads are only implemented for 1d problems at the moment."
             )
 
-    def __repr__(self):
-        return "LineLoad(%s)" % (dict.__repr__(self))
 
-
-class PointLoad(LoadGroup):
+class PointLoad(LoadCase[float | Float1d, Float1d]):
     """
     A class to handle concentrated loads.
 
     Parameters
     ----------
-    x: float or Iterable
+    domain: float or Float1d
         The point of application. A scalar for a beam, an iterable of
         length 2 for a plate.
-    v: Iterable
+    value: Float1d
         Load values for each dof. The order of the dofs for a beam
         is [F, M], for a plate it is [F, Mx, My].
     """
 
-    def __init__(self, *args, x: float | Iterable = None, v: Iterable = None, **kwargs):
-        super().__init__(*args, x=x, v=v, **kwargs)
-
-    def rhs(self, *, problem: NavierProblem | None = None) -> ndarray:
+    def rhs(self, *, problem: NavierProblem) -> ndarray:
         """
         Returns the coefficients as a NumPy array.
 
         Parameters
         ----------
-        problem: NavierProblem, Optional
+        problem: NavierProblem
             A problem the coefficients are generated for. If not specified,
-            the attached problem of the object is used. Default is None.
+            the attached problem of the object is used. Default is ``None``.
 
         Returns
         -------
@@ -338,13 +329,9 @@ class PointLoad(LoadGroup):
             2d float array of shape (H, 3), where H is the total number
             of harmonic terms involved (defined for the problem).
         """
-        p = problem if problem is not None else self.problem
-        x = self["x"]
-        v = np.array(self["v"])
-        if hasattr(p, "size"):
-            return rhs_conc_2d(p.size, p.shape, v, x)
+        x = self.domain
+        v = np.array(self.value)
+        if hasattr(problem, "size"):
+            return rhs_conc_2d(problem.size, problem.shape, v, x)
         else:
-            return rhs_conc_1d(p.length, p.N, v, x)
-
-    def __repr__(self):
-        return "PointLoad(%s)" % (dict.__repr__(self))
+            return rhs_conc_1d(problem.length, problem.N, v, x)

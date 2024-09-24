@@ -6,7 +6,8 @@ from sigmaepsilon.deepdict import DeepDict
 from sigmaepsilon.math import atleast1d
 
 from .problem import NavierProblem
-from .loads import LoadGroup, NavierLoadError
+from .loads import LoadGroup
+from .exceptions import NavierLoadError
 from .preproc import lhs_Navier, rhs_Bernoulli
 from .postproc import postproc
 from .proc import linsolve_Bernoulli, linsolve_Timoshenko
@@ -94,36 +95,34 @@ class NavierBeam(NavierProblem):
             A nested dictionary with a same layout as the loads, but as an instance
             of :class:`~sigmaepsilon.deepdict.DeepDict`.
         """
-        if isinstance(loads, LoadGroup):
-            _loads = loads
-        else:
-            raise NavierLoadError()
+        if not isinstance(loads, LoadGroup):
+            raise NavierLoadError("The loads must be an instance of LoadGroup.")
 
         # STIFFNESS
         lhs = lhs_Navier(self.length, self.N, D=self.EI, S=self.GA)
 
         # LOADS
-        _loads.problem = self
-        load_cases = list(_loads.cases())
-        rhs = np.vstack(list(lc.rhs() for lc in load_cases))
+        load_cases = list(loads.cases())
+        rhs = np.vstack(list(lc.rhs(problem=self) for lc in load_cases))
 
         # SOLUTION
         if self.GA is None:
             _RHS = rhs_Bernoulli(rhs, self.length)
             coeffs = linsolve_Bernoulli(lhs, _RHS)
             del _RHS
-            # (nLHS, nRHS, nMN)
+            # coeffs.shape = (nLHS, nRHS, nMN)
         else:
             coeffs = linsolve_Timoshenko(lhs, rhs)
-            # (nLHS, nRHS, nMN, 2)
+            # coeffs.shape = (nLHS, nRHS, nMN, 2)
 
         # POSTPROCESSING
         points = atleast1d(points)
         res = postproc(self.length, self.N, points, coeffs, rhs, self.EI, self.GA)
-        # (nLHS, nRHS, nP, nX)
+        # res.shape = (nLHS, nRHS, nPoint, nComponent)
+
         result = DeepDict()
-        for i, lc in enumerate(load_cases):
-            result[lc.address] = self._postproc_result_to_xarray_2d(res[0, i, :, :])
+        for i, (addr, _) in enumerate(loads.items(deep=True, return_address=True)):
+            result[addr] = self._postproc_result_to_xarray_2d(res[0, i, :, :])
         result.lock()
 
         return result

@@ -4,7 +4,7 @@ import numpy as np
 
 from sigmaepsilon.core.testing import SigmaEpsilonTestCase
 from sigmaepsilon.solid.fourier import LoadGroup, PointLoad, LineLoad, NavierBeam
-from sigmaepsilon.solid.fourier.loads import NavierLoadError
+from sigmaepsilon.solid.fourier.exceptions import NavierLoadError
 
 
 class TestBernoulliBeam(SigmaEpsilonTestCase):
@@ -18,13 +18,13 @@ class TestBernoulliBeam(SigmaEpsilonTestCase):
 
         loads = LoadGroup(
             concentrated=LoadGroup(
-                LC1=PointLoad(x=L / 2, v=[1.0, 0.0]),
-                LC5=PointLoad(x=L / 2, v=[0.0, 1.0]),
+                LC1=PointLoad(L / 2, [1.0, 0.0]),
+                LC5=PointLoad(L / 2, [0.0, 1.0]),
             ),
             distributed=LoadGroup(
-                LC2=LineLoad(x=[0, L], v=[1.0, 0.0]),
-                LC6=LineLoad(x=[L / 2, L], v=[0.0, 1.0]),
-                LC3=LineLoad(x=[L / 2, L], v=["x", 0]),
+                LC2=LineLoad([0, L], [1.0, 0.0]),
+                LC6=LineLoad([L / 2, L], [0.0, 1.0]),
+                LC3=LineLoad([L / 2, L], ["x", 0]),
             ),
         )
         loads.lock()
@@ -56,13 +56,13 @@ class TestTimoshenkoBeam(SigmaEpsilonTestCase):
 
         loads = LoadGroup(
             concentrated=LoadGroup(
-                LC1=PointLoad(x=L / 2, v=[1.0, 0.0]),
-                LC5=PointLoad(x=L / 2, v=[0.0, 1.0]),
+                LC1=PointLoad(L / 2, [1.0, 0.0]),
+                LC5=PointLoad(L / 2, [0.0, 1.0]),
             ),
             distributed=LoadGroup(
-                LC2=LineLoad(x=[0, L], v=[1.0, 0.0]),
-                LC6=LineLoad(x=[L / 2, L], v=[0.0, 1.0]),
-                LC3=LineLoad(x=[L / 2, L], v=["x", 0]),
+                LC2=LineLoad([0, L], [1.0, 0.0]),
+                LC6=LineLoad([L / 2, L], [0.0, 1.0]),
+                LC3=LineLoad([L / 2, L], ["x", 0]),
             ),
         )
         loads.lock()

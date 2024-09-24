@@ -4,7 +4,7 @@ import numpy as np
 
 from sigmaepsilon.core.testing import SigmaEpsilonTestCase
 
-from sigmaepsilon.solid.fourier.loads import NavierLoadError
+from sigmaepsilon.solid.fourier.exceptions import NavierLoadError
 from sigmaepsilon.solid.fourier import (
     NavierBeam,
     LoadGroup,
@@ -23,23 +23,20 @@ class TestBeamLoads(SigmaEpsilonTestCase):
 
         loads = LoadGroup(
             concentrated=LoadGroup(
-                LC1=PointLoad(x=L / 2, v=[1.0, 0.0]),
-                LC5=PointLoad(x=L / 2, v=[0.0, 1.0]),
+                LC1=PointLoad(L / 2, [1.0, 0.0]),
+                LC5=PointLoad(L / 2, [0.0, 1.0]),
             ),
             distributed=LoadGroup(
-                LC2=LineLoad(x=[0, L], v=[1.0, 0.0]),
-                LC6=LineLoad(x=[L / 2, L], v=[0.0, 1.0]),
-                LC3=LineLoad(x=[L / 2, L], v=["x", 0]),
-                LC4=LineLoad(x=[L / 2, L], v=[0, "x"]),
-                LC7=LineLoad(x=[L / 2, L], v=["x", "x"]),
+                LC2=LineLoad([0, L], [1.0, 0.0]),
+                LC6=LineLoad([L / 2, L], [0.0, 1.0]),
+                LC3=LineLoad([L / 2, L], ["x", 0]),
+                LC4=LineLoad([L / 2, L], [0, "x"]),
+                LC7=LineLoad([L / 2, L], ["x", "x"]),
             ),
         )
         loads.lock()
 
         loads.cooperative = loads.cooperative
-
-        loads.problem
-        loads["concentrated"]["LC1"].problem
 
     def test_line_Load(self):
         L = 1000.0  # geometry
@@ -48,13 +45,13 @@ class TestBeamLoads(SigmaEpsilonTestCase):
 
         I = w * h**3 / 12
         EI = E * I
-        
+
         loads = LoadGroup(
-            LC1=LineLoad(x=[0, L], v=[1.0, 0.0]),
-            LC2=LineLoad(x=[L / 2, L], v=[0.0, 1.0]),
-            LC3=LineLoad(x=[L / 2, L], v=["x", 0]),
-            LC4=LineLoad(x=[L / 2, L], v=[0, "x"]),
-            LC5=LineLoad(x=[L / 2, L], v=["x", "x"]),
+            LC1=LineLoad([0, L], [1.0, 0.0]),
+            LC2=LineLoad([L / 2, L], [0.0, 1.0]),
+            LC3=LineLoad([L / 2, L], ["x", 0]),
+            LC4=LineLoad([L / 2, L], [0, "x"]),
+            LC5=LineLoad([L / 2, L], ["x", "x"]),
         )
         loads.lock()
 
@@ -69,14 +66,12 @@ class TestPlateLoads(SigmaEpsilonTestCase):
 
         loads = LoadGroup(
             LG1=LoadGroup(
-                LC1=RectangleLoad(x=[[0, 0], [Lx, Ly]], v=[-0.1, 0, 0]),
-                LC2=RectangleLoad(
-                    x=[[Lx / 3, Ly / 2], [Lx / 2, 2 * Ly / 3]], v=[-1, 0, 0]
-                ),
+                LC1=RectangleLoad([[0, 0], [Lx, Ly]], [-0.1, 0, 0]),
+                LC2=RectangleLoad([[Lx / 3, Ly / 2], [Lx / 2, 2 * Ly / 3]], [-1, 0, 0]),
             ),
             LG2=LoadGroup(
-                LC3=PointLoad(x=[Lx / 3, Ly / 2], v=[-100.0, 0, 0]),
-                LC4=PointLoad(x=[2 * Lx / 3, Ly / 2], v=[100.0, 0, 0]),
+                LC3=PointLoad([Lx / 3, Ly / 2], [-100.0, 0, 0]),
+                LC4=PointLoad([2 * Lx / 3, Ly / 2], [100.0, 0, 0]),
             ),
         )
         loads.lock()
