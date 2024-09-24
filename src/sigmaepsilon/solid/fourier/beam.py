@@ -98,7 +98,7 @@ class NavierBeam(NavierProblem):
             _loads = loads
         else:
             raise NavierLoadError()
-        
+
         # STIFFNESS
         lhs = lhs_Navier(self.length, self.N, D=self.EI, S=self.GA)
 

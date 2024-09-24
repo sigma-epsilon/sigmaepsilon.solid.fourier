@@ -1,11 +1,25 @@
+=======
 Gallery
--------
+=======
+
+The gallery contains a collection of examples that include some
+kind of visualization. The examples here doesn't have much explanation,
+for that you should refer to the :doc:`user_guide`. 
+
+Beams
+======
 
 .. nbgallery::
     :maxdepth: 1
     :reversed:
 
-    examples/bernoulli_metplotlib.ipynb
-    examples/Kirchhoff_Love_matplotlib.ipynb
-    examples/timoshenko_matplotlib.ipynb
-    examples/Uflyand_Mindlin_matplotlib.ipynb
+    gallery/timoshenko_matplotlib.ipynb
+
+Plates
+======
+
+.. nbgallery::
+    :maxdepth: 1
+    :reversed:
+
+    gallery/Uflyand_Mindlin_matplotlib.ipynb
