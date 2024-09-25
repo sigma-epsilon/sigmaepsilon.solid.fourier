@@ -7,11 +7,10 @@ from sigmaepsilon.math import atleast2d
 
 from .problem import NavierProblem
 from .loads import LoadGroup
-from .exceptions import NavierLoadError
 from .preproc import lhs_Navier, rhs_Kirchhoff
 from .postproc import postproc
 from .proc import linsolve_Kirchhoff, linsolve_Mindlin
-
+from .result import PlateLoadCaseResultLinStat
 
 __all__ = ["RectangularPlate"]
 
@@ -29,21 +28,7 @@ class RectangularPlate(NavierProblem):
         Numbers of harmonic terms involved in both directions.
     """
 
-    postproc_components = [
-        "UZ",
-        "ROTX",
-        "ROTY",
-        "CX",
-        "CY",
-        "CXY",
-        "EXZ",
-        "EYZ",
-        "MX",
-        "MY",
-        "MXY",
-        "QX",
-        "QY",
-    ]
+    result_class = PlateLoadCaseResultLinStat
 
     def __init__(
         self,
@@ -73,10 +58,10 @@ class RectangularPlate(NavierProblem):
         Returns
         -------
         :class:`~sigmaepsilon.deepdict.deepdict.DeepDict`
-            A dictionary with a same layout as the input.
+            A dictionary with the same layout as the loads.
         """
         if not isinstance(loads, LoadGroup):
-            raise NavierLoadError("The loads must be an instance of LoadGroup.")
+            raise TypeError("The loads must be an instance of LoadGroup.")
 
         # STIFFNESS
         lhs = lhs_Navier(self.size, self.shape, D=self.D, S=self.S)
@@ -102,7 +87,7 @@ class RectangularPlate(NavierProblem):
 
         result = DeepDict()
         for i, (addr, _) in enumerate(loads.items(deep=True, return_address=True)):
-            result[addr] = self._postproc_result_to_xarray_2d(res[0, i, :, :])
+            result[addr] = self._postproc_linstat_load_case_result(res[0, i, :, :])
         result.lock()
 
         return result

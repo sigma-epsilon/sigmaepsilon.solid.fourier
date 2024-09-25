@@ -6,7 +6,6 @@ from sigmaepsilon.core.config import namespace_package_name
 from .beam import NavierBeam
 from .plate import RectangularPlate
 from .loads import LoadGroup, RectangleLoad, LineLoad, PointLoad
-from .exceptions import NavierLoadError
 
 __all__ = [
     "NavierBeam",

@@ -7,20 +7,20 @@ from sigmaepsilon.math import atleast1d
 
 from .problem import NavierProblem
 from .loads import LoadGroup
-from .exceptions import NavierLoadError
 from .preproc import lhs_Navier, rhs_Bernoulli
 from .postproc import postproc
 from .proc import linsolve_Bernoulli, linsolve_Timoshenko
-
+from .result import BeamLoadCaseResultLinStat
 
 __all__ = ["NavierBeam"]
 
 
 class NavierBeam(NavierProblem):
     """
-    A class to handle simply-supported plates and their solution
-    using Navier's approach. The beam is either Euler-Bernoulli or
-    Timoshenko, depending on the presence of the shear stiffness.
+    A class designed to handle simply-supported plates bent in the X-Y plane 
+    and solve them using Navier's method. The beam model can be either 
+    Euler-Bernoulli or Timoshenko, depending on whether shear stiffness is 
+    provided at instantiation.
 
     Parameters
     ----------
@@ -50,14 +50,7 @@ class NavierBeam(NavierProblem):
 
     """
 
-    postproc_components = [
-        "UY",
-        "ROTZ",
-        "CZ",
-        "EXY",
-        "MZ",
-        "SY",
-    ]
+    result_class = BeamLoadCaseResultLinStat
 
     def __init__(
         self,
@@ -92,10 +85,10 @@ class NavierBeam(NavierProblem):
         Returns
         -------
         :class:`~sigmaepsilon.deepdict.deepdict.DeepDict`
-            A nested dictionary with a same layout as the loads.
+            A nested dictionary with the same layout as the loads.
         """
         if not isinstance(loads, LoadGroup):
-            raise NavierLoadError("The loads must be an instance of LoadGroup.")
+            raise TypeError("The loads must be an instance of LoadGroup.")
 
         # STIFFNESS
         lhs = lhs_Navier(self.length, self.N, D=self.EI, S=self.GA)
@@ -121,7 +114,7 @@ class NavierBeam(NavierProblem):
 
         result = DeepDict()
         for i, (addr, _) in enumerate(loads.items(deep=True, return_address=True)):
-            result[addr] = self._postproc_result_to_xarray_2d(res[0, i, :, :])
+            result[addr] = self._postproc_linstat_load_case_result(res[0, i, :, :])
         result.lock()
 
         return result

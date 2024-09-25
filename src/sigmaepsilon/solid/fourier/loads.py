@@ -183,11 +183,9 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
        The coordinates of the lower-left and upper-right points of the region
        where the load is applied. Default is ``None``.
 
-    You can tell from the shape of the result that there are 20000 harmonic terms
-    involved in the approximation and that the model has 3 degrees of freedom.
-    The first axis is always 1, as there is only one left hand side (one problem).
-    The reason for the first index is that the functions that calculate the solution
-    are prepared to calculate results for multiple problems at once if necessary.
+    .. hint::
+        For a detailed explanation of the sign conventions, refer to
+        :ref:`this <plate_sign_conventions>` section of the theory guide.
     """
 
     @property
@@ -234,6 +232,10 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
     value: Float1d
         Load intensities for each dof. The order of the dofs for a beam
         is :math:`[F, M]`, for a plate it is :math:`[F, M_x, M_y]`.
+        
+    .. hint::
+        For a detailed explanation of the sign conventions, refer to
+        :ref:`this <sign_conventions>` section of the theory guide.
     """
 
     def rhs(self, problem: NavierProblem) -> ndarray:
@@ -316,6 +318,10 @@ class PointLoad(LoadCase[float | Float1d, Float1d]):
     value: Float1d
         Load values for each dof. The order of the dofs for a beam
         is [F, M], for a plate it is [F, Mx, My].
+        
+    .. hint::
+        For a detailed explanation of the sign conventions, refer to
+        :ref:`this <sign_conventions>` section of the theory guide.
     """
 
     def rhs(self, problem: NavierProblem) -> ndarray:
