@@ -4,7 +4,6 @@ import numpy as np
 
 from sigmaepsilon.core.testing import SigmaEpsilonTestCase
 
-from sigmaepsilon.solid.fourier.exceptions import NavierLoadError
 from sigmaepsilon.solid.fourier import (
     RectangularPlate,
     NavierBeam,
@@ -16,8 +15,6 @@ from sigmaepsilon.solid.fourier import (
 
 
 class TestBeamLoads(SigmaEpsilonTestCase):
-    def test_load_error_smoke(self):
-        NavierLoadError()
 
     def test_beam_loads_smoke(self):
         L = 1000.0  # geometry

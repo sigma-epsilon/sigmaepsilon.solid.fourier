@@ -19,7 +19,6 @@ from sigmaepsilon.solid.fourier import (
     PointLoad,
     RectangleLoad,
 )
-from sigmaepsilon.solid.fourier.exceptions import NavierLoadError
 
 
 class TestKirchhoffPlate(SigmaEpsilonTestCase):
@@ -98,7 +97,7 @@ class TestKirchhoffPlate(SigmaEpsilonTestCase):
 
         plate = RectangularPlate(size, (20, 20), D=D)
 
-        with self.assertRaises(NavierLoadError):
+        with self.assertRaises(TypeError):
             plate.solve(None, None)
 
 

@@ -4,7 +4,6 @@ import numpy as np
 
 from sigmaepsilon.core.testing import SigmaEpsilonTestCase
 from sigmaepsilon.solid.fourier import LoadGroup, PointLoad, LineLoad, NavierBeam
-from sigmaepsilon.solid.fourier.exceptions import NavierLoadError
 
 
 class TestBernoulliBeam(SigmaEpsilonTestCase):
@@ -38,7 +37,7 @@ class TestBernoulliBeam(SigmaEpsilonTestCase):
         L, EI = 1000.0, 1.0
         beam = NavierBeam(L, 2, EI=EI)
         x = np.linspace(0, L, 2)
-        with self.assertRaises(NavierLoadError):
+        with self.assertRaises(TypeError):
             beam.solve(None, x)
 
 
