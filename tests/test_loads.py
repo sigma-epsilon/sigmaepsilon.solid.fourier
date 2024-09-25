@@ -6,6 +6,7 @@ from sigmaepsilon.core.testing import SigmaEpsilonTestCase
 
 from sigmaepsilon.solid.fourier.exceptions import NavierLoadError
 from sigmaepsilon.solid.fourier import (
+    RectangularPlate,
     NavierBeam,
     LoadGroup,
     PointLoad,
@@ -78,7 +79,21 @@ class TestPlateLoads(SigmaEpsilonTestCase):
 
         loads.cooperative = loads.cooperative
         loads["LG1"]["LC1"].region
-
+        
+    def test_rectangle_load_coeff_shape(self):
+        length_X, length_Y = 10.0, 20.0
+        number_of_modes_X, number_of_modes_Y = 100, 200
+        bending_stiffness = np.eye(3)  # just to have some data
+        kirchhoff_plate = RectangularPlate(
+            (length_X, length_Y),
+            (number_of_modes_X, number_of_modes_Y),
+            D=bending_stiffness,
+        )
+        load_case = RectangleLoad([[0, 0], [length_X, length_Y]], [-0.1, 0, 0])
+        self.assertEqual(
+            load_case.rhs(kirchhoff_plate).shape,
+            (1, number_of_modes_X * number_of_modes_Y, 3),
+        )
 
 if __name__ == "__main__":
     unittest.main()
