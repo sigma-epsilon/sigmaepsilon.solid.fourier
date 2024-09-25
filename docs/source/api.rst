@@ -28,9 +28,14 @@ Loads
 .. autoclass:: sigmaepsilon.solid.fourier.loads.RectangleLoad
    :members:
 
+Results
+=======
 
-Exceptions
-==========
+.. autoclass:: sigmaepsilon.solid.fourier.result.LoadCaseResultLinStat
+   :members:
 
-.. autoclass:: sigmaepsilon.solid.fourier.exceptions.NavierLoadError
+.. autoclass:: sigmaepsilon.solid.fourier.result.BeamLoadCaseResultLinStat
+   :members:
+
+.. autoclass:: sigmaepsilon.solid.fourier.result.PlateLoadCaseResultLinStat
    :members:
