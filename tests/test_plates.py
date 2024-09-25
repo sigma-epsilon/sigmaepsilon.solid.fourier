@@ -14,7 +14,7 @@ from sigmaepsilon.solid.material import (
 )
 from sigmaepsilon.solid.material.utils import elastic_stiffness_matrix
 from sigmaepsilon.solid.fourier import (
-    RectangularPlate,
+    NavierPlate,
     LoadGroup,
     PointLoad,
     RectangleLoad,
@@ -65,7 +65,7 @@ class TestKirchhoffPlate(SigmaEpsilonTestCase):
         gridparams = {"size": size, "shape": grid_shape, "eshape": "Q4"}
         coords, _ = grid(**gridparams)
 
-        plate = RectangularPlate(size, (20, 20), D=D)
+        plate = NavierPlate(size, (20, 20), D=D)
         plate.solve(loads, coords)
 
     def test_invalid_load(self):
@@ -95,7 +95,7 @@ class TestKirchhoffPlate(SigmaEpsilonTestCase):
         ABDS = section.elastic_stiffness_matrix()
         D = ascont(ABDS[:3, :3])
 
-        plate = RectangularPlate(size, (20, 20), D=D)
+        plate = NavierPlate(size, (20, 20), D=D)
 
         with self.assertRaises(TypeError):
             plate.solve(None, None)
@@ -145,7 +145,7 @@ class TestMindlinPlate(SigmaEpsilonTestCase):
         gridparams = {"size": size, "shape": grid_shape, "eshape": "Q4"}
         coords, _ = grid(**gridparams)
 
-        plate = RectangularPlate(size, (20, 20), D=D, S=S)
+        plate = NavierPlate(size, (20, 20), D=D, S=S)
         plate.solve(loads, coords)
 
 

@@ -4,17 +4,20 @@ from importlib.metadata import metadata
 from sigmaepsilon.core.config import namespace_package_name
 
 from .beam import NavierBeam
-from .plate import RectangularPlate
+from .plate import NavierPlate
 from .loads import LoadGroup, RectangleLoad, LineLoad, PointLoad
+from .result import BeamLoadCaseResultLinStat, PlateLoadCaseResultLinStat
 
 __all__ = [
     "NavierBeam",
-    "RectangularPlate",
+    "NavierPlate",
     "NavierLoadError",
     "LoadGroup",
     "RectangleLoad",
     "LineLoad",
     "PointLoad",
+    "BeamLoadCaseResultLinStat",
+    "PlateLoadCaseResultLinStat",
 ]
 
 # __pkg_name__ = namespace_package_name(dirname(abspath(__file__)), 10)

@@ -5,7 +5,7 @@ import numpy as np
 from sigmaepsilon.core.testing import SigmaEpsilonTestCase
 
 from sigmaepsilon.solid.fourier import (
-    RectangularPlate,
+    NavierPlate,
     NavierBeam,
     LoadGroup,
     PointLoad,
@@ -84,7 +84,7 @@ class TestPlateLoads(SigmaEpsilonTestCase):
         length_X, length_Y = 10.0, 20.0
         number_of_modes_X, number_of_modes_Y = 100, 200
         bending_stiffness = np.eye(3)  # just to have some data
-        kirchhoff_plate = RectangularPlate(
+        kirchhoff_plate = NavierPlate(
             (length_X, length_Y),
             (number_of_modes_X, number_of_modes_Y),
             D=bending_stiffness,

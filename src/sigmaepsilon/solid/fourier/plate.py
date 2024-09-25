@@ -12,10 +12,10 @@ from .postproc import postproc
 from .proc import linsolve_Kirchhoff, linsolve_Mindlin
 from .result import PlateLoadCaseResultLinStat
 
-__all__ = ["RectangularPlate"]
+__all__ = ["NavierPlate"]
 
 
-class RectangularPlate(NavierProblem):
+class NavierPlate(NavierProblem):
     """
     A class to handle semi-analytic solutions of rectangular plates with
     specific boudary conditions.

@@ -14,8 +14,7 @@ class NavierProblem:
     result_class = LoadCaseResultLinStat
 
     def _postproc_linstat_load_case_result(self, data) -> LoadCaseResultLinStat:
-        components = self.__class__.result_class.postproc_components
-        res = LoadCaseResultLinStat(data, components=components, name="values")
+        res = self.result_class(data, name="values")
         return res
 
     @abstractmethod
