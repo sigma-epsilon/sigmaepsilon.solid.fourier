@@ -80,7 +80,7 @@ class NavierBeam(NavierProblem):
 
         Parameters
         ----------
-        loads: LoadGroup
+        loads: :class:`~sigmaepsilon.solid.fourier.loads.LoadGroup`
             The loads.
         points: float or Iterable
             A float or an 1d iterable of coordinates, where the results are
@@ -91,9 +91,8 @@ class NavierBeam(NavierProblem):
 
         Returns
         -------
-        DeepDict
-            A nested dictionary with a same layout as the loads, but as an instance
-            of :class:`~sigmaepsilon.deepdict.DeepDict`.
+        :class:`~sigmaepsilon.deepdict.deepdict.DeepDict`
+            A nested dictionary with a same layout as the loads.
         """
         if not isinstance(loads, LoadGroup):
             raise NavierLoadError("The loads must be an instance of LoadGroup.")

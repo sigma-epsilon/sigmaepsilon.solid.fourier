@@ -1,4 +1,4 @@
-from typing import Tuple, Union, Iterable
+from typing import Tuple, Iterable
 
 import numpy as np
 
@@ -23,9 +23,9 @@ class RectangularPlate(NavierProblem):
 
     Parameters
     ----------
-    size: Tuple[float]
+    size: tuple[float]
         The size of the rectangle.
-    shape: Tuple[int]
+    shape: tuple[int]
         Numbers of harmonic terms involved in both directions.
     """
 
@@ -59,32 +59,30 @@ class RectangularPlate(NavierProblem):
         self.D = np.array(D, dtype=float)
         self.S = None if S is None else np.array(S, dtype=float)
 
-    def solve(self, loads: Union[dict, LoadGroup], points: Iterable) -> DeepDict:
+    def solve(self, loads: LoadGroup, points: Iterable) -> DeepDict:
         """
         Solves the problem and calculates all entities at the specified points.
 
         Parameters
         ----------
-        loads: Union[dict, LoadGroup]
+        loads: :class:`~sigmaepsilon.solid.fourier.loads.LoadGroup`
             The loads.
-        points: Iterable
+        points: Iterable[Iterable[float]]
             2d float array of coordinates, where the results are to be evaluated.
 
         Returns
         -------
-        dict
+        :class:`~sigmaepsilon.deepdict.deepdict.DeepDict`
             A dictionary with a same layout as the input.
         """
-        if isinstance(loads, LoadGroup):
-            _loads = loads
-        else:
-            raise NavierLoadError()
+        if not isinstance(loads, LoadGroup):
+            raise NavierLoadError("The loads must be an instance of LoadGroup.")
 
         # STIFFNESS
         lhs = lhs_Navier(self.size, self.shape, D=self.D, S=self.S)
 
         # LOADS
-        load_cases = list(_loads.cases())
+        load_cases = list(loads.cases())
         rhs = np.vstack(list(lc.rhs(problem=self) for lc in load_cases))
 
         # SOLUTION

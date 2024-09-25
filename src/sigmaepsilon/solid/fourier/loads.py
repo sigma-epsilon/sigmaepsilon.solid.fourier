@@ -27,14 +27,9 @@ class LoadGroup(DeepDict):
 
     This class is also the base class of all other load types.
 
-    Parameters
-    ----------
-    exclusive: bool, Optional
-        If `True`, load cases of this group can't interact. Default is `True`.
-
     See Also
     --------
-    :class:`~sigmaepsilon.deepdict.DeepDict`
+    :class:`~sigmaepsilon.deepdict.deepdict.DeepDict`
 
     Examples
     --------
@@ -51,7 +46,7 @@ class LoadGroup(DeepDict):
     >>>     ),
     >>> )
 
-    Since the LoadGroup is a subclass of :class:`~sigmaepsilon.deepdict.DeepDict`,
+    Since the LoadGroup class is a subclass of :class:`~sigmaepsilon.deepdict.deepdict.DeepDict`,
     a case is accessible as
 
     >>> loads['group1', 'case1']
@@ -104,7 +99,7 @@ class LoadGroup(DeepDict):
 
         Yields
         ------
-        LoadGroup
+        :class:`~sigmaepsilon.solid.fourier.loads.LoadGroup`
         """
         dtype = LoadGroup if blocktype is None else blocktype
         return self.containers(inclusive=inclusive, dtype=dtype, deep=deep)
@@ -138,6 +133,9 @@ LoadValueType = TypeVar("LoadValueType")
 
 
 class LoadCase(Generic[LoadDomainType, LoadValueType]):
+    """
+    Base class for all load cases.
+    """
 
     def __init__(
         self,
@@ -169,7 +167,7 @@ class LoadCase(Generic[LoadDomainType, LoadValueType]):
         self._value = value
 
     @abstractmethod
-    def rhs(self, *, problem: NavierProblem) -> ndarray:
+    def rhs(self, problem: NavierProblem) -> ndarray:
         raise NotImplementedError("The method 'rhs' must be implemented.")
 
 
@@ -184,6 +182,12 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
     value: Float1d
        The coordinates of the lower-left and upper-right points of the region
        where the load is applied. Default is ``None``.
+
+    You can tell from the shape of the result that there are 20000 harmonic terms
+    involved in the approximation and that the model has 3 degrees of freedom.
+    The first axis is always 1, as there is only one left hand side (one problem).
+    The reason for the first index is that the functions that calculate the solution
+    are prepared to calculate results for multiple problems at once if necessary.
     """
 
     @property
@@ -195,7 +199,7 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
         """
         return points_to_rectangle_region(np.array(self.domain))
 
-    def rhs(self, *, problem: NavierProblem) -> ndarray:
+    def rhs(self, problem: NavierProblem) -> ndarray:
         """
         Returns the coefficients as a NumPy array.
 
@@ -208,8 +212,9 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
         Returns
         -------
         numpy.ndarray
-            2d float array of shape (H, 3), where H is the total number
-            of harmonic terms involved (defined for the problem).
+            3d float array of shape (1, H, 3), where H is the total number
+            of harmonic terms involved (defined for the problem). The first
+            axis is always 1, as there is only one left hand side.
         """
         x = np.array(self.domain, dtype=float)
         v = np.array(self.value, dtype=float)
@@ -231,7 +236,7 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
         is :math:`[F, M]`, for a plate it is :math:`[F, M_x, M_y]`.
     """
 
-    def rhs(self, *, problem: NavierProblem) -> ndarray:
+    def rhs(self, problem: NavierProblem) -> ndarray:
         """
         Returns the coefficients as a NumPy array.
 
@@ -313,7 +318,7 @@ class PointLoad(LoadCase[float | Float1d, Float1d]):
         is [F, M], for a plate it is [F, Mx, My].
     """
 
-    def rhs(self, *, problem: NavierProblem) -> ndarray:
+    def rhs(self, problem: NavierProblem) -> ndarray:
         """
         Returns the coefficients as a NumPy array.
 
