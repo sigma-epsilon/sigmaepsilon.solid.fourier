@@ -13,7 +13,7 @@ Models
 .. autoclass:: sigmaepsilon.solid.fourier.beam.NavierBeam
    :members:
 
-.. autoclass:: sigmaepsilon.solid.fourier.plate.RectangularPlate
+.. autoclass:: sigmaepsilon.solid.fourier.plate.NavierPlate
    :members:
 
 Loads
