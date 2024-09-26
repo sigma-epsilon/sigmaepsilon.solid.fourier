@@ -33,7 +33,6 @@ packages = [{ include = "sigmaepsilon", from = "src" }]
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
 sigmaepsilon-mesh = ">=2.3.2"
-xarray = "^2024.2.0"
 sigmaepsilon-solid-material = "^1.0.1"
 
 [tool.poetry.group.dev.dependencies]
@@ -43,12 +42,14 @@ pandas = "^2.2.0"
 pyyaml = "^6.0.1"
 ipykernel = "^6.29.5"
 black = "^24.8.0"
+xarray = "^2024.6.0"
 
 [tool.poetry.group.test.dependencies]
 coverage = "^7.4.1"
 pytest = "^8.0.1"
 pytest-cov = "^4.1.0"
 pyyaml = "^6.0.1"
+xarray = "^2024.6.0"
 
 [tool.poetry.group.dist.dependencies]
 dask = "^2024.2.0"

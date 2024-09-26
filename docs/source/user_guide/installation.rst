@@ -4,7 +4,7 @@ Installation
 
 .. note::
 
-   If you are a developer, please refer to the :ref:`installation for developers <development>` section.
+   If you are a developer, please refer to the :ref:`installation for developers <development_guide>` section.
 
 You can install the library from ``PyPI`` via ``pip`` using the following command:
 

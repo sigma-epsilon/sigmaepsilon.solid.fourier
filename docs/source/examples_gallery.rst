@@ -1,3 +1,5 @@
+.. _examples_gallery:
+
 =======
 Gallery
 =======
@@ -23,3 +25,4 @@ Plates
     :reversed:
 
     gallery/Uflyand_Mindlin_matplotlib.ipynb
+    gallery/plate_utils.ipynb
