@@ -66,7 +66,7 @@ class TestKirchhoffPlate(SigmaEpsilonTestCase):
         coords, _ = grid(**gridparams)
 
         plate = NavierPlate(size, (20, 20), D=D)
-        plate.solve(loads, coords)
+        plate.linear_static_analysis(loads, coords)
 
     def test_invalid_load(self):
         size = (600.0, 800.0)
@@ -98,7 +98,7 @@ class TestKirchhoffPlate(SigmaEpsilonTestCase):
         plate = NavierPlate(size, (20, 20), D=D)
 
         with self.assertRaises(TypeError):
-            plate.solve(None, None)
+            plate.linear_static_analysis(None, None)
 
 
 class TestMindlinPlate(SigmaEpsilonTestCase):
@@ -146,7 +146,7 @@ class TestMindlinPlate(SigmaEpsilonTestCase):
         coords, _ = grid(**gridparams)
 
         plate = NavierPlate(size, (20, 20), D=D, S=S)
-        plate.solve(loads, coords)
+        plate.linear_static_analysis(loads, coords)
 
 
 if __name__ == "__main__":

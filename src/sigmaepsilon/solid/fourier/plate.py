@@ -44,9 +44,9 @@ class NavierPlate(NavierProblem):
         self.D = np.array(D, dtype=float)
         self.S = None if S is None else np.array(S, dtype=float)
 
-    def solve(self, loads: LoadGroup, points: Iterable) -> DeepDict:
+    def linear_static_analysis(self, loads: LoadGroup, points: Iterable) -> DeepDict:
         """
-        Solves the problem and calculates all entities at the specified points.
+        Performs a linear static analysis and calculates all entities at the specified points.
 
         Parameters
         ----------

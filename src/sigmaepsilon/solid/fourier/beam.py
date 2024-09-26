@@ -66,9 +66,9 @@ class NavierBeam(NavierProblem):
         self.GA = GA
         self.N = N
 
-    def solve(self, loads: LoadGroup, points: float | Iterable) -> DeepDict:
+    def linear_static_analysis(self, loads: LoadGroup, points: float | Iterable) -> DeepDict:
         """
-        Solves the problem and calculates all postprocessing quantities at
+        Performs a linear static analysis and calculates all postprocessing quantities at
         one ore more points.
 
         Parameters

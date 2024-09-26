@@ -62,7 +62,7 @@ class LoadCaseResultLinStat:
 
     def to_xarray(self) -> "xr.DataArray":
         """
-        Returns the results as an instance of  ``xarray.DataArray``.
+        Returns the results as an instance of  :class:`xarray.DataArray`.
         """
         import xarray as xr
 
@@ -76,7 +76,7 @@ class LoadCaseResultLinStat:
 
     def to_pandas(self) -> "pd.DataFrame":
         """
-        Returns the results as an instance of ``pandas.DataFrame``.
+        Returns the results as an instance of :class:`pandas.DataFrame`.
         """
         import pandas as pd
 

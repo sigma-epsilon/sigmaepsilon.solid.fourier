@@ -177,9 +177,9 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
 
     Parameters
     ----------
-    domain: Float2d
+    domain: :class:`~sigmaepsilon.solid.fourier.loads.Float2d`
        Load intensities for each dof in the order :math:`f_z, m_x, m_y`.
-    value: Float1d
+    value: :class:`~sigmaepsilon.solid.fourier.loads.Float1d`
        The coordinates of the lower-left and upper-right points of the region
        where the load is applied. Default is ``None``.
 
@@ -203,7 +203,7 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
 
         Parameters
         ----------
-        problem: NavierProblem
+        problem: :class:`~sigmaepsilon.solid.fourier.problem.NavierProblem`
             A problem the coefficients are generated for. If not specified,
             the attached problem of the object is used. Default is None.
 
@@ -225,11 +225,11 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
 
     Parameters
     ----------
-    domain: Float1d | Float2d
+    domain: :class:`~sigmaepsilon.solid.fourier.loads.Float1d` | :class:`~sigmaepsilon.solid.fourier.loads.Float2d`
         The point of application as an 1d iterable for a beam, a 2d iterable
         for a plate. In the latter case, the first row is the first point, the
         second row is the second point.
-    value: Float1d
+    value: :class:`~sigmaepsilon.solid.fourier.loads.Float1d`
         Load intensities for each dof. The order of the dofs for a beam
         is :math:`[F, M]`, for a plate it is :math:`[F, M_x, M_y]`.
         
@@ -244,7 +244,7 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
 
         Parameters
         ----------
-        problem: NavierProblem
+        problem: :class:`~sigmaepsilon.solid.fourier.problem.NavierProblem`
             A problem the coefficients are generated for. If not specified,
             the attached problem of the object is used. Default is None.
 
@@ -312,10 +312,10 @@ class PointLoad(LoadCase[float | Float1d, Float1d]):
 
     Parameters
     ----------
-    domain: float or Float1d
+    domain: float or :class:`~sigmaepsilon.solid.fourier.loads.Float1d`
         The point of application. A scalar for a beam, an iterable of
         length 2 for a plate.
-    value: Float1d
+    value: :class:`~sigmaepsilon.solid.fourier.loads.Float1d`
         Load values for each dof. The order of the dofs for a beam
         is [F, M], for a plate it is [F, Mx, My].
         
@@ -330,7 +330,7 @@ class PointLoad(LoadCase[float | Float1d, Float1d]):
 
         Parameters
         ----------
-        problem: NavierProblem
+        problem: :class:`~sigmaepsilon.solid.fourier.problem.NavierProblem`
             A problem the coefficients are generated for. If not specified,
             the attached problem of the object is used. Default is ``None``.
 
