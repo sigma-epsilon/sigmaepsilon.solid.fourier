@@ -31,7 +31,14 @@ class TestBernoulliBeam(SigmaEpsilonTestCase):
         x = np.linspace(0, L, 2)
 
         beam = NavierBeam(L, 2, EI=EI)
-        beam.solve(loads, x)
+        solution = beam.solve(loads, x)
+
+        load_case_solution = solution["concentrated"]["LC1"]
+        load_case_solution.data
+        load_case_solution.values
+        load_case_solution.name = load_case_solution.name
+        load_case_solution.to_xarray()
+        load_case_solution.to_pandas()
 
     def test_invalid_load(self):
         L, EI = 1000.0, 1.0

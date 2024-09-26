@@ -36,8 +36,10 @@ class TestBeamLoads(SigmaEpsilonTestCase):
 
         loads.cooperative = loads.cooperative
         loads.groups()
-        loads["concentrated"]["LC1"].domain = loads["concentrated"]["LC1"].domain
-        loads["concentrated"]["LC1"].value = loads["concentrated"]["LC1"].value
+        
+        load_case = loads["concentrated"]["LC1"]
+        load_case.domain = load_case.domain
+        load_case.value = load_case.value
 
     def test_line_Load(self):
         L = 1000.0  # geometry
