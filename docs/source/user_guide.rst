@@ -28,3 +28,4 @@ please refer to the :doc:`api`.
     
     examples/plate_utils_pyvista
     examples/mindlin_vs_kirchhoff
+    examples/beam_influence_diagrams

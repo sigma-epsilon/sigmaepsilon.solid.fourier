@@ -19,6 +19,24 @@ Models
 Loads
 =====
 
+.. autoclass:: sigmaepsilon.solid.fourier.loads.Float1d
+   :members:
+
+.. autoclass:: sigmaepsilon.solid.fourier.loads.Float2d
+   :members:
+
+.. autoclass:: sigmaepsilon.solid.fourier.loads.LoadDomainType
+   :members:
+
+.. autoclass:: sigmaepsilon.solid.fourier.loads.LoadValueType
+   :members:
+
+.. autoclass:: sigmaepsilon.solid.fourier.loads.LoadGroup
+   :members:
+
+.. autoclass:: sigmaepsilon.solid.fourier.loads.LoadCase
+   :members:
+
 .. autoclass:: sigmaepsilon.solid.fourier.loads.PointLoad
    :members:
 
