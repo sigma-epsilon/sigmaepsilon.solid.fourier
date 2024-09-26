@@ -134,7 +134,7 @@ LoadValueType = TypeVar("LoadValueType")
 
 class LoadCase(Generic[LoadDomainType, LoadValueType]):
     """
-    Base class for all load cases.
+    Generic base class for all load cases.
     """
 
     def __init__(
