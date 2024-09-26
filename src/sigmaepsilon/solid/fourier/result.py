@@ -9,7 +9,7 @@ __all__ = [
 ]
 
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     import xarray as xr  # Only for type hints
     import pandas as pd  # Only for type hints
 
