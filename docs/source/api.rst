@@ -10,6 +10,9 @@ understanding of the key concepts.
 Models
 ======
 
+.. autoclass:: sigmaepsilon.solid.fourier.problem.NavierProblem
+   :members:
+
 .. autoclass:: sigmaepsilon.solid.fourier.beam.NavierBeam
    :members:
 
