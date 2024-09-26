@@ -10,27 +10,27 @@ serving a different purpose. The documentation is written in a way that it is ea
 the information you are looking for. If you are new to the library, we suggest you start with the
 :doc:`User Guide <user_guide>`.
 
-How to use the documentation
-============================
+The structure of the documentation
+==================================
 
 The documentation is devoted to three main parts:
 
-* **Getting Started Guide** - This very guide you are reading. It helps you to get started with the 
+* :ref:`Getting Started Guide <getting_started>` - This very guide you are reading. It helps you to get started with the 
   library by laying down the steps of a miniature course, through wich you hopefully get a hang of 
   things.
 
-* **User Guide** - Introduces the concepts of the library and illustrates the usage of the classes 
+* :ref:`User Guide <user_guide>` - Introduces the concepts of the library and illustrates the usage of the classes 
   and algorithms by small examples. The user guide also has a lot of references to other parts
   of the documentation, including the API Reference. **This is the best place to start if you are new
   to the library.** All of the chapters can be downloaded as Jupyter Notebooks from 
   the source repository of the library using the link at the top of the pages.
 
-* **API Reference** - The documentation of the classes and algorithms of the library. The API 
+* :ref:`API Reference <api_reference>` - The documentation of the classes and algorithms of the library. The API 
   Reference is rich in examples and explanations, and this should be the primary source 
   of information as to how to use the library. If you are a seasoned developer, you might consider 
   jumping into the API Reference directly.
 
-* **Gallery** - This is a collection of examples that involve some kind of visualization. The code 
+* :ref:`Gallery <examples_gallery>` - This is a collection of examples that involve some kind of visualization. The code 
   is ususally provided as one big block of execution, with ocassional internal notes. These examples
   doesn't have much explanation. If all this is new to you, we suggest to go through the User Guide first.
 
