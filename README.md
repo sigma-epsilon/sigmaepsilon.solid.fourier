@@ -59,7 +59,7 @@ In all cases, read the [contributing guidelines](CONTRIBUTING.md) before you do 
 
 ## Acknowledgements
 
-**Many of the packages referenced in this document and in the introduction have corresponding research papers that can be cited. If you use them in your work through `sigmaepsilon.mesh`, please take a moment to review their documentation and cite their papers accordingly.**
+**Many of the packages referenced in this document and in the introduction have corresponding research papers that can be cited. If you use them in your work through `sigmaepsilon.solid.fourier`, please take a moment to review their documentation and cite their papers accordingly.**
 
 Additionally, the funding for these libraries often depends on the size of their user base. If your work heavily relies on these libraries, consider showing your support by clicking the :star: button.
 
