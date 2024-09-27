@@ -1,3 +1,5 @@
+.. _user_guide:
+
 ==========
 User Guide
 ==========
@@ -19,6 +21,7 @@ please refer to the :doc:`api`.
     :caption: Contents
     
     user_guide/user_guide
+    theory_guide/index
 
 .. toctree::
     :maxdepth: 1
@@ -27,3 +30,4 @@ please refer to the :doc:`api`.
     
     examples/plate_utils_pyvista
     examples/mindlin_vs_kirchhoff
+    examples/beam_influence_diagrams

@@ -12,7 +12,7 @@
    Development <development>
 
 .. image:: _static/logo.png
-    :align: center
+   :align: center
 
 **Version**: |version|
 
@@ -119,7 +119,7 @@ Contents
 
         +++
 
-        .. button-ref:: development
+        .. button-ref:: development_guide
             :expand:
             :color: secondary
             :click-parent:

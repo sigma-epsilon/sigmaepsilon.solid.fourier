@@ -1,8 +1,8 @@
 from abc import abstractmethod
-from typing import List
 
-import numpy as np
-import xarray as xr
+from .result import LoadCaseResultLinStat
+
+__all__ = ["NavierProblem"]
 
 
 class NavierProblem:
@@ -11,16 +11,11 @@ class NavierProblem:
     avoid circular referencing.
     """
 
-    postproc_components: List[str]
+    result_class = LoadCaseResultLinStat
 
-    def _postproc_result_to_xarray_2d(self, data) -> xr.DataArray:
-        nP = len(data)
-        components = self.__class__.postproc_components
-        coords = [np.arange(nP), components]
-        xarr = xr.DataArray(
-            data, coords=coords, dims=["index", "component"], name="values"
-        )
-        return xarr
+    def _postproc_linstat_load_case_result(self, data) -> LoadCaseResultLinStat:
+        res = self.result_class(data, name="values")
+        return res
 
     @abstractmethod
     def solve(self, *args, **kwargs): ...

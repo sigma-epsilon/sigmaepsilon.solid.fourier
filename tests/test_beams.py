@@ -4,7 +4,6 @@ import numpy as np
 
 from sigmaepsilon.core.testing import SigmaEpsilonTestCase
 from sigmaepsilon.solid.fourier import LoadGroup, PointLoad, LineLoad, NavierBeam
-from sigmaepsilon.solid.fourier.loads import NavierLoadError
 
 
 class TestBernoulliBeam(SigmaEpsilonTestCase):
@@ -18,13 +17,13 @@ class TestBernoulliBeam(SigmaEpsilonTestCase):
 
         loads = LoadGroup(
             concentrated=LoadGroup(
-                LC1=PointLoad(x=L / 2, v=[1.0, 0.0]),
-                LC5=PointLoad(x=L / 2, v=[0.0, 1.0]),
+                LC1=PointLoad(L / 2, [1.0, 0.0]),
+                LC5=PointLoad(L / 2, [0.0, 1.0]),
             ),
             distributed=LoadGroup(
-                LC2=LineLoad(x=[0, L], v=[1.0, 0.0]),
-                LC6=LineLoad(x=[L / 2, L], v=[0.0, 1.0]),
-                LC3=LineLoad(x=[L / 2, L], v=["x", 0]),
+                LC2=LineLoad([0, L], [1.0, 0.0]),
+                LC6=LineLoad([L / 2, L], [0.0, 1.0]),
+                LC3=LineLoad([L / 2, L], ["x", 0]),
             ),
         )
         loads.lock()
@@ -32,14 +31,21 @@ class TestBernoulliBeam(SigmaEpsilonTestCase):
         x = np.linspace(0, L, 2)
 
         beam = NavierBeam(L, 2, EI=EI)
-        beam.solve(loads, x)
+        solution = beam.linear_static_analysis(loads, x)
+
+        load_case_solution = solution["concentrated"]["LC1"]
+        load_case_solution.data
+        load_case_solution.values
+        load_case_solution.name = load_case_solution.name
+        load_case_solution.to_xarray()
+        load_case_solution.to_pandas()
 
     def test_invalid_load(self):
         L, EI = 1000.0, 1.0
         beam = NavierBeam(L, 2, EI=EI)
         x = np.linspace(0, L, 2)
-        with self.assertRaises(NavierLoadError):
-            beam.solve(None, x)
+        with self.assertRaises(TypeError):
+            beam.linear_static_analysis(None, x)
 
 
 class TestTimoshenkoBeam(SigmaEpsilonTestCase):
@@ -56,13 +62,13 @@ class TestTimoshenkoBeam(SigmaEpsilonTestCase):
 
         loads = LoadGroup(
             concentrated=LoadGroup(
-                LC1=PointLoad(x=L / 2, v=[1.0, 0.0]),
-                LC5=PointLoad(x=L / 2, v=[0.0, 1.0]),
+                LC1=PointLoad(L / 2, [1.0, 0.0]),
+                LC5=PointLoad(L / 2, [0.0, 1.0]),
             ),
             distributed=LoadGroup(
-                LC2=LineLoad(x=[0, L], v=[1.0, 0.0]),
-                LC6=LineLoad(x=[L / 2, L], v=[0.0, 1.0]),
-                LC3=LineLoad(x=[L / 2, L], v=["x", 0]),
+                LC2=LineLoad([0, L], [1.0, 0.0]),
+                LC6=LineLoad([L / 2, L], [0.0, 1.0]),
+                LC3=LineLoad([L / 2, L], ["x", 0]),
             ),
         )
         loads.lock()
@@ -70,7 +76,7 @@ class TestTimoshenkoBeam(SigmaEpsilonTestCase):
         x = np.linspace(0, L, 2)
 
         beam = NavierBeam(L, 2, EI=EI, GA=GA)
-        beam.solve(loads, x)
+        beam.linear_static_analysis(loads, x)
 
 
 if __name__ == "__main__":
