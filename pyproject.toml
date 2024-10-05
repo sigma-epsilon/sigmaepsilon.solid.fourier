@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "sigmaepsilon.solid.fourier"
-version = "1.0.0"
+version = "1.1.0"
 description = "Fourier solutions of some plate and beam bending problems in Python"
 classifiers=[
         "Development Status :: 5 - Production/Stable",
