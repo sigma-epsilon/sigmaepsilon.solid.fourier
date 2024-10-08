@@ -60,7 +60,7 @@ class TestBeamLoads(SigmaEpsilonTestCase):
 
         x = np.linspace(0, L, 2)
         beam = NavierBeam(L, 2, EI=EI)
-        beam.linear_static_analysis(loads, x)
+        beam.linear_static_analysis(x, loads)
 
 
 class TestPlateLoads(SigmaEpsilonTestCase):
