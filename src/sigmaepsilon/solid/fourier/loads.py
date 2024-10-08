@@ -1,4 +1,4 @@
-from typing import Iterable, Any, Optional, TypeVar, Generic, TypeAlias, Hashable, Union
+from typing import Iterable, Any, Optional, TypeVar, Generic, TypeAlias, Hashable
 from numbers import Number
 from abc import abstractmethod
 
@@ -10,7 +10,7 @@ from sigmaepsilon.math.function import Function
 
 from .preproc import rhs_rect_const, rhs_conc_1d, rhs_conc_2d, rhs_line_const
 from .utils import points_to_rectangle_region, sin1d, cos1d
-from .protocols import NavierProblemProtocol
+from .protocols import NavierProblemProtocol, LoadGroupProtocol, LoadCaseProtocol
 
 __all__ = ["LoadGroup", "LoadCase", "RectangleLoad", "LineLoad", "PointLoad"]
 
@@ -237,8 +237,7 @@ class PointLoad(LoadCase[float | Float1d, Float1d]):
         else:
             return rhs_conc_1d(problem.length, problem.N, v, x)
 
-
-class LoadGroup(DeepDict[Hashable, Union["LoadGroup", LoadCase, Any]]):
+class LoadGroup(DeepDict[Hashable, LoadGroupProtocol | LoadCaseProtocol | Any]):
     """
     A class to handle load groups for Navier's semi-analytic solution of
     rectangular plates and beams with specific boundary conditions.
@@ -300,7 +299,7 @@ class LoadGroup(DeepDict[Hashable, Union["LoadGroup", LoadCase, Any]]):
         inclusive: Optional[bool] = False,
         blocktype: Optional[Any] = None,
         deep: Optional[bool] = True,
-    ) -> Iterable["LoadGroup"]:
+    ) -> Iterable[LoadGroupProtocol]:
         """
         Returns a generator object that yields all the subgroups.
 
@@ -325,7 +324,7 @@ class LoadGroup(DeepDict[Hashable, Union["LoadGroup", LoadCase, Any]]):
     def cases(
         self,
         case_type: Any = None,
-    ) -> Iterable["LoadCase"]:
+    ) -> Iterable[LoadCaseProtocol]:
         """
         Returns a generator that yields the load cases in the group.
 
