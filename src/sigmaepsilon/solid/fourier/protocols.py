@@ -16,6 +16,18 @@ class NavierProblemProtocol(Protocol):
 @runtime_checkable
 class LoadCaseProtocol(Protocol):
     def rhs(self, problem: NavierProblemProtocol) -> ndarray: ...
+    
+    @property
+    def domain(self): ...
+    
+    @ domain.setter
+    def domain(self, value): ...
+    
+    @property
+    def value(self): ...
+    
+    @ value.setter
+    def value(self, value): ...
 
 
 @runtime_checkable
