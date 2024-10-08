@@ -237,6 +237,7 @@ class PointLoad(LoadCase[float | Float1d, Float1d]):
         else:
             return rhs_conc_1d(problem.length, problem.N, v, x)
 
+
 class LoadGroup(DeepDict[Hashable, LoadGroupProtocol | LoadCaseProtocol | Any]):
     """
     A class to handle load groups for Navier's semi-analytic solution of

@@ -13,7 +13,7 @@ class NavierProblem:
     """
 
     result_class = LoadCaseResultLinStat
-    
+
     def __init__(self, *, loads: LoadGroupProtocol | None = None):
         self._loads = loads
 
@@ -23,14 +23,14 @@ class NavierProblem:
         Returns the loads.
         """
         return self._loads
-    
+
     @loads.setter
     def loads(self, value: LoadGroupProtocol | None):
         """
         Sets the loads.
         """
         self._loads = value
-    
+
     def _postproc_linstat_load_case_result(self, data) -> LoadCaseResultLinStat:
         res = self.result_class(data, name="values")
         return res
