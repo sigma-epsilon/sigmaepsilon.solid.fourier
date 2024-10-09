@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Hashable
 
 import numpy as np
 
@@ -6,20 +6,20 @@ from sigmaepsilon.deepdict import DeepDict
 from sigmaepsilon.math import atleast1d
 
 from .problem import NavierProblem
-from .loads import LoadGroup
 from .preproc import lhs_Navier, rhs_Bernoulli
 from .postproc import postproc
 from .proc import linsolve_Bernoulli, linsolve_Timoshenko
 from .result import BeamLoadCaseResultLinStat
+from .protocols import LoadGroupProtocol
 
 __all__ = ["NavierBeam"]
 
 
 class NavierBeam(NavierProblem):
     """
-    A class designed to handle simply-supported plates bent in the X-Y plane 
-    and solve them using Navier's method. The beam model can be either 
-    Euler-Bernoulli or Timoshenko, depending on whether shear stiffness is 
+    A class designed to handle simply-supported plates bent in the X-Y plane
+    and solve them using Navier's method. The beam model can be either
+    Euler-Bernoulli or Timoshenko, depending on whether shear stiffness is
     provided at instantiation.
 
     Parameters
@@ -33,6 +33,8 @@ class NavierBeam(NavierProblem):
         Bending stiffness.
     GA: float, Optional
         Shear stiffness. Only for Timoshenko beams. Default is None.
+    loads: LoadGroup, Optional
+        The loads. Default is None.
 
     Examples
     --------
@@ -59,14 +61,17 @@ class NavierBeam(NavierProblem):
         *,
         EI: float,
         GA: float | None = None,
+        loads: LoadGroupProtocol | None = None,
     ):
-        super().__init__()
+        super().__init__(loads=loads)
         self.length = length
         self.EI = EI
         self.GA = GA
         self.N = N
 
-    def linear_static_analysis(self, loads: LoadGroup, points: float | Iterable) -> DeepDict:
+    def linear_static_analysis(
+        self, points: float | Iterable, loads: LoadGroupProtocol | None = None
+    ) -> DeepDict[Hashable, DeepDict | BeamLoadCaseResultLinStat]:
         """
         Performs a linear static analysis and calculates all postprocessing quantities at
         one ore more points.
@@ -87,7 +92,9 @@ class NavierBeam(NavierProblem):
         :class:`~sigmaepsilon.deepdict.deepdict.DeepDict`
             A nested dictionary with the same layout as the loads.
         """
-        if not isinstance(loads, LoadGroup):
+        loads = self.loads if loads is None else loads
+
+        if not isinstance(loads, LoadGroupProtocol):
             raise TypeError("The loads must be an instance of LoadGroup.")
 
         # STIFFNESS

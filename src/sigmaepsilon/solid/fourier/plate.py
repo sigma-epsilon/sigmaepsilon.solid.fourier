@@ -1,4 +1,4 @@
-from typing import Tuple, Iterable
+from typing import Iterable, Hashable
 
 import numpy as np
 
@@ -6,11 +6,11 @@ from sigmaepsilon.deepdict import DeepDict
 from sigmaepsilon.math import atleast2d
 
 from .problem import NavierProblem
-from .loads import LoadGroup
 from .preproc import lhs_Navier, rhs_Kirchhoff
 from .postproc import postproc
 from .proc import linsolve_Kirchhoff, linsolve_Mindlin
 from .result import PlateLoadCaseResultLinStat
+from .protocols import LoadGroupProtocol
 
 __all__ = ["NavierPlate"]
 
@@ -26,25 +26,34 @@ class NavierPlate(NavierProblem):
         The size of the rectangle.
     shape: tuple[int]
         Numbers of harmonic terms involved in both directions.
+    D: Iterable
+        3x3 flexural constitutive matrix.
+    S: Iterable, Optional
+        2x2 shear constitutive matrix.
+    loads: :class:`~sigmaepsilon.solid.fourier.loads.LoadGroup`, Optional
+        The loads. Default is None.
     """
 
     result_class = PlateLoadCaseResultLinStat
 
     def __init__(
         self,
-        size: Tuple[float],
-        shape: Tuple[int],
+        size: tuple[float],
+        shape: tuple[int],
         *,
         D: Iterable,
         S: Iterable | None = None,
+        loads: LoadGroupProtocol | None = None,
     ):
-        super().__init__()
+        super().__init__(loads=loads)
         self.size = np.array(size, dtype=float)
         self.shape = np.array(shape, dtype=int)
         self.D = np.array(D, dtype=float)
         self.S = None if S is None else np.array(S, dtype=float)
 
-    def linear_static_analysis(self, loads: LoadGroup, points: Iterable) -> DeepDict:
+    def linear_static_analysis(
+        self, points: Iterable, loads: LoadGroupProtocol | None = None
+    ) -> DeepDict[Hashable, DeepDict | PlateLoadCaseResultLinStat]:
         """
         Performs a linear static analysis and calculates all entities at the specified points.
 
@@ -60,7 +69,9 @@ class NavierPlate(NavierProblem):
         :class:`~sigmaepsilon.deepdict.deepdict.DeepDict`
             A dictionary with the same layout as the loads.
         """
-        if not isinstance(loads, LoadGroup):
+        loads = self.loads if loads is None else loads
+
+        if not isinstance(loads, LoadGroupProtocol):
             raise TypeError("The loads must be an instance of LoadGroup.")
 
         # STIFFNESS

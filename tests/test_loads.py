@@ -37,7 +37,7 @@ class TestBeamLoads(SigmaEpsilonTestCase):
         loads.cooperative = loads.cooperative
         loads.groups()
         
-        load_case = loads["concentrated"]["LC1"]
+        load_case = loads["concentrated", "LC1"]
         load_case.domain = load_case.domain
         load_case.value = load_case.value
 
@@ -60,7 +60,7 @@ class TestBeamLoads(SigmaEpsilonTestCase):
 
         x = np.linspace(0, L, 2)
         beam = NavierBeam(L, 2, EI=EI)
-        beam.linear_static_analysis(loads, x)
+        beam.linear_static_analysis(x, loads)
 
 
 class TestPlateLoads(SigmaEpsilonTestCase):

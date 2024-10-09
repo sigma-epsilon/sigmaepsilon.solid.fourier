@@ -31,7 +31,8 @@ class TestBernoulliBeam(SigmaEpsilonTestCase):
         x = np.linspace(0, L, 2)
 
         beam = NavierBeam(L, 2, EI=EI)
-        solution = beam.linear_static_analysis(loads, x)
+        beam.loads = beam.loads
+        solution = beam.linear_static_analysis(x, loads)
 
         load_case_solution = solution["concentrated"]["LC1"]
         load_case_solution.data
@@ -45,7 +46,7 @@ class TestBernoulliBeam(SigmaEpsilonTestCase):
         beam = NavierBeam(L, 2, EI=EI)
         x = np.linspace(0, L, 2)
         with self.assertRaises(TypeError):
-            beam.linear_static_analysis(None, x)
+            beam.linear_static_analysis(x, None)
 
 
 class TestTimoshenkoBeam(SigmaEpsilonTestCase):
@@ -76,7 +77,7 @@ class TestTimoshenkoBeam(SigmaEpsilonTestCase):
         x = np.linspace(0, L, 2)
 
         beam = NavierBeam(L, 2, EI=EI, GA=GA)
-        beam.linear_static_analysis(loads, x)
+        beam.linear_static_analysis(x, loads)
 
 
 if __name__ == "__main__":
