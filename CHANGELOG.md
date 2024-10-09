@@ -15,8 +15,9 @@ Version 2.0.0 comes with a completely renewed documentation.
 
 - Protocols to avoid circular references and improve typing.
 - Dedicated classes `BeamLoadCaseResultLinStat` and `PlateLoadCaseResultLinStat` to store results from linear static analysis. Instances can be turned into `xarray` instances.
-- Support for Python 3.12
-- 100% coverage of the user facing part of the API
+- Support for Python 3.12.
+- 100% coverage of the user facing part of the API.
+- Lots of examples as interactive Jupyter Notebooks (see the documentation).
 
 ### Changed
 
