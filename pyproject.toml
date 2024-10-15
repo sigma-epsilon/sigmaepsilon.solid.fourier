@@ -51,6 +51,7 @@ pytest = "^8.0.1"
 pytest-cov = "^4.1.0"
 pyyaml = "^6.0.1"
 xarray = "^2024.6.0"
+matplotlib = "^3.8.3"
 
 [tool.poetry.group.dist.dependencies]
 dask = "^2024.2.0"
