@@ -58,18 +58,3 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
         x = np.array(self.domain, dtype=float)
         v = np.array(self.value, dtype=float)
         return rhs_rect_const(problem.size, problem.shape, x, v)
-
-    def _eval_at_points(self, points: Iterable) -> ndarray:
-        load_value = np.array(self.value).astype(float)
-        load_values = np.repeat(load_value[np.newaxis, :], len(points), axis=0)
-
-        [[p1x, p1y], [p2x, p2y]] = self.domain
-        cond = (
-            (points[:, 0] >= p1x) 
-            & (points[:, 0] <= p2x) 
-            & (points[:, 1] >= p1y) 
-            & (points[:, 1] <= p2y)
-        )
-        load_values[~cond] = 0.0
-
-        return load_values
