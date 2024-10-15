@@ -12,6 +12,7 @@ from .postproc import postproc
 from .proc import linsolve_Bernoulli, linsolve_Timoshenko
 from .result import BeamLoadCaseResultLinStat
 from .protocols import LoadGroupProtocol
+from .enums import MechanicalModelType
 
 __all__ = ["NavierBeam"]
 
@@ -77,6 +78,13 @@ class NavierBeam(NavierProblem):
     @property
     def shape(self) -> int:
         return self.N
+
+    @property
+    def model_type(self) -> MechanicalModelType:
+        if self.GA is None:
+            return MechanicalModelType.BERNOULLI_EULER_BEAM
+        else:
+            return MechanicalModelType.TIMOSHENKO_BEAM
 
     def linear_static_analysis(
         self,

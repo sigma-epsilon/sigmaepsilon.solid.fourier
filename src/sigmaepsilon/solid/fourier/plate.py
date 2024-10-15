@@ -12,6 +12,7 @@ from .postproc import postproc
 from .proc import linsolve_Kirchhoff, linsolve_Mindlin
 from .result import PlateLoadCaseResultLinStat
 from .protocols import LoadGroupProtocol
+from .enums import MechanicalModelType
 
 __all__ = ["NavierPlate"]
 
@@ -59,6 +60,13 @@ class NavierPlate(NavierProblem):
     @property
     def shape(self) -> int:
         return self._shape
+    
+    @property
+    def model_type(self) -> MechanicalModelType:
+        if self.S is None:
+            return MechanicalModelType.KIRCHHOFF_LOVE_PLATE
+        else:
+            return MechanicalModelType.UFLYAND_MINDLIN_PLATE
 
     def linear_static_analysis(
         self,
