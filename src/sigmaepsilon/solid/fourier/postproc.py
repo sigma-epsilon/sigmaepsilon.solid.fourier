@@ -429,3 +429,48 @@ def postproc_Kirchhoff(
                         )
     return res
 # fmt: on
+
+# fmt: off
+@njit(nogil=True, parallel=True, cache=True)
+def eval_loads_2d(
+    size: tuple,
+    shape: tuple, 
+    coeffs:ndarray, 
+    points:ndarray, 
+    load_values:ndarray
+    ) -> ndarray:
+    """
+    Evaluates the loads at some points for plate problems.
+    """
+    Lx, Ly = size
+    M, N = shape
+    nP = points.shape[0]
+    nDOF = load_values.shape[1]
+    nRHS = coeffs.shape[0]
+    res = np.zeros((nRHS, nP, nDOF), dtype=float)
+    for iP in prange(nP):
+        xP, yP = points[iP]
+        for iRHS in prange(nRHS):
+            for m in range(1, M + 1):
+                for n in range(1, N + 1):
+                    iMN = (m - 1) * N + n - 1
+                    res[iRHS, iP, 0] += (
+                        coeffs[iRHS, iMN, 0]
+                        *load_values[iP, 0]
+                        * np.sin(xP * np.pi * m / Lx) 
+                        * np.sin(yP * np.pi * n / Ly)
+                    )
+                    res[iRHS, iP, 1] += (
+                        coeffs[iRHS, iMN, 1]
+                        *load_values[iP, 0]
+                        * np.sin(xP * np.pi * m / Lx) 
+                        * np.cos(yP * np.pi * n / Ly)
+                    )
+                    res[iRHS, iP, 2] += (
+                        coeffs[iRHS, iMN, 2]
+                        *load_values[iP, 0]
+                        * np.cos(xP * np.pi * m / Lx) 
+                        * np.sin(yP * np.pi * n / Ly)
+                    )
+    return res
+# fmt: on

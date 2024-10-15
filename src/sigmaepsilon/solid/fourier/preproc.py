@@ -1,10 +1,16 @@
 from typing import Iterable, Union, Tuple
+from numbers import Number
 
 import numpy as np
 from numba import njit, prange
-from numpy import ndarray, sin, cos, ndarray, pi as PI
+from numpy import ndarray, sin, cos, ndarray, pi as PI, average as avg
 
 from sigmaepsilon.math import atleast1d, atleast2d, atleast3d
+from sigmaepsilon.math.function import Function
+from sigmaepsilon.math.linalg import linspace
+
+from .utils import sin1d, cos1d
+from .config import config
 
 
 def lhs_Navier(
@@ -13,7 +19,7 @@ def lhs_Navier(
     *,
     D: Union[float, ndarray],
     S: Union[float, ndarray, None] = None,
-    **kw
+    **kw,
 ) -> ndarray:
     """
     Returns coefficient matrices for a Navier solution, for a single or
@@ -268,10 +274,46 @@ def rhs_Bernoulli(coeffs: ndarray, L: float) -> ndarray:
 
 def rhs_line_const(L: float, N: int, v: ndarray, x: ndarray) -> ndarray:
     """
-    Returns coefficients for constant loads over line segments in
-    the order [f, m].
+    Returns coefficients for constant loads over line segments.
+    Values are expected in the order [f, m].
     """
     return _line_const_(L, N, atleast2d(x), atleast2d(v))
+
+
+def rhs_line_1d_any(L: float, N: int, v: Iterable, x: ndarray) -> ndarray:
+    """
+    Returns coefficients for arbitrary loads over line segments.
+    Values are expected in the order [f, m].
+    """
+    rhs = np.zeros((1, N, 2), dtype=x.dtype)
+
+    if isinstance(v[0], Number) and isinstance(v[1], Number):
+        v = np.array(v, dtype=float)
+        return rhs_line_const(L, N, v, x)
+
+    num_MC_samples = config.get("num_MC_samples", 1000)
+
+    points = np.linspace(x[0], x[1], num_MC_samples)
+    d = x[1] - x[0]
+    multi = (2 / L) * d
+
+    for i in range(2):
+        trigfnc = sin1d if i == 0 else cos1d
+        value = v[i]
+        if isinstance(value, str):
+            f = Function(value, variables=["x"], dim=1)
+            rhs[0, :, i] = list(
+                map(
+                    lambda i: multi * avg(trigfnc(points, i, L) * f([points])),
+                    np.arange(1, N + 1),
+                )
+            )
+        elif isinstance(value, Number):
+            _v = np.array([0, 0], dtype=float)
+            _v[i] = value
+            rhs[0, :, i] = rhs_line_const(L, N, _v, x)[0, :, i]
+
+    return rhs
 
 
 @njit(nogil=True, parallel=True, cache=True)
@@ -286,6 +328,45 @@ def _line_const_(L: float, N: int, x: ndarray, values: ndarray) -> ndarray:
             c = PI * n / L
             rhs[iR, iN, 0] = (2 * f / (PI * n)) * (cos(c * xa) - cos(c * xb))
             rhs[iR, iN, 1] = (2 * m / (PI * n)) * (sin(c * xb) - sin(c * xa))
+    return rhs
+
+
+def rhs_line_2d_any(size: tuple, shape: tuple, v: Iterable, x: Iterable) -> ndarray:
+    """
+    Returns coefficients for arbitrary line loads for 2d problems.
+    Values are expected in the order [f, mx, my].
+    """
+    M, N = shape
+    Lx, Ly = size
+    rhs = np.zeros((1, M * N, 3), dtype=float)
+
+    num_MC_samples = config.get("num_MC_samples", 1000)
+
+    points = linspace(x[0], x[1], num_MC_samples)
+    d = np.linalg.norm(x[1] - x[0])
+    multi = (4 / Lx / Ly) * d
+    px = points[:, 0]
+    py = points[:, 1]
+
+    for i in range(3):
+        if i == 0:
+            trigfnc = lambda x, y, i, j, Lx, Ly: sin1d(x, i, Lx) * sin1d(y, j, Ly)
+        elif i == 1:
+            trigfnc = lambda x, y, i, j, Lx, Ly: sin1d(x, i, Lx) * cos1d(y, j, Ly)
+        elif i == 2:
+            trigfnc = lambda x, y, i, j, Lx, Ly: cos1d(x, i, Lx) * sin1d(y, j, Ly)
+
+        if isinstance(v[i], str):
+            f = Function(v[i], variables=["x y"], dim=2)
+            f_vals = f(points)
+        elif isinstance(v[i], Number):
+            f_vals = v[i]
+
+        for n in range(1, N + 1):
+            for m in range(1, M + 1):
+                mn = (m - 1) * N + n - 1
+                rhs[0, mn, i] = multi * avg(trigfnc(px, py, n, m, Lx, Ly) * f_vals)
+
     return rhs
 
 
