@@ -39,8 +39,9 @@ class PointLoad(LoadCase[float | Float1d, Float1d]):
         Returns
         -------
         numpy.ndarray
-            2d float array of shape (H, 3), where H is the total number
-            of harmonic terms involved (defined for the problem).
+            3d float array of shape (1, H, 3), where H is the total number
+            of harmonic terms involved (defined for the problem). The first
+            axis is always 1, as there is only one left hand side.
         """
         x = self.domain
         v = np.array(self.value)

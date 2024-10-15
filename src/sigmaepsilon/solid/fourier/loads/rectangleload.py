@@ -18,14 +18,15 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
     Parameters
     ----------
     domain: :class:`~sigmaepsilon.solid.fourier.loads.Float2d`
-       Load intensities for each dof in the order :math:`f_z, m_x, m_y`.
+        The coordinates of the lower-left and upper-right points of the region
+        where the load is applied. Default is ``None``.
     value: :class:`~sigmaepsilon.solid.fourier.loads.Float1d`
-       The coordinates of the lower-left and upper-right points of the region
-       where the load is applied. Default is ``None``.
-
+        Load intensities for each dof in the order :math:`f_z, m_x, m_y`.
+       
     .. hint::
         For a detailed explanation of the sign conventions, refer to
         :ref:`this <plate_sign_conventions>` section of the theory guide.
+
     """
 
     @property
@@ -57,3 +58,18 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
         x = np.array(self.domain, dtype=float)
         v = np.array(self.value, dtype=float)
         return rhs_rect_const(problem.size, problem.shape, x, v)
+
+    def _eval_at_points(self, points: Iterable) -> ndarray:
+        load_value = np.array(self.value).astype(float)
+        load_values = np.repeat(load_value[np.newaxis, :], len(points), axis=0)
+
+        [[p1x, p1y], [p2x, p2y]] = self.domain
+        cond = (
+            (points[:, 0] >= p1x) 
+            & (points[:, 0] <= p2x) 
+            & (points[:, 1] >= p1y) 
+            & (points[:, 1] <= p2y)
+        )
+        load_values[~cond] = 0.0
+
+        return load_values

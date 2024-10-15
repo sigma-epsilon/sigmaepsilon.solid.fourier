@@ -1,12 +1,6 @@
-from numbers import Number
-
 import numpy as np
-from numpy import ndarray, average as avg
 
-from sigmaepsilon.math.function import Function
-
-from ..preproc import rhs_line_const
-from ..utils import sin1d, cos1d
+from ..preproc import rhs_line_1d_any, rhs_line_2d_any
 from ..protocols import NavierProblemProtocol
 from .loads import LoadCase, Float1d, Float2d
 
@@ -31,9 +25,10 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
     .. hint::
         For a detailed explanation of the sign conventions, refer to
         :ref:`this <sign_conventions>` section of the theory guide.
+        
     """
 
-    def rhs(self, problem: NavierProblemProtocol) -> ndarray:
+    def rhs(self, problem: NavierProblemProtocol) -> np.ndarray:
         """
         Returns the coefficients as a NumPy array.
 
@@ -46,56 +41,17 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
         Returns
         -------
         numpy.ndarray
-            2d float array of shape (H, 3), where H is the total number
-            of harmonic terms involved (defined for the problem).
+            3d float array of shape (1, H, 3), where H is the total number
+            of harmonic terms involved (defined for the problem). The first
+            axis is always 1, as there is only one left hand side.
         """
         x = np.array(self.domain, dtype=float)
         v = self.value
         if len(x.shape) == 1:
             assert len(v) == 2, f"Invalid shape {v.shape} for load intensities."
-            if isinstance(v[0], Number) and isinstance(v[1], Number):
-                v = np.array(v, dtype=float)
-                return rhs_line_const(problem.length, problem.N, v, x)
-            else:
-                rhs = np.zeros((1, problem.N, 2), dtype=x.dtype)
-                if isinstance(v[0], str):
-                    f = Function(v[0], variables=["x"], dim=1)
-                    L = problem.length
-                    points = np.linspace(x[0], x[1], 1000)
-                    d = x[1] - x[0]
-                    rhs[0, :, 0] = list(
-                        map(
-                            lambda i: (2 / L)
-                            * d
-                            * avg(sin1d(points, i, L) * f([points])),
-                            np.arange(1, problem.N + 1),
-                        )
-                    )
-                elif isinstance(v[0], Number):
-                    _v = np.array([v[0], 0], dtype=float)
-                    rhs[0, :, 0] = rhs_line_const(problem.length, problem.N, _v, x)[
-                        0, :, 0
-                    ]
-                if isinstance(v[1], str):
-                    f = Function(v[1], variables=["x"], dim=1)
-                    L = problem.length
-                    points = np.linspace(x[0], x[1], 1000)
-                    d = x[1] - x[0]
-                    rhs[0, :, 1] = list(
-                        map(
-                            lambda i: (2 / L)
-                            * d
-                            * avg(cos1d(points, i, L) * f([points])),
-                            np.arange(1, problem.N + 1),
-                        )
-                    )
-                elif isinstance(v[1], Number):
-                    _v = np.array([0, v[1]], dtype=float)
-                    rhs[0, :, 1] = rhs_line_const(problem.length, problem.N, _v, x)[
-                        0, :, 1
-                    ]
-                return rhs
-        else:
-            raise NotImplementedError(
-                "Line loads are only implemented for 1d problems at the moment."
-            )
+            return rhs_line_1d_any(problem.length, problem.N, v, x)
+        elif len(x.shape) == 2:
+            assert len(v) == 3, f"Invalid shape {v.shape} for load intensities."
+            return rhs_line_2d_any(problem.size, problem.shape, v, x)
+        else:  # pragma: no cover
+            raise ValueError("Invalid shape for the domain.")
