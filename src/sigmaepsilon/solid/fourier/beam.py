@@ -1,4 +1,5 @@
 from typing import Iterable, Hashable
+from types import NoneType
 
 import numpy as np
 
@@ -69,8 +70,19 @@ class NavierBeam(NavierProblem):
         self.GA = GA
         self.N = N
 
+    @property
+    def size(self) -> float | int:
+        return self.length
+
+    @property
+    def shape(self) -> int:
+        return self.N
+
     def linear_static_analysis(
-        self, points: float | Iterable, loads: LoadGroupProtocol | None = None
+        self,
+        *args,
+        points: float | Iterable | NoneType = None,
+        loads: LoadGroupProtocol | NoneType = None,
     ) -> DeepDict[Hashable, DeepDict | BeamLoadCaseResultLinStat]:
         """
         Performs a linear static analysis and calculates all postprocessing quantities at
@@ -78,9 +90,11 @@ class NavierBeam(NavierProblem):
 
         Parameters
         ----------
-        loads: :class:`~sigmaepsilon.solid.fourier.loads.LoadGroup`
+        *args: LoadGroup, float or Iterable
+            The loads and the points, in any order.
+        loads: :class:`~sigmaepsilon.solid.fourier.loads.LoadGroup`, Optional
             The loads.
-        points: float or Iterable
+        points: float or Iterable, Optional
             A float or an 1d iterable of coordinates, where the results are
             to be evaluated. If it is a scalar, the resulting dictionary
             contains 1d arrays for every quantity, for every load case. If
@@ -90,11 +104,31 @@ class NavierBeam(NavierProblem):
         Returns
         -------
         :class:`~sigmaepsilon.deepdict.deepdict.DeepDict`
-            A nested dictionary with the same layout as the loads.
+            A dictionary with the same layout as the loads.
+
         """
+        if len(args) > 0:
+
+            if len(args) > 2:
+                raise ValueError("Too many positional arguments.")
+
+            for arg in args:
+                if isinstance(arg, LoadGroupProtocol):
+                    if loads is not None:
+                        raise ValueError("The loads are already provided.")
+
+                    loads = arg
+                elif isinstance(arg, (float, Iterable)):
+                    if points is not None:
+                        raise ValueError("The points are already provided.")
+
+                    points = arg
+                else:
+                    raise TypeError(f"Invalid argument type {type(arg)}.")
+
         loads = self.loads if loads is None else loads
 
-        if not isinstance(loads, LoadGroupProtocol):
+        if not isinstance(loads, LoadGroupProtocol):  # pragma: no cover
             raise TypeError("The loads must be an instance of LoadGroup.")
 
         # STIFFNESS

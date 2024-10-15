@@ -1,4 +1,5 @@
 from typing import Iterable, Hashable
+from types import NoneType
 
 import numpy as np
 
@@ -46,32 +47,66 @@ class NavierPlate(NavierProblem):
         loads: LoadGroupProtocol | None = None,
     ):
         super().__init__(loads=loads)
-        self.size = np.array(size, dtype=float)
-        self.shape = np.array(shape, dtype=int)
+        self._size = np.array(size, dtype=float)
+        self._shape = np.array(shape, dtype=int)
         self.D = np.array(D, dtype=float)
         self.S = None if S is None else np.array(S, dtype=float)
 
+    @property
+    def size(self) -> float | int:
+        return self._size
+
+    @property
+    def shape(self) -> int:
+        return self._shape
+
     def linear_static_analysis(
-        self, points: Iterable, loads: LoadGroupProtocol | None = None
+        self,
+        *args,
+        points: Iterable | NoneType = None,
+        loads: LoadGroupProtocol | NoneType = None,
     ) -> DeepDict[Hashable, DeepDict | PlateLoadCaseResultLinStat]:
         """
-        Performs a linear static analysis and calculates all entities at the specified points.
+        Performs a linear static analysis and calculates all postprocessing quantities at
+        one ore more points.
 
         Parameters
         ----------
-        loads: :class:`~sigmaepsilon.solid.fourier.loads.LoadGroup`
+        *args: Iterable[float] or :class:`~sigmaepsilon.solid.fourier.loads.LoadGroup`
+            The loads and points, in any order.
+        loads: :class:`~sigmaepsilon.solid.fourier.loads.LoadGroup`, Optional
             The loads.
-        points: Iterable[Iterable[float]]
+        points: Iterable[Iterable[float]], Optional
             2d float array of coordinates, where the results are to be evaluated.
 
         Returns
         -------
         :class:`~sigmaepsilon.deepdict.deepdict.DeepDict`
             A dictionary with the same layout as the loads.
+
         """
+        if len(args) > 0:
+
+            if len(args) > 2:
+                raise ValueError("Too many positional arguments.")
+
+            for arg in args:
+                if isinstance(arg, LoadGroupProtocol):
+                    if loads is not None:
+                        raise ValueError("The loads are already provided.")
+
+                    loads = arg
+                elif isinstance(arg, Iterable):
+                    if points is not None:
+                        raise ValueError("The points are already provided.")
+
+                    points = arg
+                else:
+                    raise TypeError(f"Invalid argument type {type(arg)}.")
+
         loads = self.loads if loads is None else loads
 
-        if not isinstance(loads, LoadGroupProtocol):
+        if not isinstance(loads, LoadGroupProtocol):  # pragma: no cover
             raise TypeError("The loads must be an instance of LoadGroup.")
 
         # STIFFNESS
