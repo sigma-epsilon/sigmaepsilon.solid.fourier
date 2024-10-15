@@ -241,7 +241,7 @@ def lhs_Navier_Timoshenko(L: float, N: int, EI: ndarray, GA: ndarray) -> ndarray
 @njit(nogil=True, parallel=True, cache=True)
 def rhs_Kirchhoff(coeffs: ndarray, size: tuple) -> ndarray:
     """
-    Calculates unknowns for Bernoulli Beams.
+    Calculates unknowns for Kirchhoff plates.
     """
     Lx, Ly = size
     nRHS, N = coeffs.shape[:2]
@@ -261,7 +261,7 @@ def rhs_Kirchhoff(coeffs: ndarray, size: tuple) -> ndarray:
 @njit(nogil=True, parallel=True, cache=True)
 def rhs_Bernoulli(coeffs: ndarray, L: float) -> ndarray:
     """
-    Calculates unknowns for Bernoulli Beams.
+    Calculates unknowns for Bernoulli beams.
     """
     nRHS, N = coeffs.shape[:2]
     res = np.zeros((nRHS, N))
@@ -395,24 +395,24 @@ def __rect_const__(
         [
             16
             * f
-            * sin((1 / 2) * PI * m * w / Lx)
+            * sin(PI * m * w / (Lx * 2))
             * sin(PI * m * xc / Lx)
-            * sin((1 / 2) * PI * h * n / Ly)
+            * sin(PI * h * n / (Ly * 2))
             * sin(PI * n * yc / Ly)
             / (PI**2 * m * n),
             16
             * mx
-            * sin((1 / 2) * PI * m * w / Lx)
-            * sin((1 / 2) * PI * h * n / Ly)
-            * sin(PI * n * yc / Ly)
-            * cos(PI * m * xc / Lx)
+            * sin(PI * m * w / (Lx * 2))
+            * sin(PI * m * xc / Lx)
+            * sin(PI * h * n / (Ly * 2))
+            * cos(PI * n * yc / Ly)
             / (PI**2 * m * n),
             16
             * my
-            * sin((1 / 2) * PI * m * w / Lx)
-            * sin(PI * m * xc / Lx)
-            * sin((1 / 2) * PI * h * n / Ly)
-            * cos(PI * n * yc / Ly)
+            * sin(PI * m * w / (Lx * 2))
+            * cos(PI * m * xc / Lx)
+            * sin(PI * h * n / (Ly * 2))
+            * sin(PI * n * yc / Ly)
             / (PI**2 * m * n),
         ]
     )
@@ -422,12 +422,12 @@ def __rect_const__(
 def _rect_const_(
     size: tuple, shape: tuple, values: ndarray, points: ndarray
 ) -> ndarray:
-    nR = values.shape[0]
+    nRect = values.shape[0]  # number of rectangles
     M, N = shape
-    rhs = np.zeros((nR, M * N, 3), dtype=points.dtype)
-    for iR in prange(nR):
-        xmin, ymin = points[iR, 0]
-        xmax, ymax = points[iR, 1]
+    rhs = np.zeros((nRect, M * N, 3), dtype=points.dtype)
+    for iRect in prange(nRect):
+        xmin, ymin = points[iRect, 0]
+        xmax, ymax = points[iRect, 1]
         xc = (xmin + xmax) / 2
         yc = (ymin + ymax) / 2
         w = np.abs(xmax - xmin)
@@ -435,7 +435,9 @@ def _rect_const_(
         for m in prange(1, M + 1):
             for n in prange(1, N + 1):
                 mn = (m - 1) * N + n - 1
-                rhs[iR, mn, :] = __rect_const__(size, m, n, xc, yc, w, h, values[iR])
+                rhs[iRect, mn, :] = __rect_const__(
+                    size, m, n, xc, yc, w, h, values[iRect]
+                )
     return rhs
 
 
@@ -445,7 +447,7 @@ def rhs_conc_1d(L: float, N: int, v: ndarray, x: ndarray) -> ndarray:
 
 @njit(nogil=True, parallel=True, cache=True)
 def _conc1d_(L: tuple, N: tuple, values: ndarray, points: ndarray) -> ndarray:
-    nRHS = values.shape[0]
+    nRHS = values.shape[0]  # number of point loads
     c = 2 / L
     rhs = np.zeros((nRHS, N, 2), dtype=points.dtype)
     PI = np.pi
@@ -466,7 +468,7 @@ def rhs_conc_2d(size: tuple, shape: tuple, v: ndarray, x: ndarray) -> ndarray:
 
 @njit(nogil=True, parallel=True, cache=True)
 def _conc2d_(size: tuple, shape: tuple, values: ndarray, points: ndarray) -> ndarray:
-    nRHS = values.shape[0]
+    nRHS = values.shape[0]  # number of point loads
     Lx, Ly = size
     c = 4 / Lx / Ly
     M, N = shape
