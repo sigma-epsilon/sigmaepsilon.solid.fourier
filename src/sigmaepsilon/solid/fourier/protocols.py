@@ -8,6 +8,13 @@ from .result import LoadCaseResultLinStat
 
 @runtime_checkable
 class NavierProblemProtocol(Protocol):
+
+    @property
+    def size(self) -> Iterable[float | int] | float | int: ...
+
+    @property
+    def shape(self, value) -> Iterable[int] | int: ...
+
     def linear_static_analysis(
         self, points, loads
     ) -> DeepDict[Hashable, DeepDict | LoadCaseResultLinStat]: ...
