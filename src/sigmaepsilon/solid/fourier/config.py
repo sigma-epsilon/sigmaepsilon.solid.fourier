@@ -1,15 +1,8 @@
-import importlib.util
-
-
-def is_module_available(module_name):
-    return importlib.util.find_spec(module_name) is not None
-
-
-__hasmatplotlib__ = is_module_available("matplotlib")
-
-
 config = dict(
-    num_MC_samples=1000,
+    NUM_MC_SAMPLES_PLATE=100000,
+    MC_BATCH_SIZE_PLATE=5000,
+    NUM_MC_SAMPLES_BEAM=50000,
+    MC_BATCH_SIZE_BEAM=5000,
 )
 
-__all__ = ["__hasmatplotlib__", "config"]
+__all__ = ["config"]
