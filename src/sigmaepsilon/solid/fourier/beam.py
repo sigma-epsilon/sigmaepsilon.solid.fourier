@@ -66,21 +66,44 @@ class NavierBeam(NavierProblem):
         loads: LoadGroupProtocol | None = None,
     ):
         super().__init__(loads=loads)
-        self.length = length
+        self._length = length
         self.EI = EI
         self.GA = GA
         self.N = N
 
     @property
+    def length(self) -> float:
+        """The length of the beam."""
+        return self._length
+
+    @length.setter
+    def length(self, value: float):
+        """Sets the length of the beam."""
+        self._length = value
+
+    @property
     def size(self) -> float | int:
+        """The length of the beam."""
         return self.length
+
+    @size.setter
+    def size(self, value: float | int):
+        """Sets the length of the beam."""
+        self.length = value
 
     @property
     def shape(self) -> int:
+        """The number of harmonic terms involved in the approximation."""
         return self.N
+
+    @shape.setter
+    def shape(self, value: int):
+        """Sets the number of harmonic terms involved in the approximation."""
+        self.N = value
 
     @property
     def model_type(self) -> MechanicalModelType:
+        """The mechanical model type of the beam."""
         if self.GA is None:
             return MechanicalModelType.BERNOULLI_EULER_BEAM
         else:
