@@ -2,6 +2,7 @@ from typing import Iterable, Hashable
 from types import NoneType
 
 import numpy as np
+from numpy import ndarray
 
 from sigmaepsilon.deepdict import DeepDict
 from sigmaepsilon.math import atleast2d
@@ -54,11 +55,11 @@ class NavierPlate(NavierProblem):
         self.S = None if S is None else np.array(S, dtype=float)
 
     @property
-    def size(self) -> float | int:
+    def size(self) -> ndarray[float]:
         return self._size
 
     @property
-    def shape(self) -> int:
+    def shape(self) -> ndarray[int]:
         return self._shape
     
     @property
