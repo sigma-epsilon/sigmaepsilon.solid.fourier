@@ -56,9 +56,7 @@ def _monte_carlo_1d(
         if isinstance(values[i], str):
             function = Function(values[i], variables=["x"])
         elif isinstance(values[i], (float, int)):
-            function = lambda points: np.full(
-                (len(points),), values[i], dtype=float
-            )
+            function = lambda points: np.full((len(points),), values[i], dtype=float)
         else:  # pragma: no cover
             raise ValueError(f"Invalid value {values[i]}")
         functions.append(function)

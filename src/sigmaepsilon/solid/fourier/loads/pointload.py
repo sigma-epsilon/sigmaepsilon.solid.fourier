@@ -59,6 +59,6 @@ class PointLoad(LoadCase[float | Float1d, Float1d]):
             evaluator = rhs_conc_1d
         else:  # pragma: no cover
             raise NotImplementedError
-        
+
         x = np.atleast_1d(x)
         return evaluator(problem.size, problem.shape, v, x)

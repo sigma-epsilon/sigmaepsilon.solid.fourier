@@ -63,7 +63,7 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
 
         x = np.array(self.domain, dtype=float)
         v = self.value
-        
+
         has_symbolic_load = any(not isinstance(vi, (float, int)) for vi in v)
         if has_symbolic_load:
             return rhs_rect_mc(problem.size, problem.shape, x, v)

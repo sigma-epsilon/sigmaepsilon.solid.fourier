@@ -61,7 +61,7 @@ class NavierPlate(NavierProblem):
     @property
     def shape(self) -> ndarray[int]:
         return self._shape
-    
+
     @property
     def model_type(self) -> MechanicalModelType:
         if self.S is None:

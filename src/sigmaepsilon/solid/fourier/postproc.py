@@ -253,7 +253,7 @@ def postproc_Mindlin(
             11 : shear force x
 
             12 : shear force y
-            
+
     """
     Lx, Ly = size
     M, N = shape
