@@ -1,5 +1,4 @@
 from typing import Iterable, Any, Optional, TypeVar, Generic, TypeAlias, Hashable
-from types import NoneType
 from abc import abstractmethod
 
 from numpy import ndarray
@@ -8,8 +7,8 @@ import numpy as np
 from sigmaepsilon.deepdict import DeepDict
 
 from ..protocols import NavierProblemProtocol, LoadGroupProtocol, LoadCaseProtocol
-from ..postproc import eval_loads_2d
-from ..config import __hasmatplotlib__
+from ..postproc import eval_loads_1d, eval_loads_2d
+from ..enums import MechanicalModelType
 
 __all__ = ["LoadGroup", "LoadCase", "RectangleLoad", "LineLoad", "PointLoad"]
 
@@ -59,120 +58,42 @@ class LoadCase(Generic[LoadDomainType, LoadValueType]):
     def rhs(self, problem: NavierProblemProtocol) -> ndarray:
         raise NotImplementedError("The method 'rhs' must be implemented.")
 
-    def _plot_mpl_3d_plate(
-        self,
-        problem: NavierProblemProtocol,
-        *,
-        ax=None,
-        points: Iterable | NoneType = None,
-        grid_shape: int | tuple[int, int] | NoneType = None,
-        return_axis: bool = False,
-        **plot_kwargs,
-    ) -> object:
-        if not __hasmatplotlib__:  # pragma: no cover
-            raise ImportError("matplotlib is not available.")
+    def eval_approx(self, problem: NavierProblemProtocol, points: Iterable) -> ndarray:
+        """
+        Evaluates the Fourier series approximation of the load at the given points.
 
-        import matplotlib.pyplot as plt
-        from matplotlib import cm
-
-        if ax is None:
-            _, ax = plt.subplots(subplot_kw={"projection": "3d"})
-
-        if grid_shape is None:
-            grid_shape = problem.shape
-
-        if points is None:
+        The returned array is an 1d array with the same length as the number of points.
+        """
+        if problem.model_type in [
+            MechanicalModelType.KIRCHHOFF_LOVE_PLATE,
+            MechanicalModelType.UFLYAND_MINDLIN_PLATE,
+        ]:
             length_X, length_Y = problem.size
-            n_X, n_Y = grid_shape
-            x = np.linspace(0, length_X, n_X)
-            y = np.linspace(0, length_Y, n_Y)
-            xv, yv = np.meshgrid(x, y)
-            points = np.stack((xv.flatten(), yv.flatten()), axis=1)
-        points = np.array(points).astype(float)
-
-        rhs = self.rhs(problem)
-
-        length_X, length_Y = problem.size
-        number_of_modes_X, number_of_modes_Y = problem.shape
-
-        values = eval_loads_2d(
-            (length_X, length_Y),
-            (number_of_modes_X, number_of_modes_Y),
-            rhs,
-            points,
-        )
-
-        X = points[:, 0].reshape((number_of_modes_X, number_of_modes_Y))
-        Y = points[:, 1].reshape((number_of_modes_X, number_of_modes_Y))
-        Z = values[0, :, 0].reshape((number_of_modes_X, number_of_modes_Y))
-
-        if "cmap" not in plot_kwargs:
-            plot_kwargs["cmap"] = cm.turbo
-
-        if "linewidth" not in plot_kwargs:
-            plot_kwargs["linewidth"] = 0
-
-        if "antialiased" not in plot_kwargs:
-            plot_kwargs["antialiased"] = True
-
-        if not hasattr(ax, "plot_surface"):
-            raise ValueError("The provided axis does not support 3d plotting.")
-
-        ax.plot_surface(X, Y, Z, **plot_kwargs)
-
-        if return_axis:
-            return ax
-
-    def plot_mpl_3d(
-        self,
-        problem: NavierProblemProtocol,
-        *,
-        ax=None,
-        points: Iterable | NoneType = None,
-        grid_shape: int | tuple[int, int] | NoneType = None,
-        return_axis: bool = False,
-        **plot_kwargs,
-    ) -> object:
-        """
-        Plots the load on the provided axis using the `plot_surface`
-        method of `matplotlib`.
-
-        Parameters
-        ----------
-        problem: :class:`~sigmaepsilon.solid.fourier.problem.NavierProblem`
-            A problem the coefficients are generated for.
-        ax: matplotlib.axes.Axes
-            The axis to plot on. If not specified, a new axis is created.
-        **plot_kwargs
-            Additional keyword arguments to pass to the plotting function.
-
-        Notes
-        -----
-        If a `matplotlib.axes.Axes` is provided, it should be created with
-        the `projection='3d'` keyword argument:
-
-        code-block:: python
-
-            import matplotlib.pyplot as plt
-            fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-
-        Returns
-        -------
-        matplotlib.axes.Axes
-            The axis object.
-
-        """
-        if not __hasmatplotlib__:  # pragma: no cover
-            raise ImportError("matplotlib is not available.")
-
-        return self._plot_mpl_3d_plate(
-            problem,
-            ax=ax,
-            points=points,
-            grid_shape=grid_shape,
-            return_axis=return_axis,
-            **plot_kwargs,
-        )
+            number_of_modes_X, number_of_modes_Y = problem.shape
+            rhs = self.rhs(problem)
+            points = np.array(points, dtype=float)
+            return eval_loads_2d(
+                (length_X, length_Y),
+                (number_of_modes_X, number_of_modes_Y),
+                rhs,
+                points,
+            )
+        elif problem.model_type in [
+            MechanicalModelType.BERNOULLI_EULER_BEAM,
+            MechanicalModelType.TIMOSHENKO_BEAM,
+        ]:
+            length_X = float(problem.size)
+            number_of_modes_X = problem.shape
+            rhs = self.rhs(problem)
+            points = np.array(points, dtype=float)
+            return eval_loads_1d(
+                length_X,
+                number_of_modes_X,
+                rhs,
+                points,
+            )
+        else:  # pragma: no cover
+            raise NotImplementedError
 
 
 class LoadGroup(DeepDict[Hashable, LoadGroupProtocol | LoadCaseProtocol | Any]):
