@@ -4,6 +4,7 @@ from numpy import ndarray
 from ..preproc import rhs_conc_1d, rhs_conc_2d
 from ..protocols import NavierProblemProtocol
 from .loads import LoadCase, Float1d
+from ..enums import MechanicalModelType
 
 __all__ = ["PointLoad"]
 
@@ -41,11 +42,23 @@ class PointLoad(LoadCase[float | Float1d, Float1d]):
         numpy.ndarray
             3d float array of shape (1, H, 3), where H is the total number
             of harmonic terms involved (defined for the problem). The first
-            axis is always 1, as there is only one left hand side.
+            axis is always of length 1, as there is only one left hand side.
         """
-        x = self.domain
+        x = np.array(self.domain)
         v = np.array(self.value)
-        if hasattr(problem, "size"):
-            return rhs_conc_2d(problem.size, problem.shape, v, x)
-        else:
-            return rhs_conc_1d(problem.length, problem.N, v, x)
+
+        if problem.model_type in [
+            MechanicalModelType.KIRCHHOFF_LOVE_PLATE,
+            MechanicalModelType.UFLYAND_MINDLIN_PLATE,
+        ]:
+            evaluator = rhs_conc_2d
+        elif problem.model_type in [
+            MechanicalModelType.BERNOULLI_EULER_BEAM,
+            MechanicalModelType.TIMOSHENKO_BEAM,
+        ]:
+            evaluator = rhs_conc_1d
+        else:  # pragma: no cover
+            raise NotImplementedError
+        
+        x = np.atleast_1d(x)
+        return evaluator(problem.size, problem.shape, v, x)

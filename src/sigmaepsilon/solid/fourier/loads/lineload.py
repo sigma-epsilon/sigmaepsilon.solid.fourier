@@ -1,9 +1,10 @@
 import numpy as np
+from numpy import ndarray
 
-from ..preproc import rhs_line_1d_any, rhs_line_2d_any
+from ..preproc import rhs_line_const, rhs_line_1d_mc, rhs_line_2d_mc
 from ..protocols import NavierProblemProtocol
 from .loads import LoadCase, Float1d, Float2d
-
+from ..enums import MechanicalModelType
 
 __all__ = ["LineLoad"]
 
@@ -25,10 +26,10 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
     .. hint::
         For a detailed explanation of the sign conventions, refer to
         :ref:`this <sign_conventions>` section of the theory guide.
-        
+
     """
 
-    def rhs(self, problem: NavierProblemProtocol) -> np.ndarray:
+    def rhs(self, problem: NavierProblemProtocol) -> ndarray:
         """
         Returns the coefficients as a NumPy array.
 
@@ -43,15 +44,30 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
         numpy.ndarray
             3d float array of shape (1, H, 3), where H is the total number
             of harmonic terms involved (defined for the problem). The first
-            axis is always 1, as there is only one left hand side.
+            axis is always of length 1, as there is only one left hand side.
         """
         x = np.array(self.domain, dtype=float)
         v = self.value
-        if len(x.shape) == 1:
-            assert len(v) == 2, f"Invalid shape {v.shape} for load intensities."
-            return rhs_line_1d_any(problem.length, problem.N, v, x)
-        elif len(x.shape) == 2:
+
+        if problem.model_type in [
+            MechanicalModelType.KIRCHHOFF_LOVE_PLATE,
+            MechanicalModelType.UFLYAND_MINDLIN_PLATE,
+        ]:
+            assert len(x.shape) == 2, f"Invalid shape {x.shape} for the domain."
             assert len(v) == 3, f"Invalid shape {v.shape} for load intensities."
-            return rhs_line_2d_any(problem.size, problem.shape, v, x)
+            evaluator = rhs_line_2d_mc
+        elif problem.model_type in [
+            MechanicalModelType.BERNOULLI_EULER_BEAM,
+            MechanicalModelType.TIMOSHENKO_BEAM,
+        ]:
+            assert len(x.shape) == 1, f"Invalid shape {x.shape} for the domain."
+            assert len(v) == 2, f"Invalid shape {v.shape} for load intensities."
+            if isinstance(v[0], (float, int)) and isinstance(v[1], (float, int)):
+                v = np.array(v, dtype=float)
+                evaluator = rhs_line_const
+            else:
+                evaluator = rhs_line_1d_mc
         else:  # pragma: no cover
-            raise ValueError("Invalid shape for the domain.")
+            raise NotImplementedError
+
+        return evaluator(problem.size, problem.shape, v, x)

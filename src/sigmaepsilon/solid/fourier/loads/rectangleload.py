@@ -3,10 +3,11 @@ from typing import Iterable
 import numpy as np
 from numpy import ndarray
 
-from ..preproc import rhs_rect_const
+from ..preproc import rhs_rect_const, rhs_rect_mc
 from ..utils import points_to_rectangle_region
 from ..protocols import NavierProblemProtocol
 from .loads import LoadCase, Float1d, Float2d
+from ..enums import MechanicalModelType
 
 __all__ = ["RectangleLoad"]
 
@@ -22,7 +23,7 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
         where the load is applied. Default is ``None``.
     value: :class:`~sigmaepsilon.solid.fourier.loads.Float1d`
         Load intensities for each dof in the order :math:`f_z, m_x, m_y`.
-       
+
     .. hint::
         For a detailed explanation of the sign conventions, refer to
         :ref:`this <plate_sign_conventions>` section of the theory guide.
@@ -53,8 +54,19 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
         numpy.ndarray
             3d float array of shape (1, H, 3), where H is the total number
             of harmonic terms involved (defined for the problem). The first
-            axis is always 1, as there is only one left hand side.
+            axis is always of length 1, as there is only one left hand side.
         """
+        assert problem.model_type in [
+            MechanicalModelType.KIRCHHOFF_LOVE_PLATE,
+            MechanicalModelType.UFLYAND_MINDLIN_PLATE,
+        ], f"Invalid model type {problem.model_type}."
+
         x = np.array(self.domain, dtype=float)
-        v = np.array(self.value, dtype=float)
-        return rhs_rect_const(problem.size, problem.shape, x, v)
+        v = self.value
+        
+        has_symbolic_load = any(not isinstance(vi, (float, int)) for vi in v)
+        if has_symbolic_load:
+            return rhs_rect_mc(problem.size, problem.shape, x, v)
+        else:
+            v = np.array(v, dtype=float)
+            return rhs_rect_const(problem.size, problem.shape, x, v)
