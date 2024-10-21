@@ -1,4 +1,5 @@
 from typing import Iterable, Union, Tuple
+from types import NoneType
 from functools import partial
 
 import numpy as np
@@ -21,7 +22,7 @@ def lhs_Navier(
     shape: Union[int, Tuple[int]],
     *,
     D: Union[float, ndarray],
-    S: Union[float, ndarray, None] = None,
+    S: Union[float, ndarray, NoneType] = None,
     **kw,
 ) -> ndarray:
     """
