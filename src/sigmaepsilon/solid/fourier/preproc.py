@@ -1,16 +1,19 @@
 from typing import Iterable, Union, Tuple
-from numbers import Number
+from functools import partial
 
 import numpy as np
 from numba import njit, prange
-from numpy import ndarray, sin, cos, ndarray, pi as PI, average as avg
+from numpy import ndarray, sin, cos, ndarray
 
 from sigmaepsilon.math import atleast1d, atleast2d, atleast3d
-from sigmaepsilon.math.function import Function
-from sigmaepsilon.math.linalg import linspace
 
-from .utils import sin1d, cos1d
-from .config import config
+from .mc import _monte_carlo_1d, _monte_carlo_2d
+from .utils import (
+    generate_random_points_in_disk,
+    generate_random_points_in_rectangle,
+    generate_random_points_on_line_segment_1d,
+    generate_random_points_on_line_segment_2d,
+)
 
 
 def lhs_Navier(
@@ -98,6 +101,7 @@ def lhs_Navier_Mindlin(size: tuple, shape: tuple, D: ndarray, S: ndarray) -> nda
     Lx, Ly = size
     nLHS = D.shape[0]
     M, N = shape
+    PI = np.pi
     res = np.zeros((nLHS, M * N, 3, 3), dtype=D.dtype)
     for iLHS in prange(nLHS):
         D11, D12, D22, D66 = D[iLHS, 0, 0], D[iLHS, 0, 1], D[iLHS, 1, 1], D[iLHS, 2, 2]
@@ -152,6 +156,7 @@ def lhs_Navier_Kirchhoff(size: tuple, shape: tuple, D: ndarray) -> ndarray:
     Lx, Ly = size
     nLHS = D.shape[0]
     M, N = shape
+    PI = np.pi
     res = np.zeros((nLHS, M * N), dtype=D.dtype)
     for iLHS in prange(nLHS):
         D11, D12, D22, D66 = D[iLHS, 0, 0], D[iLHS, 0, 1], D[iLHS, 1, 1], D[iLHS, 2, 2]
@@ -188,6 +193,7 @@ def lhs_Navier_Bernoulli(L: float, N: int, EI: ndarray) -> ndarray:
         2d float array of coefficients.
     """
     nLHS = EI.shape[0]
+    PI = np.pi
     res = np.zeros((nLHS, N), dtype=EI.dtype)
     for iLHS in prange(nLHS):
         for n in prange(1, N + 1):
@@ -222,6 +228,7 @@ def lhs_Navier_Timoshenko(L: float, N: int, EI: ndarray, GA: ndarray) -> ndarray
         4d float array of coefficients.
     """
     nLHS = EI.shape[0]
+    PI = np.pi
     res = np.zeros((nLHS, N, 2, 2), dtype=EI.dtype)
     for iLHS in prange(nLHS):
         for n in prange(1, N + 1):
@@ -246,6 +253,7 @@ def rhs_Kirchhoff(coeffs: ndarray, size: tuple) -> ndarray:
     Lx, Ly = size
     nRHS, N = coeffs.shape[:2]
     res = np.zeros((nRHS, N))
+    PI = np.pi
     cx = PI / Lx
     cy = PI / Ly
     for i in prange(nRHS):
@@ -265,60 +273,17 @@ def rhs_Bernoulli(coeffs: ndarray, L: float) -> ndarray:
     """
     nRHS, N = coeffs.shape[:2]
     res = np.zeros((nRHS, N))
-    c = PI / L
+    c = np.pi / L
     for i in prange(nRHS):
         for n in prange(N):
             res[i, n] = coeffs[i, n, 0] - coeffs[i, n, 1] * c * (n + 1)
     return res
 
 
-def rhs_line_const(L: float, N: int, v: ndarray, x: ndarray) -> ndarray:
-    """
-    Returns coefficients for constant loads over line segments.
-    Values are expected in the order [f, m].
-    """
-    return _line_const_(L, N, atleast2d(x), atleast2d(v))
-
-
-def rhs_line_1d_any(L: float, N: int, v: Iterable, x: ndarray) -> ndarray:
-    """
-    Returns coefficients for arbitrary loads over line segments.
-    Values are expected in the order [f, m].
-    """
-    rhs = np.zeros((1, N, 2), dtype=x.dtype)
-
-    if isinstance(v[0], Number) and isinstance(v[1], Number):
-        v = np.array(v, dtype=float)
-        return rhs_line_const(L, N, v, x)
-
-    num_MC_samples = config.get("num_MC_samples", 1000)
-
-    points = np.linspace(x[0], x[1], num_MC_samples)
-    d = x[1] - x[0]
-    multi = (2 / L) * d
-
-    for i in range(2):
-        trigfnc = sin1d if i == 0 else cos1d
-        value = v[i]
-        if isinstance(value, str):
-            f = Function(value, variables=["x"], dim=1)
-            rhs[0, :, i] = list(
-                map(
-                    lambda i: multi * avg(trigfnc(points, i, L) * f([points])),
-                    np.arange(1, N + 1),
-                )
-            )
-        elif isinstance(value, Number):
-            _v = np.array([0, 0], dtype=float)
-            _v[i] = value
-            rhs[0, :, i] = rhs_line_const(L, N, _v, x)[0, :, i]
-
-    return rhs
-
-
 @njit(nogil=True, parallel=True, cache=True)
 def _line_const_(L: float, N: int, x: ndarray, values: ndarray) -> ndarray:
     nR = values.shape[0]
+    PI = np.pi
     rhs = np.zeros((nR, N, 2), dtype=x.dtype)
     for iR in prange(nR):
         for n in prange(1, N + 1):
@@ -331,55 +296,8 @@ def _line_const_(L: float, N: int, x: ndarray, values: ndarray) -> ndarray:
     return rhs
 
 
-def rhs_line_2d_any(size: tuple, shape: tuple, v: Iterable, x: Iterable) -> ndarray:
-    """
-    Returns coefficients for arbitrary line loads for 2d problems.
-    Values are expected in the order [f, mx, my].
-    """
-    M, N = shape
-    Lx, Ly = size
-    rhs = np.zeros((1, M * N, 3), dtype=float)
-
-    num_MC_samples = config.get("num_MC_samples", 1000)
-
-    points = linspace(x[0], x[1], num_MC_samples)
-    d = np.linalg.norm(x[1] - x[0])
-    multi = (4 / Lx / Ly) * d
-    px = points[:, 0]
-    py = points[:, 1]
-
-    for i in range(3):
-        if i == 0:
-            trigfnc = lambda x, y, i, j, Lx, Ly: sin1d(x, i, Lx) * sin1d(y, j, Ly)
-        elif i == 1:
-            trigfnc = lambda x, y, i, j, Lx, Ly: sin1d(x, i, Lx) * cos1d(y, j, Ly)
-        elif i == 2:
-            trigfnc = lambda x, y, i, j, Lx, Ly: cos1d(x, i, Lx) * sin1d(y, j, Ly)
-
-        if isinstance(v[i], str):
-            f = Function(v[i], variables=["x y"], dim=2)
-            f_vals = f(points)
-        elif isinstance(v[i], Number):
-            f_vals = v[i]
-
-        for n in range(1, N + 1):
-            for m in range(1, M + 1):
-                mn = (m - 1) * N + n - 1
-                rhs[0, mn, i] = multi * avg(trigfnc(px, py, n, m, Lx, Ly) * f_vals)
-
-    return rhs
-
-
-def rhs_rect_const(size: tuple, shape: tuple, x: ndarray, v: ndarray) -> ndarray:
-    """
-    Returns coefficients for constant loads over rectangular patches
-    in the order [f, mx, my].
-    """
-    return _rect_const_(size, shape, atleast2d(v), atleast3d(x))
-
-
 @njit(nogil=True, cache=True)
-def __rect_const__(
+def _rect_const_single_harmonic(
     size: tuple,
     m: int,
     n: int,
@@ -391,6 +309,7 @@ def __rect_const__(
 ) -> ndarray:
     Lx, Ly = size
     f, mx, my = values
+    PI = np.pi
     return np.array(
         [
             16
@@ -419,7 +338,7 @@ def __rect_const__(
 
 
 @njit(nogil=True, parallel=True, cache=True)
-def _rect_const_(
+def _rect_const_multi(
     size: tuple, shape: tuple, values: ndarray, points: ndarray
 ) -> ndarray:
     nRect = values.shape[0]  # number of rectangles
@@ -435,14 +354,10 @@ def _rect_const_(
         for m in prange(1, M + 1):
             for n in prange(1, N + 1):
                 mn = (m - 1) * N + n - 1
-                rhs[iRect, mn, :] = __rect_const__(
+                rhs[iRect, mn, :] = _rect_const_single_harmonic(
                     size, m, n, xc, yc, w, h, values[iRect]
                 )
     return rhs
-
-
-def rhs_conc_1d(L: float, N: int, v: ndarray, x: ndarray) -> ndarray:
-    return _conc1d_(L, N, atleast2d(v), atleast1d(x))
 
 
 @njit(nogil=True, parallel=True, cache=True)
@@ -456,14 +371,10 @@ def _conc1d_(L: tuple, N: tuple, values: ndarray, points: ndarray) -> ndarray:
         f, m = values[iRHS]
         Sx = PI * x / L
         for n in prange(1, N + 1):
-            i = n - 1
-            rhs[iRHS, i, 0] = c * f * sin(n * Sx)
-            rhs[iRHS, i, 1] = c * m * cos(n * Sx)
+            iN = n - 1
+            rhs[iRHS, iN, 0] = c * f * sin(n * Sx)
+            rhs[iRHS, iN, 1] = c * m * cos(n * Sx)
     return rhs
-
-
-def rhs_conc_2d(size: tuple, shape: tuple, v: ndarray, x: ndarray) -> ndarray:
-    return _conc2d_(size, shape, atleast2d(v), atleast2d(x))
 
 
 @njit(nogil=True, parallel=True, cache=True)
@@ -485,4 +396,94 @@ def _conc2d_(size: tuple, shape: tuple, values: ndarray, points: ndarray) -> nda
                 rhs[iRHS, mn, 0] = c * fz * sin(m * Sx) * sin(n * Sy)
                 rhs[iRHS, mn, 1] = c * mx * cos(m * Sx) * sin(n * Sy)
                 rhs[iRHS, mn, 2] = c * my * sin(m * Sx) * cos(n * Sy)
+    return rhs
+
+
+def rhs_conc_1d(L: float, N: int, v: ndarray, x: ndarray) -> ndarray:
+    """
+    Returns coefficients for a concentrated load on a beam.
+    Load values are expected in the order [f, m].
+    """
+    return _conc1d_(L, N, atleast2d(v), atleast1d(x))
+
+
+def rhs_conc_2d(size: tuple, shape: tuple, v: ndarray, x: ndarray) -> ndarray:
+    """
+    Returns coefficients for a concentrated load on a plate.
+    Load values are expected in the order [f, mx, my].
+    """
+    return _conc2d_(size, shape, atleast2d(v), atleast2d(x))
+
+
+def rhs_line_const(L: float, N: int, v: ndarray, x: ndarray) -> ndarray:
+    """
+    Returns coefficients for constant loads over line segments.
+    Values are expected in the order [f, m].
+    """
+    return _line_const_(L, N, atleast2d(x), atleast2d(v))
+
+
+def rhs_line_1d_mc(
+    size: float, shape: int, values: Iterable, domain: ndarray
+) -> ndarray:
+    """
+    Returns coefficients for arbitrary loads over line segments.
+    Values are expected in the order [f, m].
+    """
+    length = domain[1] - domain[0]
+    rhs = np.zeros((1, shape, 2), dtype=float)
+    rpg = partial(generate_random_points_on_line_segment_1d, domain[0], domain[1])
+    _monte_carlo_1d(size, shape, values, length, rpg=rpg, out=rhs)
+    return rhs
+
+
+def rhs_line_2d_mc(
+    size: tuple, shape: tuple, values: Iterable, domain: Iterable
+) -> ndarray:
+    """
+    Returns coefficients for arbitrary line loads for 2d problems.
+    Values are expected in the order [f, mx, my].
+    """
+    length = np.linalg.norm(domain[1] - domain[0])
+    rhs = np.zeros((1, np.prod(shape), 3), dtype=float)
+    rpg = partial(generate_random_points_on_line_segment_2d, domain[0], domain[1])
+    _monte_carlo_2d(size, shape, values, length, rpg=rpg, out=rhs)
+    return rhs
+
+
+def rhs_rect_const(size: tuple, shape: tuple, x: ndarray, v: ndarray) -> ndarray:
+    """
+    Returns coefficients for constant loads over rectangular patches
+    in the order [f, mx, my].
+    """
+    return _rect_const_multi(size, shape, atleast2d(v), atleast3d(x))
+
+
+def rhs_rect_mc(
+    size: tuple, shape: tuple, domain: ndarray, values: Iterable
+) -> ndarray:
+    """
+    Returns coefficients for arbitrary loads over a rectangle.
+    Load values are expected in the order [f, mx, my].
+    """
+    area = np.abs(domain[1, 0] - domain[0, 0]) * np.abs(domain[1, 1] - domain[0, 1])
+    rhs = np.zeros((1, np.prod(shape), 3), dtype=float)
+    rpg = partial(generate_random_points_in_rectangle, domain[0], domain[1])
+    _monte_carlo_2d(size, shape, values, area, rpg=rpg, out=rhs)
+    return rhs
+
+
+def rhs_disk_mc(
+    size: tuple, shape: tuple, domain: ndarray, values: Iterable
+) -> ndarray:
+    """
+    Returns coefficients for arbitrary loads over a disk.
+    Load values are expected in the order [f, mx, my].
+    """
+    center = domain[0]
+    radius = domain[1]
+    area = np.pi * radius**2
+    rhs = np.zeros((1, np.prod(shape), 3), dtype=float)
+    rpg = partial(generate_random_points_in_disk, center, radius)
+    _monte_carlo_2d(size, shape, values, area, rpg=rpg, out=rhs)
     return rhs
