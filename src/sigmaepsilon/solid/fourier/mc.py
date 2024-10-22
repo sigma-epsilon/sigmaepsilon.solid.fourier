@@ -7,7 +7,7 @@ from numpy import ndarray, ndarray
 
 from sigmaepsilon.math.function import Function
 
-from .config import config
+from .config import Config
 
 
 @njit(nogil=True, parallel=True, cache=True)
@@ -61,8 +61,8 @@ def _monte_carlo_1d(
             raise ValueError(f"Invalid value {values[i]}")
         functions.append(function)
 
-    num_MC_samples = config.get("NUM_MC_SAMPLES_BEAM")
-    MC_batch_size = config.get("MC_BATCH_SIZE_BEAM")
+    num_MC_samples = Config.NUM_MC_SAMPLES_BEAM
+    MC_batch_size = Config.MC_BATCH_SIZE_BEAM
     num_MC_bacthes = int(num_MC_samples // MC_batch_size)
     remaining_MC_points = int(num_MC_samples % MC_batch_size)
     f_vals = np.zeros((MC_batch_size, 2), dtype=float)
@@ -164,8 +164,8 @@ def _monte_carlo_2d(
             raise ValueError(f"Invalid value {values[i]}")
         functions.append(function)
 
-    num_MC_samples = config.get("NUM_MC_SAMPLES_PLATE")
-    MC_batch_size = config.get("MC_BATCH_SIZE_PLATE")
+    num_MC_samples = Config.NUM_MC_SAMPLES_PLATE
+    MC_batch_size = Config.MC_BATCH_SIZE_PLATE
     num_MC_bacthes = int(num_MC_samples // MC_batch_size)
     remaining_MC_points = int(num_MC_samples % MC_batch_size)
     f_vals = np.zeros((MC_batch_size, 3), dtype=float)
