@@ -59,7 +59,7 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
             assert (
                 len(values) == 3
             ), f"Invalid shape {values.shape} for load intensities."
-            
+
             evaluator = rhs_line_2d_mc
         elif problem.model_type in [
             MechanicalModelType.BERNOULLI_EULER_BEAM,
@@ -71,7 +71,7 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
             assert (
                 len(values) == 2
             ), f"Invalid shape {values.shape} for load intensities."
-            
+
             if is_scalar(values[0]) and is_scalar(values[1]):
                 values = np.array(values, dtype=float)
                 evaluator = rhs_line_const

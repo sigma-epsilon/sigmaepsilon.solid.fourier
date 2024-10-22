@@ -124,7 +124,7 @@ class NavierPlate(NavierProblem):
         # LOADS
         rhs = np.stack(list(lc.rhs(problem=self) for lc in loads.cases()), axis=0)
         # rhs.shape = (nRHS, nMN, nComponent)
-        
+
         # SOLUTION
         if self.S is None:
             _rhs = rhs_Kirchhoff(rhs, self.size)
