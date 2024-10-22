@@ -40,25 +40,24 @@ class PointLoad(LoadCase[float | Float1d, Float1d]):
         Returns
         -------
         numpy.ndarray
-            3d float array of shape (1, H, 3), where H is the total number
-            of harmonic terms involved (defined for the problem). The first
-            axis is always of length 1, as there is only one left hand side.
+            2d float array of shape (H, 3), where H is the total number
+            of harmonic terms involved (defined for the problem).
         """
-        x = np.array(self.domain)
-        v = np.array(self.value)
+        values = np.array(self.value, dtype=float)
 
         if problem.model_type in [
             MechanicalModelType.KIRCHHOFF_LOVE_PLATE,
             MechanicalModelType.UFLYAND_MINDLIN_PLATE,
         ]:
+            domain = np.array(self.domain, dtype=float)
             evaluator = rhs_conc_2d
         elif problem.model_type in [
             MechanicalModelType.BERNOULLI_EULER_BEAM,
             MechanicalModelType.TIMOSHENKO_BEAM,
         ]:
+            domain = float(self.domain)
             evaluator = rhs_conc_1d
         else:  # pragma: no cover
             raise NotImplementedError
 
-        x = np.atleast_1d(x)
-        return evaluator(problem.size, problem.shape, v, x)
+        return evaluator(problem.size, problem.shape, domain, values)

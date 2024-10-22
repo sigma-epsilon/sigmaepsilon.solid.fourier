@@ -5,6 +5,7 @@ from ..preproc import rhs_line_const, rhs_line_1d_mc, rhs_line_2d_mc
 from ..protocols import NavierProblemProtocol
 from .loads import LoadCase, Float1d, Float2d
 from ..enums import MechanicalModelType
+from ..utils import is_scalar
 
 __all__ = ["LineLoad"]
 
@@ -42,32 +43,41 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
         Returns
         -------
         numpy.ndarray
-            3d float array of shape (1, H, 3), where H is the total number
-            of harmonic terms involved (defined for the problem). The first
-            axis is always of length 1, as there is only one left hand side.
+            2d float array of shape (H, 3), where H is the total number
+            of harmonic terms involved (defined for the problem).
         """
-        x = np.array(self.domain, dtype=float)
-        v = self.value
+        domain = np.array(self.domain, dtype=float)
+        values = self.value
 
         if problem.model_type in [
             MechanicalModelType.KIRCHHOFF_LOVE_PLATE,
             MechanicalModelType.UFLYAND_MINDLIN_PLATE,
         ]:
-            assert len(x.shape) == 2, f"Invalid shape {x.shape} for the domain."
-            assert len(v) == 3, f"Invalid shape {v.shape} for load intensities."
+            assert (
+                len(domain.shape) == 2
+            ), f"Invalid shape {domain.shape} for the domain."
+            assert (
+                len(values) == 3
+            ), f"Invalid shape {values.shape} for load intensities."
+            
             evaluator = rhs_line_2d_mc
         elif problem.model_type in [
             MechanicalModelType.BERNOULLI_EULER_BEAM,
             MechanicalModelType.TIMOSHENKO_BEAM,
         ]:
-            assert len(x.shape) == 1, f"Invalid shape {x.shape} for the domain."
-            assert len(v) == 2, f"Invalid shape {v.shape} for load intensities."
-            if isinstance(v[0], (float, int)) and isinstance(v[1], (float, int)):
-                v = np.array(v, dtype=float)
+            assert (
+                len(domain.shape) == 1
+            ), f"Invalid shape {domain.shape} for the domain."
+            assert (
+                len(values) == 2
+            ), f"Invalid shape {values.shape} for load intensities."
+            
+            if is_scalar(values[0]) and is_scalar(values[1]):
+                values = np.array(values, dtype=float)
                 evaluator = rhs_line_const
             else:
                 evaluator = rhs_line_1d_mc
         else:  # pragma: no cover
             raise NotImplementedError
 
-        return evaluator(problem.size, problem.shape, v, x)
+        return evaluator(problem.size, problem.shape, domain, values)

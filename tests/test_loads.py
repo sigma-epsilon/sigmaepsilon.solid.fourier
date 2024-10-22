@@ -114,7 +114,7 @@ class TestPlateLoads(SigmaEpsilonTestCase):
         load_case = RectangleLoad([[0, 0], [length_X, length_Y]], [-0.1, 0, 0])
         self.assertEqual(
             load_case.rhs(kirchhoff_plate).shape,
-            (1, number_of_modes_X * number_of_modes_Y, 3),
+            (number_of_modes_X * number_of_modes_Y, 3),
         )
         
     def test_eval_smoke(self):

@@ -1,6 +1,5 @@
 from typing import Iterable
 
-import numpy as np
 from numpy import ndarray
 
 from ..preproc import rhs_disk_mc
@@ -42,9 +41,8 @@ class DiskLoad(LoadCase[tuple[tuple[float, float], float], Iterable]):
         Returns
         -------
         numpy.ndarray
-            3d float array of shape (1, H, 3), where H is the total number
-            of harmonic terms involved (defined for the problem). The first
-            axis is always of length 1, as there is only one left hand side.
+            2d float array of shape (H, 3), where H is the total number
+            of harmonic terms involved (defined for the problem).
         """
         assert problem.model_type in [
             MechanicalModelType.KIRCHHOFF_LOVE_PLATE,

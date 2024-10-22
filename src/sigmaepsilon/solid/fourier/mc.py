@@ -27,10 +27,10 @@ def _monte_carlo_1d_njit(
 
     for n in prange(1, N + 1):
         iN = n - 1
-        out[0, iN, 0] += (
+        out[iN, 0] += (
             multi * np.sum(np.sin(points * factor * n) * fvalues[:, 0]) / num_MC_tot
         )
-        out[0, iN, 1] += (
+        out[iN, 1] += (
             multi * np.sum(np.cos(points * factor * n) * fvalues[:, 1]) / num_MC_tot
         )
 
@@ -49,7 +49,7 @@ def _monte_carlo_1d(
     N = shape
 
     if out is None:
-        out = np.zeros((1, N, 2), dtype=float)
+        out = np.zeros((N, 2), dtype=float)
 
     functions = []
     for i in range(2):
@@ -107,7 +107,7 @@ def _monte_carlo_2d_njit(
     for m in prange(1, M + 1):
         for n in prange(1, N + 1):
             mn = (m - 1) * N + n - 1
-            out[0, mn, 0] += (
+            out[mn, 0] += (
                 multi
                 * np.sum(
                     np.sin(px * factor_x * m)
@@ -116,7 +116,7 @@ def _monte_carlo_2d_njit(
                 )
                 / num_MC_tot
             )
-            out[0, mn, 1] += (
+            out[mn, 1] += (
                 multi
                 * np.sum(
                     np.sin(px * factor_x * m)
@@ -125,7 +125,7 @@ def _monte_carlo_2d_njit(
                 )
                 / num_MC_tot
             )
-            out[0, mn, 2] += (
+            out[mn, 2] += (
                 multi
                 * np.sum(
                     np.cos(px * factor_x * m)
@@ -150,7 +150,7 @@ def _monte_carlo_2d(
     M, N = shape
 
     if out is None:
-        out = np.zeros((1, M * N, 3), dtype=float)
+        out = np.zeros((M * N, 3), dtype=float)
 
     functions = []
     for i in range(3):

@@ -166,8 +166,8 @@ class NavierBeam(NavierProblem):
         lhs = lhs_Navier(self.length, self.N, D=self.EI, S=self.GA)
 
         # LOADS
-        load_cases = list(loads.cases())
-        rhs = np.vstack(list(lc.rhs(problem=self) for lc in load_cases))
+        rhs = np.stack(list(lc.rhs(problem=self) for lc in loads.cases()), axis=0)
+        # rhs.shape = (nRHS, nMN, nComponent)
 
         # SOLUTION
         if self.GA is None:

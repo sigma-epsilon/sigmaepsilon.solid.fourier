@@ -52,21 +52,20 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
         Returns
         -------
         numpy.ndarray
-            3d float array of shape (1, H, 3), where H is the total number
-            of harmonic terms involved (defined for the problem). The first
-            axis is always of length 1, as there is only one left hand side.
+            2d float array of shape (H, 3), where H is the total number
+            of harmonic terms involved (defined for the problem).
         """
         assert problem.model_type in [
             MechanicalModelType.KIRCHHOFF_LOVE_PLATE,
             MechanicalModelType.UFLYAND_MINDLIN_PLATE,
         ], f"Invalid model type {problem.model_type}."
 
-        x = np.array(self.domain, dtype=float)
-        v = self.value
+        domain = np.array(self.domain, dtype=float)
+        values = self.value
 
-        has_symbolic_load = any(not isinstance(vi, (float, int)) for vi in v)
+        has_symbolic_load = any(not isinstance(vi, (float, int)) for vi in values)
         if has_symbolic_load:
-            return rhs_rect_mc(problem.size, problem.shape, x, v)
+            return rhs_rect_mc(problem.size, problem.shape, domain, values)
         else:
-            v = np.array(v, dtype=float)
-            return rhs_rect_const(problem.size, problem.shape, x, v)
+            values = np.array(values, dtype=float)
+            return rhs_rect_const(problem.size, problem.shape, domain, values)

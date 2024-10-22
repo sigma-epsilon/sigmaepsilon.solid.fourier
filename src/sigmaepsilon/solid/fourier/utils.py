@@ -4,6 +4,13 @@ import numpy as np
 from numpy import ndarray
 
 
+def is_scalar(value: any) -> bool:
+    """
+    Check if a value is a scalar.
+    """
+    return isinstance(value, (int, float))
+
+
 def points_to_rectangle_region(points: ndarray) -> tuple[float]:
     xmin = points[:, 0].min()
     ymin = points[:, 1].min()

@@ -447,21 +447,19 @@ def eval_loads_1d(
     N = shape
     nP = points.shape[0]
     nDOF = 2
-    nRHS = coeffs.shape[0]
-    res = np.zeros((nRHS, nP, nDOF), dtype=float)
+    res = np.zeros((nP, nDOF), dtype=float)
     for iP in prange(nP):
         xP = points[iP]
-        for iRHS in prange(nRHS):
-            for n in range(1, N + 1):
-                iN = n-1
-                res[iRHS, iP, 0] += (
-                    coeffs[iRHS, iN, 0]
-                    * np.sin(xP * np.pi * n / Lx) 
-                )
-                res[iRHS, iP, 1] += (
-                    coeffs[iRHS, iN, 1]
-                    * np.cos(xP * np.pi * n / Lx) 
-                )
+        for n in range(1, N + 1):
+            iN = n-1
+            res[iP, 0] += (
+                coeffs[iN, 0]
+                * np.sin(xP * np.pi * n / Lx) 
+            )
+            res[iP, 1] += (
+                coeffs[iN, 1]
+                * np.cos(xP * np.pi * n / Lx) 
+            )
     return res
 # fmt: on
 
@@ -480,28 +478,26 @@ def eval_loads_2d(
     M, N = shape
     nP = points.shape[0]
     nDOF = 3
-    nRHS = coeffs.shape[0]
-    res = np.zeros((nRHS, nP, nDOF), dtype=float)
+    res = np.zeros((nP, nDOF), dtype=float)
     for iP in prange(nP):
         xP, yP = points[iP]
-        for iRHS in prange(nRHS):
-            for m in range(1, M + 1):
-                for n in range(1, N + 1):
-                    iMN = (m - 1) * N + n - 1
-                    res[iRHS, iP, 0] += (
-                        coeffs[iRHS, iMN, 0]
-                        * np.sin(xP * np.pi * m / Lx) 
-                        * np.sin(yP * np.pi * n / Ly)
-                    )
-                    res[iRHS, iP, 1] += (
-                        coeffs[iRHS, iMN, 1]
-                        * np.sin(xP * np.pi * m / Lx) 
-                        * np.cos(yP * np.pi * n / Ly)
-                    )
-                    res[iRHS, iP, 2] += (
-                        coeffs[iRHS, iMN, 2]
-                        * np.cos(xP * np.pi * m / Lx) 
-                        * np.sin(yP * np.pi * n / Ly)
-                    )
+        for m in range(1, M + 1):
+            for n in range(1, N + 1):
+                iMN = (m - 1) * N + n - 1
+                res[iP, 0] += (
+                    coeffs[iMN, 0]
+                    * np.sin(xP * np.pi * m / Lx) 
+                    * np.sin(yP * np.pi * n / Ly)
+                )
+                res[iP, 1] += (
+                    coeffs[iMN, 1]
+                    * np.sin(xP * np.pi * m / Lx) 
+                    * np.cos(yP * np.pi * n / Ly)
+                )
+                res[iP, 2] += (
+                    coeffs[iMN, 2]
+                    * np.cos(xP * np.pi * m / Lx) 
+                    * np.sin(yP * np.pi * n / Ly)
+                )
     return res
 # fmt: on
