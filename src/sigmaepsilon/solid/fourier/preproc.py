@@ -415,7 +415,12 @@ def rhs_line_const(L: float, N: int, domain: ndarray, values: ndarray) -> ndarra
 
 
 def rhs_line_1d_mc(
-    size: float, shape: int, domain: ndarray, values: Iterable
+    size: float,
+    shape: int,
+    domain: ndarray,
+    values: Iterable,
+    *,
+    n_MC: int | NoneType = None,
 ) -> ndarray:
     """
     Returns coefficients for arbitrary loads over line segments.
@@ -424,12 +429,17 @@ def rhs_line_1d_mc(
     length = domain[1] - domain[0]
     rhs = np.zeros((shape, 2), dtype=float)
     rpg = partial(generate_random_points_on_line_segment_1d, domain[0], domain[1])
-    _monte_carlo_1d(size, shape, values, length, rpg=rpg, out=rhs)
+    _monte_carlo_1d(size, shape, values, length, rpg=rpg, n_MC=n_MC, out=rhs)
     return rhs
 
 
 def rhs_line_2d_mc(
-    size: tuple, shape: tuple, domain: ndarray, values: Iterable
+    size: tuple,
+    shape: tuple,
+    domain: ndarray,
+    values: Iterable,
+    *,
+    n_MC: int | NoneType = None,
 ) -> ndarray:
     """
     Returns coefficients for arbitrary line loads for 2d problems.
@@ -438,7 +448,7 @@ def rhs_line_2d_mc(
     length = np.linalg.norm(domain[1] - domain[0])
     rhs = np.zeros((1, np.prod(shape), 3), dtype=float)
     rpg = partial(generate_random_points_on_line_segment_2d, domain[0], domain[1])
-    _monte_carlo_2d(size, shape, values, length, rpg=rpg, out=rhs)
+    _monte_carlo_2d(size, shape, values, length, rpg=rpg, n_MC=n_MC, out=rhs)
     return rhs
 
 
@@ -453,7 +463,12 @@ def rhs_rect_const(
 
 
 def rhs_rect_mc(
-    size: tuple, shape: tuple, domain: ndarray, values: Iterable
+    size: tuple,
+    shape: tuple,
+    domain: ndarray,
+    values: Iterable,
+    *,
+    n_MC: int | NoneType = None,
 ) -> ndarray:
     """
     Returns coefficients for arbitrary loads over a rectangle.
@@ -462,12 +477,17 @@ def rhs_rect_mc(
     area = np.abs(domain[1, 0] - domain[0, 0]) * np.abs(domain[1, 1] - domain[0, 1])
     rhs = np.zeros((np.prod(shape), 3), dtype=float)
     rpg = partial(generate_random_points_in_rectangle, domain[0], domain[1])
-    _monte_carlo_2d(size, shape, values, area, rpg=rpg, out=rhs)
+    _monte_carlo_2d(size, shape, values, area, rpg=rpg, n_MC=n_MC, out=rhs)
     return rhs
 
 
 def rhs_disk_mc(
-    size: tuple, shape: tuple, domain: ndarray, values: Iterable
+    size: tuple,
+    shape: tuple,
+    domain: ndarray,
+    values: Iterable,
+    *,
+    n_MC: int | NoneType = None,
 ) -> ndarray:
     """
     Returns coefficients for arbitrary loads over a disk.
@@ -478,5 +498,5 @@ def rhs_disk_mc(
     area = np.pi * radius**2
     rhs = np.zeros((np.prod(shape), 3), dtype=float)
     rpg = partial(generate_random_points_in_disk, center, radius)
-    _monte_carlo_2d(size, shape, values, area, rpg=rpg, out=rhs)
+    _monte_carlo_2d(size, shape, values, area, rpg=rpg, n_MC=n_MC, out=rhs)
     return rhs

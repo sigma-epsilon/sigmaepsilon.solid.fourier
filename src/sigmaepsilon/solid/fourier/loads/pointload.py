@@ -25,6 +25,7 @@ class PointLoad(LoadCase[float | Float1d, Float1d]):
     .. hint::
         For a detailed explanation of the sign conventions, refer to
         :ref:`this <sign_conventions>` section of the theory guide.
+        
     """
 
     def rhs(self, problem: NavierProblemProtocol) -> ndarray:

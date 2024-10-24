@@ -44,6 +44,7 @@ def _monte_carlo_1d(
     dsize: float,
     *,
     rpg: Callable[[int], ndarray],
+    n_MC: int | NoneType = None,
     out: ndarray | NoneType = None,
 ) -> ndarray:
     N = shape
@@ -61,7 +62,7 @@ def _monte_carlo_1d(
             raise ValueError(f"Invalid value {values[i]}")
         functions.append(function)
 
-    num_MC_samples = Config.NUM_MC_SAMPLES_BEAM
+    num_MC_samples = n_MC or Config.NUM_MC_SAMPLES_BEAM
     MC_batch_size = Config.MC_BATCH_SIZE_BEAM
     num_MC_bacthes = int(num_MC_samples // MC_batch_size)
     remaining_MC_points = int(num_MC_samples % MC_batch_size)
@@ -145,6 +146,7 @@ def _monte_carlo_2d(
     dsize: float,
     *,
     rpg: Callable[[int], ndarray],
+    n_MC: int | NoneType = None,
     out: ndarray | NoneType = None,
 ) -> ndarray:
     M, N = shape
@@ -164,7 +166,7 @@ def _monte_carlo_2d(
             raise ValueError(f"Invalid value {values[i]}")
         functions.append(function)
 
-    num_MC_samples = Config.NUM_MC_SAMPLES_PLATE
+    num_MC_samples = n_MC or Config.NUM_MC_SAMPLES_PLATE
     MC_batch_size = Config.MC_BATCH_SIZE_PLATE
     num_MC_bacthes = int(num_MC_samples // MC_batch_size)
     remaining_MC_points = int(num_MC_samples % MC_batch_size)

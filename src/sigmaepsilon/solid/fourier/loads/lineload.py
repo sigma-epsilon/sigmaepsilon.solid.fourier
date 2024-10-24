@@ -1,3 +1,5 @@
+from functools import partial
+
 import numpy as np
 from numpy import ndarray
 
@@ -6,6 +8,7 @@ from ..protocols import NavierProblemProtocol
 from .loads import LoadCase, Float1d, Float2d
 from ..enums import MechanicalModelType
 from ..utils import is_scalar
+from ..config import Config
 
 __all__ = ["LineLoad"]
 
@@ -48,6 +51,7 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
         """
         domain = np.array(self.domain, dtype=float)
         values = self.value
+        n_MC = self._num_mc or Config.NUM_MC_SAMPLES_PLATE
 
         if problem.model_type in [
             MechanicalModelType.KIRCHHOFF_LOVE_PLATE,
@@ -60,7 +64,7 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
                 len(values) == 3
             ), f"Invalid shape {values.shape} for load intensities."
 
-            evaluator = rhs_line_2d_mc
+            evaluator = partial(rhs_line_2d_mc, n_MC=n_MC)
         elif problem.model_type in [
             MechanicalModelType.BERNOULLI_EULER_BEAM,
             MechanicalModelType.TIMOSHENKO_BEAM,
@@ -76,7 +80,7 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
                 values = np.array(values, dtype=float)
                 evaluator = rhs_line_const
             else:
-                evaluator = rhs_line_1d_mc
+                evaluator = partial(rhs_line_1d_mc, n_MC=n_MC)
         else:  # pragma: no cover
             raise NotImplementedError
 

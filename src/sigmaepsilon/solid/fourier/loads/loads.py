@@ -1,4 +1,5 @@
 from typing import Iterable, Any, Optional, TypeVar, Generic, TypeAlias, Hashable
+from types import NoneType
 from abc import abstractmethod
 
 from numpy import ndarray
@@ -9,6 +10,7 @@ from sigmaepsilon.deepdict import DeepDict
 from ..protocols import NavierProblemProtocol, LoadGroupProtocol, LoadCaseProtocol
 from ..postproc import eval_loads_1d, eval_loads_2d
 from ..enums import MechanicalModelType
+from ..config import Config
 
 __all__ = ["LoadGroup", "LoadCase", "RectangleLoad", "LineLoad", "PointLoad"]
 
@@ -23,16 +25,29 @@ LoadValueType = TypeVar("LoadValueType")
 class LoadCase(Generic[LoadDomainType, LoadValueType]):
     """
     Generic base class for all load cases.
+    
+    Parameters
+    ----------
+    domain: LoadDomainType
+        The domain of the load.
+    value: LoadValueType
+        The value of the load.
+    num_mc: int, Optional
+        The number of sampling points for Monte Carlo integration. 
+        If no value is provided, the global config value is used.
+        
     """
 
     def __init__(
         self,
         domain: LoadDomainType,
         value: LoadValueType,
+        num_mc: int | NoneType = None,
     ):
         super().__init__()
         self._domain = domain
         self._value = value
+        self._num_mc = num_mc
 
     @property
     def domain(self) -> LoadDomainType:

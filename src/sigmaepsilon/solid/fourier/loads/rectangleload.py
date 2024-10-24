@@ -8,6 +8,7 @@ from ..utils import points_to_rectangle_region
 from ..protocols import NavierProblemProtocol
 from .loads import LoadCase, Float1d, Float2d
 from ..enums import MechanicalModelType
+from ..config import Config
 
 __all__ = ["RectangleLoad"]
 
@@ -23,6 +24,9 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
         where the load is applied. Default is ``None``.
     value: :class:`~sigmaepsilon.solid.fourier.loads.Float1d`
         Load intensities for each dof in the order :math:`f_z, m_x, m_y`.
+    num_mc: int, Optional
+        The number of sampling points for Monte Carlo integration. If no value
+        is provided, the global config value is used.
 
     .. hint::
         For a detailed explanation of the sign conventions, refer to
@@ -62,10 +66,11 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
 
         domain = np.array(self.domain, dtype=float)
         values = self.value
+        n_MC = self._num_mc or Config.NUM_MC_SAMPLES_PLATE
 
         has_symbolic_load = any(not isinstance(vi, (float, int)) for vi in values)
         if has_symbolic_load:
-            return rhs_rect_mc(problem.size, problem.shape, domain, values)
+            return rhs_rect_mc(problem.size, problem.shape, domain, values, n_MC=n_MC)
         else:
             values = np.array(values, dtype=float)
             return rhs_rect_const(problem.size, problem.shape, domain, values)
