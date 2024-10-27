@@ -9,14 +9,15 @@ from sigmaepsilon.deepdict import DeepDict
 
 from ..protocols import NavierProblemProtocol, LoadGroupProtocol, LoadCaseProtocol
 from ..postproc import eval_loads_1d, eval_loads_2d
-from ..enums import MechanicalModelType
-from ..config import Config
 
 __all__ = ["LoadGroup", "LoadCase", "RectangleLoad", "LineLoad", "PointLoad"]
 
 
 Float1d: TypeAlias = Iterable[float]
 Float2d: TypeAlias = Iterable[Float1d]
+
+Int1d: TypeAlias = Iterable[int]
+Int2d: TypeAlias = Iterable[Int1d]
 
 LoadDomainType = TypeVar("LoadDomainType")
 LoadValueType = TypeVar("LoadValueType")
@@ -25,7 +26,7 @@ LoadValueType = TypeVar("LoadValueType")
 class LoadCase(Generic[LoadDomainType, LoadValueType]):
     """
     Generic base class for all load cases.
-    
+
     Parameters
     ----------
     domain: LoadDomainType
@@ -33,9 +34,9 @@ class LoadCase(Generic[LoadDomainType, LoadValueType]):
     value: LoadValueType
         The value of the load.
     num_mc: int, Optional
-        The number of sampling points for Monte Carlo integration. 
+        The number of sampling points for Monte Carlo integration.
         If no value is provided, the global config value is used.
-        
+
     """
 
     def __init__(
@@ -79,10 +80,7 @@ class LoadCase(Generic[LoadDomainType, LoadValueType]):
 
         The returned array is an 1d array with the same length as the number of points.
         """
-        if problem.model_type in [
-            MechanicalModelType.KIRCHHOFF_LOVE_PLATE,
-            MechanicalModelType.UFLYAND_MINDLIN_PLATE,
-        ]:
+        if problem.model_type.is_2d:
             length_X, length_Y = problem.size
             number_of_modes_X, number_of_modes_Y = problem.shape
             rhs = self.rhs(problem)
@@ -93,10 +91,7 @@ class LoadCase(Generic[LoadDomainType, LoadValueType]):
                 rhs,
                 points,
             )
-        elif problem.model_type in [
-            MechanicalModelType.BERNOULLI_EULER_BEAM,
-            MechanicalModelType.TIMOSHENKO_BEAM,
-        ]:
+        elif problem.model_type.is_1d:
             length_X = float(problem.size)
             number_of_modes_X = problem.shape
             rhs = self.rhs(problem)

@@ -44,14 +44,9 @@ def _monte_carlo_1d(
     dsize: float,
     *,
     rpg: Callable[[int], ndarray],
+    out: ndarray | NoneType,
     n_MC: int | NoneType = None,
-    out: ndarray | NoneType = None,
 ) -> ndarray:
-    N = shape
-
-    if out is None:
-        out = np.zeros((N, 2), dtype=float)
-
     functions = []
     for i in range(2):
         if isinstance(values[i], str):
@@ -146,14 +141,9 @@ def _monte_carlo_2d(
     dsize: float,
     *,
     rpg: Callable[[int], ndarray],
+    out: ndarray | NoneType,
     n_MC: int | NoneType = None,
-    out: ndarray | NoneType = None,
 ) -> ndarray:
-    M, N = shape
-
-    if out is None:
-        out = np.zeros((M * N, 3), dtype=float)
-
     functions = []
     for i in range(3):
         if isinstance(values[i], str):
