@@ -16,6 +16,7 @@ Beams
     :reversed:
 
     gallery/timoshenko_matplotlib.ipynb
+    gallery/plot_loads_1d.ipynb
 
 Plates
 ======

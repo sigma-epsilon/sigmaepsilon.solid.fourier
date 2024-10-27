@@ -1,4 +1,5 @@
-from typing import Iterable, Union, Optional
+from typing import Iterable
+from types import NoneType
 
 import numpy as np
 from numpy import sin, cos, ndarray, pi as PI
@@ -14,13 +15,13 @@ UZ, ROTX, ROTY, CX, CY, CXY, EXZ, EYZ, MX, MY, MXY, QX, QY = list(range(13))
 
 
 def postproc(
-    size: Union[float, Iterable[float]],
-    shape: Union[int, Iterable[int]],
+    size: float | Iterable[float],
+    shape: int | Iterable[int],
     points: ndarray,
     solution: ndarray,
     loads: ndarray,
-    D: Union[float, ndarray],
-    S: Optional[Union[float, ndarray, None]] = None,
+    D: float | ndarray,
+    S: float | ndarray | NoneType = None,
 ) -> ndarray:
     """
     Calculates postprocessing items.
@@ -252,6 +253,7 @@ def postproc_Mindlin(
             11 : shear force x
 
             12 : shear force y
+
     """
     Lx, Ly = size
     M, N = shape
@@ -427,5 +429,75 @@ def postproc_Kirchhoff(
                             + 2 * PI**3 * Amn * D66 * m**2 * n * Sm * Cn / (Lx**2 * Ly)
                             - qmn * Sm * Cn
                         )
+    return res
+# fmt: on
+
+# fmt: off
+@njit(nogil=True, parallel=True, cache=True)
+def eval_loads_1d(
+    size: float,
+    shape: int, 
+    coeffs:ndarray, 
+    points:ndarray,
+    ) -> ndarray:
+    """
+    Evaluates the loads at some points for beam problems.
+    """
+    Lx = size
+    N = shape
+    nP = points.shape[0]
+    nDOF = 2
+    res = np.zeros((nP, nDOF), dtype=float)
+    for iP in prange(nP):
+        xP = points[iP]
+        for n in range(1, N + 1):
+            iN = n-1
+            res[iP, 0] += (
+                coeffs[iN, 0]
+                * np.sin(xP * np.pi * n / Lx) 
+            )
+            res[iP, 1] += (
+                coeffs[iN, 1]
+                * np.cos(xP * np.pi * n / Lx) 
+            )
+    return res
+# fmt: on
+
+# fmt: off
+@njit(nogil=True, parallel=True, cache=True)
+def eval_loads_2d(
+    size: tuple,
+    shape: tuple, 
+    coeffs:ndarray, 
+    points:ndarray,
+    ) -> ndarray:
+    """
+    Evaluates the loads at some points for plate problems.
+    """
+    Lx, Ly = size
+    M, N = shape
+    nP = points.shape[0]
+    nDOF = 3
+    res = np.zeros((nP, nDOF), dtype=float)
+    for iP in prange(nP):
+        xP, yP = points[iP]
+        for m in range(1, M + 1):
+            for n in range(1, N + 1):
+                iMN = (m - 1) * N + n - 1
+                res[iP, 0] += (
+                    coeffs[iMN, 0]
+                    * np.sin(xP * np.pi * m / Lx) 
+                    * np.sin(yP * np.pi * n / Ly)
+                )
+                res[iP, 1] += (
+                    coeffs[iMN, 1]
+                    * np.sin(xP * np.pi * m / Lx) 
+                    * np.cos(yP * np.pi * n / Ly)
+                )
+                res[iP, 2] += (
+                    coeffs[iMN, 2]
+                    * np.cos(xP * np.pi * m / Lx) 
+                    * np.sin(yP * np.pi * n / Ly)
+                )
     return res
 # fmt: on

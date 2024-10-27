@@ -5,7 +5,7 @@ from sigmaepsilon.core.config import namespace_package_name
 
 from .beam import NavierBeam
 from .plate import NavierPlate
-from .loads import LoadGroup, RectangleLoad, LineLoad, PointLoad
+from .loads import LoadGroup, RectangleLoad, LineLoad, PointLoad, DiskLoad
 from .result import BeamLoadCaseResultLinStat, PlateLoadCaseResultLinStat
 
 __all__ = [
@@ -16,6 +16,7 @@ __all__ = [
     "RectangleLoad",
     "LineLoad",
     "PointLoad",
+    "DiskLoad",
     "BeamLoadCaseResultLinStat",
     "PlateLoadCaseResultLinStat",
 ]

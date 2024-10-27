@@ -6,7 +6,7 @@
 [![codecov](https://codecov.io/gh/sigma-epsilon/sigmaepsilon.solid.fourier/graph/badge.svg?token=7JKJ3HHSX3)](https://codecov.io/gh/sigma-epsilon/sigmaepsilon.solid.fourier)
 [![Documentation Status](https://readthedocs.org/projects/sigmaepsilonsolidfourier/badge/?version=latest)](https://sigmaepsilonsolidfourier.readthedocs.io/en/latest/?badge=latest)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PyPI](https://badge.fury.io/py/sigmaepsilon.solid.fourier.svg)](https://pypi.org/project/sigmaepsilon.solid.fourier)
+[![PyPI - Version](https://img.shields.io/pypi/v/sigmaepsilon.solid.fourier)](https://pypi.org/project/sigmaepsilon.solid.fourier/)
 [![Python](https://img.shields.io/badge/python-3.10|3.11|3.12-blue)](https://www.python.org)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
