@@ -76,7 +76,7 @@ class TestKirchhoffPlate(SigmaEpsilonTestCase):
         plate = NavierPlate(size, (20, 20), D=D)
         with self.assertRaises(TypeError):
             plate.linear_static_analysis(None, None)
-            
+
     def test_linear_static_analysis_too_many_input(self):
         size = (600.0, 800.0)
         D = np.eye(3)
@@ -90,6 +90,19 @@ class TestKirchhoffPlate(SigmaEpsilonTestCase):
         plate = NavierPlate(size, (20, 20), D=D)
         with self.assertRaises(TypeError):
             plate.linear_static_analysis(0, 0)
+
+    def test_linear_static_analysis_duplicate_load_input_error(self):
+        size = Lx, Ly = (600.0, 800.0)
+        D = np.eye(3)
+        plate = NavierPlate(size, (20, 20), D=D)
+        loads = LoadGroup(LC1=RectangleLoad([[0, 0], [Lx, Ly]], [-0.1, 0, 0]))
+        grid_shape = (30, 40)
+        gridparams = {"size": size, "shape": grid_shape, "eshape": "Q4"}
+        points, _ = grid(**gridparams)
+        with self.assertRaises(ValueError):
+            plate.linear_static_analysis(loads, points, loads=loads)
+        with self.assertRaises(ValueError):
+            plate.linear_static_analysis(loads, points, points=points)
 
 
 class TestMindlinPlate(SigmaEpsilonTestCase):
