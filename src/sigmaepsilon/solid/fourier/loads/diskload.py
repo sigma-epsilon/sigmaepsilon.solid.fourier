@@ -5,7 +5,6 @@ from numpy import ndarray
 from ..preproc import rhs_disk_mc
 from ..protocols import NavierProblemProtocol
 from .loads import LoadCase
-from ..enums import MechanicalModelType
 from ..config import Config
 
 __all__ = ["DiskLoad"]
@@ -45,10 +44,7 @@ class DiskLoad(LoadCase[tuple[tuple[float, float], float], Iterable]):
             2d float array of shape (H, 3), where H is the total number
             of harmonic terms involved (defined for the problem).
         """
-        assert problem.model_type in [
-            MechanicalModelType.KIRCHHOFF_LOVE_PLATE,
-            MechanicalModelType.UFLYAND_MINDLIN_PLATE,
-        ], f"Invalid model type {problem.model_type}."
+        assert problem.model_type.is_2d, f"Invalid model type {problem.model_type}."
         n_MC = self._num_mc or Config.NUM_MC_SAMPLES_PLATE
         return rhs_disk_mc(
             problem.size, problem.shape, self.domain, self.value, n_MC=n_MC

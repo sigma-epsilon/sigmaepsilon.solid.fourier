@@ -4,7 +4,6 @@ from numpy import ndarray
 from ..preproc import rhs_conc_1d, rhs_conc_2d
 from ..protocols import NavierProblemProtocol
 from .loads import LoadCase, Float1d
-from ..enums import MechanicalModelType
 
 __all__ = ["PointLoad"]
 
@@ -25,7 +24,7 @@ class PointLoad(LoadCase[float | Float1d, Float1d]):
     .. hint::
         For a detailed explanation of the sign conventions, refer to
         :ref:`this <sign_conventions>` section of the theory guide.
-        
+
     """
 
     def rhs(self, problem: NavierProblemProtocol) -> ndarray:
@@ -46,16 +45,10 @@ class PointLoad(LoadCase[float | Float1d, Float1d]):
         """
         values = np.array(self.value, dtype=float)
 
-        if problem.model_type in [
-            MechanicalModelType.KIRCHHOFF_LOVE_PLATE,
-            MechanicalModelType.UFLYAND_MINDLIN_PLATE,
-        ]:
+        if problem.model_type.is_2d:
             domain = np.array(self.domain, dtype=float)
             evaluator = rhs_conc_2d
-        elif problem.model_type in [
-            MechanicalModelType.BERNOULLI_EULER_BEAM,
-            MechanicalModelType.TIMOSHENKO_BEAM,
-        ]:
+        elif problem.model_type.is_1d:
             domain = float(self.domain)
             evaluator = rhs_conc_1d
         else:  # pragma: no cover

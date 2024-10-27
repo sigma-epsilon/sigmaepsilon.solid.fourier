@@ -6,7 +6,6 @@ from numpy import ndarray
 from ..preproc import rhs_line_const, rhs_line_1d_mc, rhs_line_2d_mc
 from ..protocols import NavierProblemProtocol
 from .loads import LoadCase, Float1d, Float2d
-from ..enums import MechanicalModelType
 from ..utils import is_scalar
 from ..config import Config
 
@@ -26,6 +25,9 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
     value: :class:`~sigmaepsilon.solid.fourier.loads.Float1d`
         Load intensities for each dof. The order of the dofs for a beam
         is :math:`[F, M]`, for a plate it is :math:`[F, M_x, M_y]`.
+    num_mc: int, Optional
+        The number of sampling points for Monte Carlo integration.
+        If no value is provided, the global config value is used.
 
     .. hint::
         For a detailed explanation of the sign conventions, refer to
@@ -53,22 +55,14 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
         values = self.value
         n_MC = self._num_mc or Config.NUM_MC_SAMPLES_PLATE
 
-        if problem.model_type in [
-            MechanicalModelType.KIRCHHOFF_LOVE_PLATE,
-            MechanicalModelType.UFLYAND_MINDLIN_PLATE,
-        ]:
+        if problem.model_type.is_2d:
             assert (
                 len(domain.shape) == 2
             ), f"Invalid shape {domain.shape} for the domain."
-            assert (
-                len(values) == 3
-            ), f"Invalid shape {values.shape} for load intensities."
+            assert len(values) == 3, "Invalid shape for load intensities."
 
             evaluator = partial(rhs_line_2d_mc, n_MC=n_MC)
-        elif problem.model_type in [
-            MechanicalModelType.BERNOULLI_EULER_BEAM,
-            MechanicalModelType.TIMOSHENKO_BEAM,
-        ]:
+        elif problem.model_type.is_1d:
             assert (
                 len(domain.shape) == 1
             ), f"Invalid shape {domain.shape} for the domain."

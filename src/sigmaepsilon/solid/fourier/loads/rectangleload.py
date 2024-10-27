@@ -7,7 +7,6 @@ from ..preproc import rhs_rect_const, rhs_rect_mc
 from ..utils import points_to_rectangle_region
 from ..protocols import NavierProblemProtocol
 from .loads import LoadCase, Float1d, Float2d
-from ..enums import MechanicalModelType
 from ..config import Config
 
 __all__ = ["RectangleLoad"]
@@ -59,10 +58,7 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
             2d float array of shape (H, 3), where H is the total number
             of harmonic terms involved (defined for the problem).
         """
-        assert problem.model_type in [
-            MechanicalModelType.KIRCHHOFF_LOVE_PLATE,
-            MechanicalModelType.UFLYAND_MINDLIN_PLATE,
-        ], f"Invalid model type {problem.model_type}."
+        assert problem.model_type.is_2d, f"Invalid model type {problem.model_type}."
 
         domain = np.array(self.domain, dtype=float)
         values = self.value
