@@ -446,7 +446,7 @@ def rhs_line_2d_mc(
     Values are expected in the order [f, mx, my].
     """
     length = np.linalg.norm(domain[1] - domain[0])
-    rhs = np.zeros((1, np.prod(shape), 3), dtype=float)
+    rhs = np.zeros((np.prod(shape), 3), dtype=float)
     rpg = partial(generate_random_points_on_line_segment_2d, domain[0], domain[1])
     _monte_carlo_2d(size, shape, values, length, rpg=rpg, n_MC=n_MC, out=rhs)
     return rhs
