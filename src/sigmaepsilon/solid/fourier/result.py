@@ -52,7 +52,7 @@ class LoadCaseResultLinStat:
         """
         Returns the results as a ``numpy.ndarray``.
         """
-        if self.strain_range is None:
+        if self.strain_range is None:  # pragma: no cover
             raise ValueError("Strain range is not defined.")
         return self._data[:, list(self.strain_range)]
 
@@ -224,5 +224,5 @@ class PlateLoadCaseResultLinStat(LoadCaseResultLinStat):
         """
         Returns the results as a ``numpy.ndarray``.
         """
-        return self._data[:, 3:8]
+        #return self._data[:, 3:8]
         return self._data[:, list(self.strain_range)]

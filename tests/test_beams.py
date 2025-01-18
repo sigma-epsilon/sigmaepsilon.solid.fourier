@@ -44,6 +44,7 @@ class TestBernoulliBeam(SigmaEpsilonTestCase):
         load_case_solution = solution["concentrated", "LC1"]
         load_case_solution.data
         load_case_solution.values
+        load_case_solution.strains
         load_case_solution.name = load_case_solution.name
         load_case_solution.to_xarray()
         load_case_solution.to_pandas()
