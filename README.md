@@ -36,6 +36,10 @@ The [documentation](https://sigmaepsilonsolidfourier.readthedocs.io/en/latest/) 
 
 Check it out for the user guide, installation instructions, an ever growing set of examples, and API Reference.
 
+## Running the Applications
+
+The repository contains a set of applications, where typically a third party library is used to create something interactive and deployable involving some calculations and reporting. Of course, before you can run these examples on your local machine, you have to go through first the installation instructions below.
+
 ## Installation
 
 For installation instructions, please refer to the [documentation](https://sigmaepsilonsolidfourier.readthedocs.io/en/latest/).

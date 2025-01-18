@@ -1,0 +1,42 @@
+{
+    "_meta": {
+        "job_id": "_00000000001",
+        "job_data_file_path": "d:\\Projects\\SigmaEpsilon\\sigmaepsilon.solid.fourier\\apps\\plate_calculator_papermill_azure_pyvista\\outputs\\_00000000001_data.json"
+    },
+    "load": {
+        "position": [
+            350.0,
+            450.0
+        ],
+        "value": [
+            -50.0,
+            0.0,
+            0.0
+        ]
+    },
+    "geometry": {
+        "width": 100.0,
+        "height": 100.0,
+        "thickness": 10.0
+    },
+    "material": {
+        "youngs_modulus": 200.0,
+        "poissons_ratio": 0.3,
+        "yield_strength": 7800.0,
+        "density": 7800.0
+    },
+    "calculation": {
+        "nx": 10,
+        "ny": 10,
+        "azure": {
+            "storage": {
+                "container_name": "navier"
+            }
+        }
+    },
+    "output": {
+        "folder": "outputs",
+        "absolute_file_path_res2d": "d:\\Projects\\SigmaEpsilon\\sigmaepsilon.solid.fourier\\apps\\plate_calculator_papermill_azure_pyvista\\_00000000001_res2d.parquet",
+        "absolute_file_path_res3d": "d:\\Projects\\SigmaEpsilon\\sigmaepsilon.solid.fourier\\apps\\plate_calculator_papermill_azure_pyvista\\_00000000001_res3d.parquet"
+    }
+}

@@ -36,6 +36,21 @@ sigmaepsilon-deepdict = "^2.0.0"
 sigmaepsilon-mesh = "^3.0.2"
 sigmaepsilon-solid-material = "^1.0.2"
 
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.dist.docs]
+optional = true
+
+[tool.poetry.app-navier-plate-calculator-concentrated-load.docs]
+optional = true
+
 [tool.poetry.group.dev.dependencies]
 matplotlib = "^3.8.3"
 texttable = "^1.7.0"
@@ -74,3 +89,5 @@ numpy = ">=1.22.2"
 pillow = ">=10.0.1"
 tornado = ">=6.3.3"
 fonttools = ">=4.43.0"
+
+[tool.poetry.group.app-navier-plate-calculator-concentrated-load.dependencies]

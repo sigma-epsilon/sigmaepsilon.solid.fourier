@@ -1,4 +1,4 @@
-from typing import Iterable, ClassVar, TYPE_CHECKING
+from typing import Iterable, ClassVar, TYPE_CHECKING, Sequence
 import numpy as np
 
 
@@ -22,6 +22,7 @@ class LoadCaseResultLinStat:
     __slots__ = ["_data", "_name", "_components"]
 
     components: ClassVar[Iterable[str]]
+    strain_range: ClassVar[Sequence[int]] = []
 
     def __init__(
         self,
@@ -45,6 +46,16 @@ class LoadCaseResultLinStat:
         Returns the results as a ``numpy.ndarray``.
         """
         return self._data
+    
+    @property
+    def strains(self) -> np.ndarray:
+        """
+        Returns the results as a ``numpy.ndarray``.
+        """
+        if self.strain_range is None:
+            raise ValueError("Strain range is not defined.")
+        return self._data[:, list(self.strain_range)]
+
 
     @property
     def name(self) -> str | None:
@@ -206,3 +217,12 @@ class PlateLoadCaseResultLinStat(LoadCaseResultLinStat):
         "QX",
         "QY",
     ]
+    strain_range = range(3, 8)
+    
+    @property
+    def strains(self) -> np.ndarray:
+        """
+        Returns the results as a ``numpy.ndarray``.
+        """
+        return self._data[:, 3:8]
+        return self._data[:, list(self.strain_range)]
