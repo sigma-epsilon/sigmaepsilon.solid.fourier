@@ -48,7 +48,7 @@ optional = true
 [tool.poetry.group.dist]
 optional = true
 
-[tool.poetry.app-navier-plate-calculator-concentrated-load.docs]
+[tool.poetry.group.app-navier-plate-calculator-concentrated-load]
 optional = true
 
 [tool.poetry.group.dev.dependencies]
