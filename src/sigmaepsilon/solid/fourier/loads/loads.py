@@ -10,7 +10,7 @@ from sigmaepsilon.deepdict import DeepDict
 from ..protocols import NavierProblemProtocol, LoadGroupProtocol, LoadCaseProtocol
 from ..postproc import eval_loads_1d, eval_loads_2d
 
-__all__ = ["LoadGroup", "LoadCase", "RectangleLoad", "LineLoad", "PointLoad"]
+__all__ = ["LoadGroup", "LoadCase"]
 
 
 Float1d: TypeAlias = Iterable[float]
