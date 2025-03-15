@@ -6,7 +6,7 @@ import numpy as np
 from numba import njit, prange
 from numpy import ndarray, sin, cos
 
-from sigmaepsilon.math import atleast1d, atleast2d, atleast3d
+from sigmaepsilon.math import atleast1d, atleast3d
 
 from .mc import _monte_carlo_1d, _monte_carlo_2d
 from .utils import (
