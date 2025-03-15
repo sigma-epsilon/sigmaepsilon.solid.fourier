@@ -68,7 +68,12 @@ class TestKirchhoffPlate(SigmaEpsilonTestCase):
 
         plate = NavierPlate(size, (20, 20), D=D)
         plate.loads = plate.loads
-        plate.linear_static_analysis(coords, loads)
+        solution = plate.linear_static_analysis(coords, loads)
+        
+        load_case_solution = solution["LG1", "LC1"]
+        load_case_solution.data
+        load_case_solution.values
+        load_case_solution.strains
 
     def test_invalid_load(self):
         size = (600.0, 800.0)

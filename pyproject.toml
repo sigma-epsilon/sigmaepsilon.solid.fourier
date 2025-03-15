@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "sigmaepsilon.solid.fourier"
-version = "2.1.0"
+version = "2.1.1"
 description = "Fourier solutions of some plate and beam bending problems in Python"
 classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -35,6 +35,24 @@ python = ">=3.10,<3.13"
 sigmaepsilon-deepdict = "^2.0.0"
 sigmaepsilon-mesh = "^3.0.2"
 sigmaepsilon-solid-material = "^1.0.2"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.dist]
+optional = true
+
+[tool.poetry.group.app-navier-plate-calculator-concentrated-load]
+optional = true
+
+[tool.poetry.group.app-fastapi]
+optional = true
 
 [tool.poetry.group.dev.dependencies]
 matplotlib = "^3.8.3"
@@ -74,3 +92,11 @@ numpy = ">=1.22.2"
 pillow = ">=10.0.1"
 tornado = ">=6.3.3"
 fonttools = ">=4.43.0"
+
+[tool.poetry.group.app-navier-plate-calculator-concentrated-load.dependencies]
+pyarrow = "^19.0.1"
+pyvista = "^0.44.2"
+papermill = "^2.6.0"
+
+[tool.poetry.group.app-fastapi.dependencies]
+fastapi = "^0.115.11"
