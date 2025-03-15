@@ -4,7 +4,7 @@ from functools import partial
 
 import numpy as np
 from numba import njit, prange
-from numpy import ndarray, sin, cos, ndarray
+from numpy import ndarray, sin, cos
 
 from sigmaepsilon.math import atleast1d, atleast2d, atleast3d
 
