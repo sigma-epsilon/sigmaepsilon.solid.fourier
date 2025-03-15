@@ -3,7 +3,7 @@ from types import NoneType
 
 import numpy as np
 from numba import njit, prange
-from numpy import ndarray, ndarray
+from numpy import ndarray
 
 from sigmaepsilon.math.function import Function
 
