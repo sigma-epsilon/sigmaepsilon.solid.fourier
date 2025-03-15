@@ -1,7 +1,7 @@
-from os.path import dirname, abspath
+#from os.path import dirname, abspath
 from importlib.metadata import metadata
 
-from sigmaepsilon.core.config import namespace_package_name
+#from sigmaepsilon.core.config import namespace_package_name
 
 from .beam import NavierBeam
 from .plate import NavierPlate

@@ -36,4 +36,5 @@ class NavierProblem:
         return res
 
     @abstractmethod
-    def linear_static_analysis(self, *args, **kwargs): ...
+    def linear_static_analysis(self, *args, **kwargs):
+        pass

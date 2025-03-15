@@ -46,7 +46,7 @@ class LoadCaseResultLinStat:
         Returns the results as a ``numpy.ndarray``.
         """
         return self._data
-    
+
     @property
     def strains(self) -> np.ndarray:
         """
@@ -55,7 +55,6 @@ class LoadCaseResultLinStat:
         if self.strain_range is None:  # pragma: no cover
             raise ValueError("Strain range is not defined.")
         return self._data[:, list(self.strain_range)]
-
 
     @property
     def name(self) -> str | None:
@@ -218,11 +217,11 @@ class PlateLoadCaseResultLinStat(LoadCaseResultLinStat):
         "QY",
     ]
     strain_range = range(3, 8)
-    
+
     @property
     def strains(self) -> np.ndarray:
         """
         Returns the results as a ``numpy.ndarray``.
         """
-        #return self._data[:, 3:8]
+        # return self._data[:, 3:8]
         return self._data[:, list(self.strain_range)]
