@@ -1,8 +1,8 @@
 version: 2.1
 
 orbs:
-  python: circleci/python@2.1.1
-  codecov: codecov/codecov@4.2.0
+  python: circleci/python@3.0.0
+  codecov: codecov/codecov@5.0.3
 
 executors:
   my-executor:
@@ -14,20 +14,18 @@ jobs:
     executor: my-executor
     steps:
       - checkout
-      - run:
-          name: Create lock file
-          command: poetry lock --no-update
+      - python/install-packages:
+          pkg-manager: poetry
       - run:
           name: Install project
-          command: poetry install --with test
+          command: |
+            poetry install --with test
       - run:
           name: Run tests and generate coverage report
-          command: |
-            chmod +x ./run_tests_with_coverage.sh
-            ./run_tests_with_coverage.sh 
+          command: poetry run pytest --cov-report=xml --cov-config=.coveragerc --cov=sigmaepsilon.solid.fourier
       - store_artifacts:
           name: Store coverage report as artifact
-          path: htmlcov/
+          path: coverage.xml
       - codecov/upload
       - store_test_results:
           name: Store test results
@@ -40,14 +38,8 @@ jobs:
       - python/install-packages:
           pkg-manager: poetry
       - run:
-          name: Add new command
-          command: chmod +x ./export_requirements.sh
-      - run:
           name: Build project
           command: |
-            poetry check
-            poetry lock
-            ./export_requirements.sh 
             poetry install
             poetry build
       - run:
@@ -64,14 +56,8 @@ jobs:
       - python/install-packages:
           pkg-manager: poetry
       - run:
-          name: Add new command
-          command: chmod +x ./export_requirements.sh
-      - run:
           name: Build project
           command: |
-            poetry check
-            poetry lock
-            ./export_requirements.sh 
             poetry install
             poetry build
       - run:
