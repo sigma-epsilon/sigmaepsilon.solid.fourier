@@ -11,7 +11,6 @@ from .result import BeamLoadCaseResultLinStat, PlateLoadCaseResultLinStat
 __all__ = [
     "NavierBeam",
     "NavierPlate",
-    "NavierLoadError",
     "LoadGroup",
     "RectangleLoad",
     "LineLoad",
