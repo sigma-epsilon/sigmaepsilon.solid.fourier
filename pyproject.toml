@@ -51,6 +51,9 @@ optional = true
 [tool.poetry.group.app-navier-plate-calculator-concentrated-load]
 optional = true
 
+[tool.poetry.group.app-fastapi]
+optional = true
+
 [tool.poetry.group.dev.dependencies]
 matplotlib = "^3.8.3"
 texttable = "^1.7.0"
@@ -91,3 +94,6 @@ tornado = ">=6.3.3"
 fonttools = ">=4.43.0"
 
 [tool.poetry.group.app-navier-plate-calculator-concentrated-load.dependencies]
+
+[tool.poetry.group.app-fastapi.dependencies]
+fastapi = "^0.115.11"
