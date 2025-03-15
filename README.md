@@ -9,6 +9,7 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/sigmaepsilon.solid.fourier)](https://pypi.org/project/sigmaepsilon.solid.fourier/)
 [![Python](https://img.shields.io/badge/python-3.10|3.11|3.12-blue)](https://www.python.org)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/1cfaba0f5c0e41d786ee4ca9ce7f1707)](https://app.codacy.com/gh/sigma-epsilon/sigmaepsilon.solid.fourier/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 The `sigmaepsilon.solid.fourier` library provides semi-analytic solutions for certain beam and plate bending problems, where boundary conditions are inherently satisfied through the careful choice of approximating functions. While the calculations are limited to a few boundary conditions, they are considerably faster than, for example, a finite element solution when applicable. This makes the library particularly useful for several purposes:
 
