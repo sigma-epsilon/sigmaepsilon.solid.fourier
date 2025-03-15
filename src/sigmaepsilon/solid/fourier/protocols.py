@@ -32,7 +32,7 @@ class NavierProblemProtocol(Protocol):
 
 @runtime_checkable
 class LoadCaseProtocol(Protocol):
-    
+
     @property
     def domain(self):
         pass
@@ -62,6 +62,6 @@ class LoadCaseProtocol(Protocol):
 class LoadGroupProtocol(Protocol):
     def groups(self, *args, **kwargs) -> Iterable["LoadGroupProtocol"]:
         pass
-    
+
     def cases(self, *args, **kwargs) -> Iterable[LoadCaseProtocol]:
         pass
