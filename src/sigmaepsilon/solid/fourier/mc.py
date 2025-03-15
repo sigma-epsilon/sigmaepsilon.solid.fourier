@@ -152,9 +152,10 @@ def _monte_carlo_2d(
         if isinstance(values[i], str):
             function = Function(values[i], variables=["x", "y"])
         elif isinstance(values[i], (float, int)):
-            function = lambda points: np.full(
-                (points.shape[1],), values[i], dtype=float
-            )
+
+            def function(points) -> ndarray:
+                return np.full((points.shape[1],), values[i], dtype=float)
+
         else:  # pragma: no cover
             raise ValueError(f"Invalid value {values[i]}")
         functions.append(function)
