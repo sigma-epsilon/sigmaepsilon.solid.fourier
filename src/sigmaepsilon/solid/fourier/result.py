@@ -50,7 +50,7 @@ class LoadCaseResultLinStat:
     @property
     def strains(self) -> np.ndarray:
         """
-        Returns the results as a ``numpy.ndarray``.
+        Returns the strains as a ``numpy.ndarray``.
         """
         if self.strain_range is None:  # pragma: no cover
             raise ValueError("Strain range is not defined.")
