@@ -22,6 +22,7 @@ class DiskLoad(LoadCase[tuple[tuple[float, float], float], Iterable]):
     value: Iterable
         Load intensities for each dof in the order :math:`f_z, m_x, m_y`.
 
+    
     .. hint::
         For a detailed explanation of the sign conventions, refer to
         :ref:`this <plate_sign_conventions>` section of the theory guide.

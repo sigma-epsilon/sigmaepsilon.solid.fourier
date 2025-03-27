@@ -221,7 +221,7 @@ class PlateLoadCaseResultLinStat(LoadCaseResultLinStat):
     @property
     def strains(self) -> np.ndarray:
         """
-        Returns the results as a ``numpy.ndarray``.
+        Returns the strains as a ``numpy.ndarray``.
         """
         # return self._data[:, 3:8]
         return self._data[:, list(self.strain_range)]
