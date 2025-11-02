@@ -1,0 +1,42 @@
+{
+    "material": {
+        "name": "Steel",
+        "elastic_modulus": 200000,
+        "poissons_ratio": 0.3,
+        "density": 7.85e-6,
+        "yield_strength": 500,
+        "color": "grey"
+    },
+    "section": {
+        "type": "rectangular_hollow_section",
+        "mesh_sizes": [4],
+        "params": {
+            "d": {
+                "range": [20, 300],
+                "default": 100,
+                "variable": true
+            },
+            "b": {
+                "range": [20, 300],
+                "default": 100,
+                "variable": true
+            },
+            "t": {
+                "range": [2, 20],
+                "default": 6,
+                "variable": true
+            },
+            "r_out": {
+                "range": [8, 20],
+                "default": 15,
+                "variable": true
+            },
+            "n_r": {
+                "default": 4,
+                "variable": false
+            }
+        }
+    },
+    "num_sections": 200,
+    "num_load_cases_per_section": 50
+}
