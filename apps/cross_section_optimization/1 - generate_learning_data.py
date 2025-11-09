@@ -1,56 +1,16 @@
 # Generate learning data for model training
 
-# Import necessary libraries
 from sectionproperties.analysis import Section
-from sectionproperties.pre.library import rectangular_hollow_section
-from sectionproperties.pre import Material
-import numpy as np
 import pandas as pd
 import multiprocessing
 import random
 import json
 import logging
-
-logging.basicConfig(level=logging.DEBUG, force=True)
-
-# Load configuration from JSON file
-with open("config.json", "r") as f:
-    config = json.load(f)
-
-load_components = ["n", "mxx", "myy", "vx", "vy", "mzz"]
-
-# this is gonna be replaced later
-load_ranges = {k: (0, 1000) for k in load_components}
-
-# Load material data and define the material
-material_params = config["material"]
-material = Material(**material_params)
-
-# Load section data
-section_data = config["section"]
+import argparse
+from utils.section import construct_section, utilization, section_properties, load_components
 
 
-def utilization(section_params:dict, loads:dict) -> float:
-    """Calculate the maximum utilization of a cross section under given loads."""
-    # Define the section
-    geom_params = {k:v for k,v in section_params.items() if k in section_data["params"]}
-    geom = rectangular_hollow_section(**geom_params, material=material)
-    geom.create_mesh(mesh_sizes=section_data["mesh_sizes"])
-    sec = Section(geometry=geom)
-
-    # Calculate geometric properties
-    sec.calculate_geometric_properties()
-    sec.calculate_warping_properties()
-    #sec.calculate_frame_properties()
-
-    # Calculate maximum Von-Mises stress under given loads
-    stress = sec.calculate_stress(**loads)
-    sig_vm_max = np.max(stress.get_stress()[0]["sig_vm"])
-    utilization_max = sig_vm_max / material_params["yield_strength"]
-    return utilization_max
-
-
-def default_section_params() -> dict:
+def default_section_params(section_data: dict) -> dict:
     """Generate default cross section parameters for a rectangular hollow section."""
     params = {}
     for p in section_data["params"].keys():
@@ -58,7 +18,7 @@ def default_section_params() -> dict:
     return params
     
 
-def random_section_params() -> dict:
+def random_section_params(section_data: dict) -> dict:
     """Generate random cross section parameters for a rectangular hollow section."""
     params = {}
     for p in section_data["params"].keys():
@@ -70,7 +30,7 @@ def random_section_params() -> dict:
     return params
 
 
-def random_loads() -> dict:
+def random_loads(load_ranges: dict) -> dict:
     """Generate a dictionary with random loads for section analysis."""
     loads = {}
     for k in load_components:
@@ -80,17 +40,41 @@ def random_loads() -> dict:
 
 def generate_sample(args: tuple[dict, dict]) -> dict:
     """Generate a single data sample of section parameters, loads, and utilization."""
-    section_params, loads = args
+    (
+        section_param_id,
+        section_type, 
+        section_params, 
+        mesh_sizes, 
+        material_params, 
+        loads
+    ) = args
     try:
-        util = utilization(section_params, loads)
+        section = construct_section(
+            geometry_constructor=section_type,
+            params=section_params,
+            material=material_params,
+            mesh_sizes=mesh_sizes,
+            calculate=True,
+        )
+        util = utilization(section, loads)
+        stiffness_props = section_properties(section)
     except Exception as e:
         logging.error(f"Error calculating utilization for params {section_params} and loads {loads}: {e}")
         util = None
-    result = {**section_params, **loads, "utilization": util}
+        stiffness_props = {}
+        
+    result = {
+        **section_params, 
+        **loads,
+        **stiffness_props,
+        "utilization": util,
+        "section_param_id": section_param_id,
+        "section_type": section_type,
+    }
     return result
 
 
-def find_internal_force_limits(section_params: dict) -> dict:
+def find_internal_force_limits(section: Section) -> dict:
     """Find the min and max load values for each load component that 
     lead to utilization of at least 1.0."""
 
@@ -101,7 +85,7 @@ def find_internal_force_limits(section_params: dict) -> dict:
             # calculate utilization for current load value
             loads = {component: 0.0 for component in load_components}
             loads[load_component] = load_value
-            new_utilization_value = utilization(section_params, loads)
+            new_utilization_value = utilization(section, loads)
             # calculate new step size based on linear prediction
             delta_u = new_utilization_value - utilization_value
             load_step = (1 - new_utilization_value) * load_step / delta_u if delta_u != 0 else load_step
@@ -125,7 +109,24 @@ def find_internal_force_limits(section_params: dict) -> dict:
     logging.info("Finished finding internal force limits.")
     return results
 
+
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Cross Section Optimization")
+    parser.add_argument("--config", type=str, default="config.json", help="Path to the config file")
+    parser.add_argument("--loglevel", type=str, default="INFO", help="Set logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)")
+    parser.add_argument("--num_sections", type=int, default=-1, help="Number of sections to generate")
+    parser.add_argument("--num_load_cases_per_section", type=int, default=-1, help="Number of load cases per section")
+    parser.add_argument("--num_workers", type=int, default=8, help="Number of parallel workers for data generation")
+    parser.add_argument("--output", type=str, default="data.csv", help="Output CSV file name")
+    args = parser.parse_args()
+
+    logging.basicConfig(level=args.loglevel, force=True)
+
+    # Load configuration from JSON file
+    with open(args.config, "r") as f:
+        config = json.load(f)
 
     # print("Default Section Params:", default_section_params())
     # print("Default Section Params:", default_section_params())
@@ -133,31 +134,48 @@ if __name__ == "__main__":
     # print("Random Loads:", random_loads())
     # print("Generated Sample:", generate_sample((random_section_params(), random_loads())))
     # print("Utilization:", utilization(default_section_params(), random_loads()))
-
+    
+    material_params = config["material"]
+    section_data = config["section"]
+    section_type = section_data["type"]
+    section = construct_section(
+        geometry_constructor=section_type,
+        params=default_section_params(section_data),
+        material=material_params,
+        mesh_sizes=section_data["mesh_sizes"],
+        calculate=True,
+    )
+    
     # Load ranges for random generation
     logging.info("Calculating load ranges based on default section parameters...")
-    load_ranges = find_internal_force_limits(default_section_params())
+    load_ranges = find_internal_force_limits(section)
     logging.info(f"Determined load ranges: {load_ranges}")
 
-    num_sections = config["num_sections"]
-    num_loads_per_section = config["num_load_cases_per_section"]
+    if (num_sections := args.num_sections) < 0:
+        num_sections = config["num_sections"]
+    if (num_loads_per_section := args.num_load_cases_per_section) < 0:
+        num_loads_per_section = config["num_load_cases_per_section"]
+        
+    assert num_sections > 0, "Number of sections must be positive."
+    assert num_loads_per_section > 0, "Number of load cases per section must be positive."
+        
     logging.info("Generating random section and load parameters...")
     logging.debug(f"Number of sections: {num_sections}, Number of loads per section: {num_loads_per_section}")
     param_load_pairs = []
     for section_param_id in range(num_sections):
-        section_params = random_section_params()
-        section_params.update({"section_param_id": section_param_id})
+        section_params = random_section_params(section_data)
+        mesh_sizes = section_data["mesh_sizes"]
         for _ in range(num_loads_per_section):
-            loads = random_loads()
-            param_load_pairs.append((section_params, loads))
+            loads = random_loads(load_ranges)
+            param_load_pairs.append((section_param_id, section_type, section_params, mesh_sizes, material_params, loads))
     logging.info(f"Generated {len(param_load_pairs)} parameter-load pairs.")
-    
-    num_workers = 8
+
+    num_workers = args.num_workers
     logging.info(f"Generating data with {num_workers} parallel workers...")
     with multiprocessing.Pool(processes=num_workers) as pool:
         data = pool.map(generate_sample, param_load_pairs)
 
     logging.info("Data generation completed. Saving to CSV...")
     df = pd.DataFrame(data)
-    df.to_csv("data.csv", index=False)
-    logging.info("Data saved to data.csv.")
+    df.to_csv(args.output, index=False)
+    logging.info(f"Data saved to {args.output}.")

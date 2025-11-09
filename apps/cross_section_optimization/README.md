@@ -1,4 +1,4 @@
-# Cross Section Optimization with Scikit-Learn
+# Cross Section Optimization with SigmaEpsilon, Scikit-Learn and PyTorch
 
 In this application we
 
@@ -12,4 +12,10 @@ To install the dependencies for this app:
 ```console
 cd apps/cross_section_optimization
 pip install -r requirements.txt
+```
+
+## Usage
+
+```console
+python '1 - generate_learning_data.py' --config config.json --loglevel DEBUG --num_sections 2 --num_load_cases_per_section 2 --num_workers 2 --output out.csv
 ```
