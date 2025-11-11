@@ -1,5 +1,5 @@
 from sectionproperties.analysis import Section
-from sectionproperties.pre.library import rectangular_hollow_section
+from sectionproperties.pre.library import rectangular_hollow_section, i_section
 from sectionproperties.pre import Material
 from typing import Callable
 from types import NoneType
@@ -9,6 +9,7 @@ load_components = ["n", "mxx", "myy", "vx", "vy", "mzz"]
 
 geometry_constructors = {
     "rectangular_hollow_section": rectangular_hollow_section,
+    "i_section": i_section,
     # Add other handlers here as needed
 }
 

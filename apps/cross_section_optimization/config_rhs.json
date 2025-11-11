@@ -36,7 +36,5 @@
                 "variable": false
             }
         }
-    },
-    "num_sections": 200,
-    "num_load_cases_per_section": 50
+    }
 }

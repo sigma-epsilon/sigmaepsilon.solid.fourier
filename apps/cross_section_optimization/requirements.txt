@@ -1,2 +1,6 @@
 sectionproperties
 scikit-learn
+torch
+papermill
+sigmaepsilon.solid.fourier
+matplotlib
