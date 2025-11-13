@@ -9,7 +9,7 @@ The **Chan–Welford algorithm** provides a numerically stable way to do this **
 
 We want to compute:
 \[
-\text{mean} = \frac{1}{N} \sum_{i=1}^{N} x_i, \qquad 
+\text{mean} = \frac{1}{N} \sum_{i=1}^{N} x_i, \qquad
 \text{variance} = \frac{1}{N} \sum_{i=1}^{N} (x_i - \text{mean})^2
 \]
 
