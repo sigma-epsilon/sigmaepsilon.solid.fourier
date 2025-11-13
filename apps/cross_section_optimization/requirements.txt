@@ -3,4 +3,6 @@ scikit-learn
 torch
 papermill
 sigmaepsilon.solid.fourier
+sigmaepsilon.math
 matplotlib
+mlflow
