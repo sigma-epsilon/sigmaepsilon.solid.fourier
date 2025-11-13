@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from dataclasses import dataclass
 import numpy as np
 
-__all__ = ["canonical_regression_score_from_batches"]
+__all__ = ["canonical_regression_score_from_batches", "get_torch_device"]
 
 
 @dataclass
@@ -290,3 +290,21 @@ def collect_confusion_matrix_from_batches(
         
     # Confusion matrix
     return cm
+
+
+def get_torch_device() -> torch.device:
+    """
+    Get the appropriate torch device (GPU if available, else CPU).
+    
+    Returns
+    -------
+    torch.device
+        The selected device.
+    """
+    if torch.cuda.is_available():
+        device = torch.device("cuda:0")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+    return device

@@ -5,7 +5,6 @@ from typing import Callable
 from types import NoneType
 import numpy as np
 
-load_components = ["n", "mxx", "myy", "vx", "vy", "mzz"]
 
 geometry_constructors = {
     "rectangular_hollow_section": rectangular_hollow_section,

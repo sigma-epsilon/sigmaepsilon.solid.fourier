@@ -7,7 +7,8 @@ import random
 import json
 import logging
 import argparse
-from utils.section import construct_section, utilization, section_properties, load_components
+from utils import INTERNAL_FORCE_COMPONENTS
+from utils.section import construct_section, utilization, section_properties
 
 
 def default_section_params(section_data: dict) -> dict:
@@ -33,7 +34,7 @@ def random_section_params(section_data: dict) -> dict:
 def random_loads(load_ranges: dict) -> dict:
     """Generate a dictionary with random loads for section analysis."""
     loads = {}
-    for k in load_components:
+    for k in INTERNAL_FORCE_COMPONENTS:
         loads[k] = random.uniform(load_ranges[k][0], load_ranges[k][1])
     return loads
 
@@ -83,7 +84,7 @@ def find_internal_force_limits(section: Section) -> dict:
         utilization_value = 0.0
         while (utilization_value < 0.9) or (utilization_value > 1.3):
             # calculate utilization for current load value
-            loads = {component: 0.0 for component in load_components}
+            loads = {component: 0.0 for component in INTERNAL_FORCE_COMPONENTS}
             loads[load_component] = load_value
             new_utilization_value = utilization(section, loads)
             # calculate new step size based on linear prediction
@@ -98,8 +99,8 @@ def find_internal_force_limits(section: Section) -> dict:
     
     logging.info("Finding internal force limits...")
     
-    results = {component: None for component in load_components}
-    for load_component in load_components:
+    results = {component: None for component in INTERNAL_FORCE_COMPONENTS}
+    for load_component in INTERNAL_FORCE_COMPONENTS:
         logging.info(f"Finding limits for load component: {load_component}")
         max_value = _find_extreme_load_value(load_component, load_step=1.0)
         min_value = _find_extreme_load_value(load_component, load_step=-1.0)
