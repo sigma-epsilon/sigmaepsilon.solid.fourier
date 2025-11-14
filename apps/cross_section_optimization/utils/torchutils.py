@@ -278,7 +278,7 @@ def collect_confusion_matrix_from_batches(
         inputs  = inputs.to(device)
         targets = targets.to(device)
 
-        logits = model(inputs)#.squeeze(1)
+        logits = model(inputs)
         logits /= temperature.clamp(min=1e-6)
 
         # Compute probabilities and predictions

@@ -17,3 +17,5 @@ def get_system_info() -> dict:
 def print_system_info() -> None:
     for key, value in get_system_info().items():
         print(f"{key}: {value}")
+        
+

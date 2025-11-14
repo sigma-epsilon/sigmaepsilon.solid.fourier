@@ -36,5 +36,46 @@
                 "variable": false
             }
         }
+    },
+    "beam": {
+        "length": 10000.0
+    },
+    "loads" : {
+        "concentrated" : {
+            "LC1": {
+                "type": "PointLoad",
+                "params": {
+                    "domain": 5000.0,
+                    "value": [1.0, 0.0]
+                }
+            },
+            "LC2": {
+                "type": "PointLoad",
+                "params": {
+                    "domain": 5000.0,
+                    "value": [0.0, 1.0]
+                }
+            }
+        },
+        "distributed" : {
+            "LC3": {
+                "type": "LineLoad",
+                "params": {
+                    "domain": [5000.0, 10000.0],
+                    "value": [1.0, 0.0]
+                }
+            },
+            "LC4": {
+                "type": "LineLoad",
+                "params": {
+                    "domain": [0, 10000.0],
+                    "value": [0.0, 1.0]
+                }
+            }
+        }
+    },
+    "calculation": {
+        "number_of_modes": 6,
+        "num_evaluation_points": 20
     }
 }

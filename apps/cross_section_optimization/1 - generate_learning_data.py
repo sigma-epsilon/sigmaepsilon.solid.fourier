@@ -1,14 +1,18 @@
 # Generate learning data for model training
 
+from typing import Any
 from sectionproperties.analysis import Section
 import pandas as pd
 import multiprocessing
 import random
 import json
-import logging
 import argparse
 from utils import INTERNAL_FORCE_COMPONENTS
 from utils.section import construct_section, utilization, section_properties
+from utils.logger import get_logger, set_log_level
+from tqdm import tqdm
+
+logger = get_logger()
 
 
 def default_section_params(section_data: dict) -> dict:
@@ -60,7 +64,10 @@ def generate_sample(args: tuple[dict, dict]) -> dict:
         util = utilization(section, loads)
         stiffness_props = section_properties(section)
     except Exception as e:
-        logging.error(f"Error calculating utilization for params {section_params} and loads {loads}: {e}")
+        if "TopologyException" in str(e):
+            logger.warning(f"TopologyException for params {section_params} and loads {loads}: {e}")
+        else:
+            logger.error(f"Error generating sample for params {section_params} and loads {loads}: {e}")
         util = None
         stiffness_props = {}
         
@@ -94,20 +101,20 @@ def find_internal_force_limits(section: Section) -> dict:
             utilization_value = new_utilization_value
             # increment load value
             load_value += load_step
-            logging.debug(f"Testing {load_component}={load_value:.2f}, Utilization={utilization_value:.4f}, Step={load_step:.2f}")
+            logger.debug(f"Testing {load_component}={load_value:.2f}, Utilization={utilization_value:.4f}, Step={load_step:.2f}")
         return load_value
     
-    logging.info("Finding internal force limits...")
+    logger.info("Finding internal force limits...")
     
     results = {component: None for component in INTERNAL_FORCE_COMPONENTS}
     for load_component in INTERNAL_FORCE_COMPONENTS:
-        logging.info(f"Finding limits for load component: {load_component}")
+        logger.info(f"Finding limits for load component: {load_component}")
         max_value = _find_extreme_load_value(load_component, load_step=1.0)
         min_value = _find_extreme_load_value(load_component, load_step=-1.0)
         results[load_component] = (min_value, max_value)
-        logging.info(f"Found limits for load component {load_component}: {min_value}, {max_value}")
+        logger.info(f"Found limits for load component {load_component}: {min_value}, {max_value}")
 
-    logging.info("Finished finding internal force limits.")
+    logger.info("Finished finding internal force limits.")
     return results
 
 
@@ -116,19 +123,20 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Cross Section Optimization")
     parser.add_argument("--config", type=str, default="config.json", help="Path to the config file")
-    parser.add_argument("--loglevel", type=str, default="INFO", help="Set logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)")
+    parser.add_argument("--loglevel", type=str, default="INFO", help="Set logger level (DEBUG, INFO, WARNING, ERROR, CRITICAL)")
     parser.add_argument("--num_sections", type=int, default=-1, help="Number of sections to generate")
     parser.add_argument("--num_load_cases_per_section", type=int, default=-1, help="Number of load cases per section")
     parser.add_argument("--num_workers", type=int, default=8, help="Number of parallel workers for data generation")
     parser.add_argument("--output", type=str, default="data.csv", help="Output CSV file name")
     args = parser.parse_args()
 
-    logging.basicConfig(level=args.loglevel, force=True)
+    set_log_level(args.loglevel)
 
     # Load configuration from JSON file
     with open(args.config, "r") as f:
         config = json.load(f)
 
+    ## TESTS - uncomment to run
     # print("Default Section Params:", default_section_params())
     # print("Default Section Params:", default_section_params())
     # print("Random Section Params:", random_section_params())
@@ -148,9 +156,9 @@ if __name__ == "__main__":
     )
     
     # Load ranges for random generation
-    logging.info("Calculating load ranges based on default section parameters...")
+    logger.info("Calculating load ranges based on default section parameters...")
     load_ranges = find_internal_force_limits(section)
-    logging.info(f"Determined load ranges: {load_ranges}")
+    logger.info(f"Determined load ranges: {load_ranges}")
 
     if (num_sections := args.num_sections) < 0:
         num_sections = config["num_sections"]
@@ -160,23 +168,46 @@ if __name__ == "__main__":
     assert num_sections > 0, "Number of sections must be positive."
     assert num_loads_per_section > 0, "Number of load cases per section must be positive."
         
-    logging.info("Generating random section and load parameters...")
-    logging.debug(f"Number of sections: {num_sections}, Number of loads per section: {num_loads_per_section}")
-    param_load_pairs = []
+    logger.info("Generating random section and load parameters...")
+    logger.debug(f"Number of sections: {num_sections}, Number of loads per section: {num_loads_per_section}")
+    tasks = []
     for section_param_id in range(num_sections):
         section_params = random_section_params(section_data)
         mesh_sizes = section_data["mesh_sizes"]
         for _ in range(num_loads_per_section):
             loads = random_loads(load_ranges)
-            param_load_pairs.append((section_param_id, section_type, section_params, mesh_sizes, material_params, loads))
-    logging.info(f"Generated {len(param_load_pairs)} parameter-load pairs.")
+            tasks.append((section_param_id, section_type, section_params, mesh_sizes, material_params, loads))
+    logger.info(f"Generated {len(tasks)} tasks.")
 
     num_workers = args.num_workers
-    logging.info(f"Generating data with {num_workers} parallel workers...")
-    with multiprocessing.Pool(processes=num_workers) as pool:
-        data = pool.map(generate_sample, param_load_pairs)
+    logger.info(f"Generating data with {num_workers} parallel workers...")
 
-    logging.info("Data generation completed. Saving to CSV...")
+    data = []
+    with multiprocessing.Pool(num_workers) as pool:
+        with tqdm(total=len(tasks), desc="Generating samples") as pbar:
+
+            def on_success(result: Any) -> None:
+                """Called after each successful worker execution."""
+                data.append(result)
+                pbar.update(1)
+
+            def on_error(e: Exception) -> None:
+                """Called after a failed worker execution."""
+                logger.error(f"Error in worker: {e}")
+                pbar.update(1)
+
+            for t in tasks:
+                pool.apply_async(
+                    generate_sample,
+                    args=(t,),
+                    callback=on_success,
+                    error_callback=on_error
+                )
+
+            pool.close()
+            pool.join()
+
+    logger.info(f"Data generation completed. Saving results to {args.output} ...")
     df = pd.DataFrame(data)
     df.to_csv(args.output, index=False)
-    logging.info(f"Data saved to {args.output}.")
+    logger.info(f"Saved results to {args.output}.")

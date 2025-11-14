@@ -4,7 +4,11 @@ from sectionproperties.pre import Material
 from typing import Callable
 from types import NoneType
 import numpy as np
+from .constants import INTERNAL_FORCE_COMPONENTS
+from .logger import get_logger
 
+
+logger = get_logger()
 
 geometry_constructors = {
     "rectangular_hollow_section": rectangular_hollow_section,
@@ -102,3 +106,39 @@ def section_properties(section: Section) -> dict:
         "g_eff": g_eff,
     }
     return props
+
+
+def find_internal_force_limits(section: Section) -> dict:
+    """Find the min and max load values for each load component that 
+    lead to utilization of at least 1.0."""
+
+    def _find_extreme_load_value(load_component:str, load_step:float) -> float:
+        load_value = load_step
+        utilization_value = 0.0
+        while (utilization_value < 0.9) or (utilization_value > 1.3):
+            # calculate utilization for current load value
+            loads = {component: 0.0 for component in INTERNAL_FORCE_COMPONENTS}
+            loads[load_component] = load_value
+            new_utilization_value = utilization(section, loads)
+            # calculate new step size based on linear prediction
+            delta_u = new_utilization_value - utilization_value
+            load_step = (1 - new_utilization_value) * load_step / delta_u if delta_u != 0 else load_step
+            # update utilization value
+            utilization_value = new_utilization_value
+            # increment load value
+            load_value += load_step
+            logger.debug(f"Testing {load_component}={load_value:.2f}, Utilization={utilization_value:.4f}, Step={load_step:.2f}")
+        return load_value
+
+    logger.info("Finding internal force limits...")
+
+    results = {component: None for component in INTERNAL_FORCE_COMPONENTS}
+    for load_component in INTERNAL_FORCE_COMPONENTS:
+        logger.info(f"Finding limits for load component: {load_component}")
+        max_value = _find_extreme_load_value(load_component, load_step=1.0)
+        min_value = _find_extreme_load_value(load_component, load_step=-1.0)
+        results[load_component] = (min_value, max_value)
+        logger.info(f"Found limits for load component {load_component}: {min_value}, {max_value}")
+
+    logger.info("Finished finding internal force limits.")
+    return results

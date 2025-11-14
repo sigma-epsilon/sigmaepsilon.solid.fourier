@@ -141,6 +141,12 @@ To generate training data for a specific cross section and loads, call the file 
 python '1 - generate_learning_data.py' --config config.json --loglevel DEBUG --num_sections 200 --num_load_cases_per_section 20 --num_workers 8 --output out.csv
 ```
 
+Issuing the following command in the terminal would generate 50000 data points.
+
+```console
+cross_section_optimization % poetry run python '1 - generate_learning_data.py' --config config_rhs.json --loglevel DEBUG --num_sections 500 --num_load_cases_per_section 100 --num_workers 8 --output data_50000.csv
+```
+
 Note down the name of the configuration file and the generated csv file, you'll need these in later steps.
 
 ### Step 2 - Train models
