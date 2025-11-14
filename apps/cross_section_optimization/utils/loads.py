@@ -1,7 +1,9 @@
 from sigmaepsilon.deepdict import DeepDict
 from sigmaepsilon.solid.fourier import LoadGroup, PointLoad, LineLoad
+import random
+from .constants import INTERNAL_FORCE_COMPONENTS
 
-__all__ = ["get_loads_from_config"]
+__all__ = ["get_loads_from_config", "random_loads"]
 
 
 def get_loads_from_config(config: dict) -> LoadGroup:
@@ -33,3 +35,11 @@ def get_loads_from_config(config: dict) -> LoadGroup:
             raise NotImplementedError(f"Load type '{load_config['type']}' is not implemented.")
 
     return beam_loads
+
+
+def random_loads(load_ranges: dict) -> dict:
+    """Generate a dictionary with random loads for section analysis."""
+    loads = {}
+    for k in INTERNAL_FORCE_COMPONENTS:
+        loads[k] = random.uniform(load_ranges[k][0], load_ranges[k][1])
+    return loads

@@ -4,6 +4,7 @@ from sectionproperties.pre import Material
 from typing import Callable
 from types import NoneType
 import numpy as np
+import random
 from .constants import INTERNAL_FORCE_COMPONENTS
 from .logger import get_logger
 
@@ -134,11 +135,31 @@ def find_internal_force_limits(section: Section) -> dict:
 
     results = {component: None for component in INTERNAL_FORCE_COMPONENTS}
     for load_component in INTERNAL_FORCE_COMPONENTS:
-        logger.info(f"Finding limits for load component: {load_component}")
+        logger.debug(f"Finding limits for load component: {load_component}")
         max_value = _find_extreme_load_value(load_component, load_step=1.0)
         min_value = _find_extreme_load_value(load_component, load_step=-1.0)
         results[load_component] = (min_value, max_value)
-        logger.info(f"Found limits for load component {load_component}: {min_value}, {max_value}")
+        logger.debug(f"Found limits for load component {load_component}: {min_value}, {max_value}")
 
     logger.info("Finished finding internal force limits.")
     return results
+
+
+def default_section_params(section_data: dict) -> dict:
+    """Generate default cross section parameters for a rectangular hollow section."""
+    params = {}
+    for p in section_data["params"].keys():
+        params[p] = section_data["params"][p]["default"]
+    return params
+
+
+def random_section_params(section_data: dict) -> dict:
+    """Generate random cross section parameters for a rectangular hollow section."""
+    params = {}
+    for p in section_data["params"].keys():
+        if section_data["params"][p]["variable"]:
+            min_value, max_value = section_data["params"][p]["range"]
+            params[p] = random.uniform(min_value, max_value)
+        else:
+            params[p] = section_data["params"][p]["default"]
+    return params

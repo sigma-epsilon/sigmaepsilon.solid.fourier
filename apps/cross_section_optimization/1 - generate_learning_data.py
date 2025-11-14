@@ -1,46 +1,23 @@
 # Generate learning data for model training
 
 from typing import Any
-from sectionproperties.analysis import Section
 import pandas as pd
 import multiprocessing
-import random
 import json
 import argparse
-from utils import INTERNAL_FORCE_COMPONENTS
-from utils.section import construct_section, utilization, section_properties
+from utils.section import (
+    construct_section,
+    utilization,
+    section_properties,
+    find_internal_force_limits,
+    default_section_params,
+    random_section_params
+)
+from utils.loads import random_loads
 from utils.logger import get_logger, set_log_level
 from tqdm import tqdm
 
 logger = get_logger()
-
-
-def default_section_params(section_data: dict) -> dict:
-    """Generate default cross section parameters for a rectangular hollow section."""
-    params = {}
-    for p in section_data["params"].keys():
-        params[p] = section_data["params"][p]["default"]
-    return params
-    
-
-def random_section_params(section_data: dict) -> dict:
-    """Generate random cross section parameters for a rectangular hollow section."""
-    params = {}
-    for p in section_data["params"].keys():
-        if section_data["params"][p]["variable"]:
-            min_value, max_value = section_data["params"][p]["range"]
-            params[p] = random.uniform(min_value, max_value)
-        else:
-            params[p] = section_data["params"][p]["default"]
-    return params
-
-
-def random_loads(load_ranges: dict) -> dict:
-    """Generate a dictionary with random loads for section analysis."""
-    loads = {}
-    for k in INTERNAL_FORCE_COMPONENTS:
-        loads[k] = random.uniform(load_ranges[k][0], load_ranges[k][1])
-    return loads
 
 
 def generate_sample(args: tuple[dict, dict]) -> dict:
@@ -80,42 +57,6 @@ def generate_sample(args: tuple[dict, dict]) -> dict:
         "section_type": section_type,
     }
     return result
-
-
-def find_internal_force_limits(section: Section) -> dict:
-    """Find the min and max load values for each load component that 
-    lead to utilization of at least 1.0."""
-
-    def _find_extreme_load_value(load_component:str, load_step:float) -> float:
-        load_value = load_step
-        utilization_value = 0.0
-        while (utilization_value < 0.9) or (utilization_value > 1.3):
-            # calculate utilization for current load value
-            loads = {component: 0.0 for component in INTERNAL_FORCE_COMPONENTS}
-            loads[load_component] = load_value
-            new_utilization_value = utilization(section, loads)
-            # calculate new step size based on linear prediction
-            delta_u = new_utilization_value - utilization_value
-            load_step = (1 - new_utilization_value) * load_step / delta_u if delta_u != 0 else load_step
-            # update utilization value
-            utilization_value = new_utilization_value
-            # increment load value
-            load_value += load_step
-            logger.debug(f"Testing {load_component}={load_value:.2f}, Utilization={utilization_value:.4f}, Step={load_step:.2f}")
-        return load_value
-    
-    logger.info("Finding internal force limits...")
-    
-    results = {component: None for component in INTERNAL_FORCE_COMPONENTS}
-    for load_component in INTERNAL_FORCE_COMPONENTS:
-        logger.info(f"Finding limits for load component: {load_component}")
-        max_value = _find_extreme_load_value(load_component, load_step=1.0)
-        min_value = _find_extreme_load_value(load_component, load_step=-1.0)
-        results[load_component] = (min_value, max_value)
-        logger.info(f"Found limits for load component {load_component}: {min_value}, {max_value}")
-
-    logger.info("Finished finding internal force limits.")
-    return results
 
 
 if __name__ == "__main__":
