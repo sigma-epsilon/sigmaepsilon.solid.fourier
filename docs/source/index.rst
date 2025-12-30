@@ -7,6 +7,7 @@
    :hidden:
 
    User Guide <user_guide>
+   Theory Guide <theory_guide/index>
    Gallery <examples_gallery>
    API Reference <api>
    Development <development>
@@ -20,7 +21,8 @@
 :doc:`Installation <user_guide/installation>` |
 :ref:`Getting Started <getting_started>` |
 `Issue Tracker <https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier/issues>`_ | 
-`Source Repository <https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier>`_
+`Source Repository <https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier>`_ | 
+:doc:`Bibliography <bibliography>`
 
 .. include:: global_refs.rst
 
@@ -130,6 +132,7 @@ Contents
 Indices and tables
 ==================
 
+* :doc:`Bibliography <bibliography>`
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`

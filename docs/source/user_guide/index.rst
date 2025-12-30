@@ -37,7 +37,7 @@ The documentation is devoted to three main parts:
 What is `sigmaepsilon.solid.fourier`?
 =====================================
 
-.. include:: ..\global_refs.rst
+.. include:: ../global_refs.rst
 
 The `sigmaepsilon.solid.fourier`_ library offers semi-analytic solutions to some beam and plate 
 bending problems, where the boundary conditions are a-priori satisfied by careful selection of the 
