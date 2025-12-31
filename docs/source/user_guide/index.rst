@@ -85,7 +85,7 @@ It is recommended to be familiar with
 What about performance?
 =======================
 
-Yes, it is. The library is designed to be fast, as it relies on the vector math capabilities of `NumPy`_ and `SciPy`_, 
+The library is designed to be fast, as it relies on the vector math capabilities of `NumPy`_ and `SciPy`_, 
 while other computationally sensitive calculations are JIT-compiled using `Numba`_. Thanks to `Numba`_, the 
 implemented algorithms are able to bypass the limitations of Python's GIL and are parallelized on multiple cores, 
 utilizing the full potential of what the hardware has to offer.
