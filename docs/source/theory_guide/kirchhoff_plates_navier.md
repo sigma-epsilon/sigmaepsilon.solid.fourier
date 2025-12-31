@@ -14,14 +14,14 @@ Kirchhoff-Love plate theory {cite:p}`enwiki:1297807693` is based on the followin
 
 ### Equilibrium Equations
 
-The equilibrium equations for an infinitesimal area of the reference surface are:
+The equilibrium equations for an infinitesimally small section of the plate are:
 
 ```{math}
 :label: eq_equilibrium_equations_kirchhoff
 \begin{align*}
-\sum F_z:& \quad p_{z}(x,y) + \frac{\partial v_x(x,y)}{\partial x} + \frac{\partial v_y(x,y)}{\partial y} &= 0, \\
-\sum M_x:& \quad p_{xx}(x,y) - \frac{\partial m_y(x,y)}{\partial y} - \frac{\partial m_{xy}(x,y)}{\partial x} + v_y(x,y) &= 0, \\
-\sum M_y:& \quad p_{yy}(x,y) + \frac{\partial m_x(x,y)}{\partial x} + \frac{\partial m_{xy}(x,y)}{\partial y} - v_x(x,y) &= 0,
+\sum F_z:& \quad p_{z}(x,y) + \left. \frac{\partial v_x}{\partial x}\right|_{(x,y)} + \left.\frac{\partial v_y}{\partial y}\right|_{(x,y)} &= 0, \\
+\sum M_x:& \quad p_{xx}(x,y) - \left.\frac{\partial m_y}{\partial y}\right|_{(x,y)} - \left.\frac{\partial m_{xy}}{\partial x}\right|_{(x,y)} + v_y(x,y) &= 0, \\
+\sum M_y:& \quad p_{yy}(x,y) + \left.\frac{\partial m_x}{\partial x}\right|_{(x,y)} + \left.\frac{\partial m_{xy}}{\partial y}\right|_{(x,y)} - v_x(x,y) &= 0,
 \end{align*}
 ```
 
@@ -256,8 +256,8 @@ where the load coefficients are obtained by evaluating the following expressions
 ```{math}
 :label: eq_load_coeff_expressions_kirchhoff
 \begin{align*}
-p_z^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_x} \int_0^{L_y} p_z(x,y) \, S_i(x) \, S_j(y) \, dxdy, \\
-p_{xx}^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_x} \int_0^{L_y} p_{xx}(x,y) \, S_i(x) \, C_j(y) \, dxdy, \\
-p_{yy}^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_x} \int_0^{L_y} p_{yy}(x,y) \, C_i(x) \, S_j(y) \, dxdy.
+p_z^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_z(x,y) \, S_i(x) \, S_j(y) \, dxdy, \\
+p_{xx}^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_{xx}(x,y) \, S_i(x) \, C_j(y) \, dxdy, \\
+p_{yy}^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_{yy}(x,y) \, C_i(x) \, S_j(y) \, dxdy.
 \end{align*}
 ```

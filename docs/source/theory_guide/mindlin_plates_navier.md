@@ -284,7 +284,7 @@ p_{yy}(x, y) \approx \overline{p}_{yy}(x, y) &= \sum_{i=1}^m \sum_{j=1}^n p_{yy}
 \end{align*}
 ```
 
-Substituting the approximations from {eq}`eq_approx_mindlin` into {eq}`eq_PDE_mindlin`, using trigonometric identities and rearranging, we find that the solution for the unknown coefficients $w^{(ij)}$, $\vartheta_x^{(ij)}$ and $\vartheta_y^{(ij)}$ is:
+Substituting the approximations from {eq}`eq_approx_mindlin` into {eq}`eq_PDE_mindlin`, using trigonometric identities and rearranging, we find that the solution for the unknown coefficients $w^{(ij)}$, $\vartheta_x^{(ij)}$ and $\vartheta_y^{(ij)}$ can be obtained from
 
 ```{math}
 :label: eq_solution_ij_mindlin
@@ -311,8 +311,8 @@ and load coefficients
 ```{math}
 :label: eq_load_coeff_expressions_mindlin
 \begin{align*}
-p_z^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_x} \int_0^{L_y} p_z(x,y) \, S_i(x) \, S_j(y) \, dxdy, \\
-p_{xx}^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_x} \int_0^{L_y} p_{xx}(x,y) \, S_i(x) \, C_j(y) \, dxdy, \\
-p_{yy}^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_x} \int_0^{L_y} p_{yy}(x,y) \, C_i(x) \, S_j(y) \, dxdy.
+p_z^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_z(x,y) \, S_i(x) \, S_j(y) \, dxdy, \\
+p_{xx}^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_{xx}(x,y) \, S_i(x) \, C_j(y) \, dxdy, \\
+p_{yy}^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_{yy}(x,y) \, C_i(x) \, S_j(y) \, dxdy.
 \end{align*}
 ```
