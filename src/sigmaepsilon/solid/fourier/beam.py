@@ -20,9 +20,10 @@ __all__ = ["NavierBeam"]
 class NavierBeam(NavierProblem):
     """
     A class designed to handle simply-supported plates bent in the X-Y plane
-    and solve them using Navier's method. The beam model can be either
-    Euler-Bernoulli or Timoshenko, depending on whether shear stiffness is
-    provided at instantiation.
+    and solve them using Navier's method. 
+    
+    The beam model can be either Euler-Bernoulli or Timoshenko, depending on whether shear 
+    stiffness is provided at instantiation.
 
     Parameters
     ----------
