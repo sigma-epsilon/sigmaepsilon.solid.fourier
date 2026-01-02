@@ -6,11 +6,14 @@ At the core of all solutions provided in this package lies Navier's classical ap
 
 The Euler-Bernoulli beam theory {cite:p}`enwiki:1329231351` builds on the following set of assumptions:
 
-1. Small strains and small displacements
-2. Linear elastic material behaviour
-3. Plane sections remain plane and perpendicular to the neutral axis
-4. Constant cross section along the beam axis
-5. No coupling between bending and torsion
+1. Small strains and small displacements.
+2. Linear elastic material behaviour.
+3. Plane sections remain plane and perpendicular to the neutral axis.
+
+On top of these fundamental assumptions, we use the following simplifications:
+
+- Constant cross section along the beam axis.
+- No coupling between bending and torsion effects.
 
 ### Equilibrium equations
 
@@ -18,14 +21,14 @@ If we take an infinitesimal beam segment in the $x-y$ plane, and write the equat
 
 ```{math}
 :label: eq_mz_beamXY
-\sum M_z: \, \frac{d M_z(x)}{dx} + V_y(x) + p_{zz}(x) = 0
+\sum M_z: \, \left. \frac{d M_z}{dx} \right|_x + V_y(x) + p_{zz}(x) = 0
 ```
 
 for the moment equilibrium about $z$ at $x$ and
 
 ```{math}
 :label: eq_fy_beamXY
-\sum F_y: \, \frac{d V_y(x)}{dx} + p_{y}(x) = 0
+\sum F_y: \, \left. \frac{d V_y}{dx} \right|_x + p_{y}(x) = 0
 ```
 
 for the vertical equilibrium along the $y$ axis, where
@@ -53,7 +56,7 @@ If we rearrange {eq}`eq_mz_beamXY` for $V_y$, take the derivative wrt. $x$ and s
 
 ```{math}
 :label: eq_total_beamXY
-\sum F_y: \, -\frac{d^2 M_z(x)}{dx^2} - \frac{d p_{zz}(x)}{dx}+ p_{y}(x) = 0.
+\sum F_y: \, \left. -\frac{d^2 M_z}{dx^2} \right|_x - \left. \frac{d p_{zz}}{dx} \right|_{x} + p_{y}(x) = 0.
 ```
 
 ### Geometric equations
@@ -69,21 +72,21 @@ According to our assumptions of having small strains, we have
 
 ```{math}
 :label: eq_geom_epsxx_bernoulli_beamXY
-\varepsilon_x (x,y,z) = \frac{d u(x,y,z)}{dx} = -y \, \frac{d \vartheta_z(x)}{dx}
+\varepsilon_x (x,y,z) = \left. \frac{d u}{dx} \right|_{(x,y,z)} = -y \, \left. \frac{d \vartheta_z}{dx} \right|_{x}
 ```
 
 and
 
 ```{math}
 :label: eq_geom_epsxy_bernoulli_beamXY
-\gamma_{xy}(x,y,z) = \frac{d u(x,y,z)}{dy} + \frac{d v(x,y,z)}{dx} = \frac{d v(x,y,z)}{dx} - \vartheta_z(x)
+\gamma_{xy}(x,y,z) = \left. \frac{d u}{dy} \right|_{(x,y,z)} + \left. \frac{d v}{dx} \right|_{(x,y,z)} = \left. \frac{d v}{dx} \right|_{x} - \vartheta_z(x)
 ```
 
 for the nonzero engineering-strain components of the small-strain tensor, where we used equation {eq}`eq_geom_bernoulli_beamXY` in the right side of {eq}`eq_geom_epsxy_bernoulli_beamXY`. According to the Bernoulli hypothesis of planar cross-sections remaining perpendicular to the $x$ axis, we can equate {eq}`eq_geom_epsxy_bernoulli_beamXY` with zero, obtaining the relationship
 
 ```{math}
 :label: eq_geom_epsxy_bernoulli_beamXY_v2
-\frac{d v(x)}{dx} = \vartheta_z(x),
+\left. \frac{d v}{dx} \right|_{x} = \vartheta_z(x),
 ```
 
 that we will use a couple of steps later to calculate the rotations after having the unknown function $v(x)$ readily computed.
@@ -105,12 +108,12 @@ where $\sigma_x$ denotes normal stresses along $x$, and $E$ is Young's modulus o
 M_z(x)
 &= - \int_A y \, \sigma_x (x) \, dA \\
 &= - \int_A y \, E \varepsilon_x (x) \, dA \\
-&=  \int_A y^2 \, E \, \frac{d \vartheta_z(x)}{dx} \, dA \\
+&=  \int_A y^2 \, E \, \left. \frac{d \vartheta_z}{dx} \right|_{x} \, dA \\
 &= E I_z \kappa_x(x),
 \end{align*}
 ```
 
-where $I_z = \int_A y^2 \\, dA$ is the second moment of inertia about $z$ and $\kappa_x(x)=\frac{d \vartheta_z(x)}{dx}$ is the curvature about $z$.
+where $I_z = \int_A y^2 \\, dA$ is the second moment of inertia about $z$ and $\kappa_x(x)=\left. \frac{d \vartheta_z}{dx}\right|_{x}$ is the curvature about $z$.
 
 ### Putting it all together
 
@@ -118,7 +121,7 @@ If we take second derivative of {eq}`eq_bernoulli_beamXY_total_1` wrt. $x$ and s
 
 ```{math}
 :label: eq_bernoulli_beamXY_final
-\sum F_y: \, E I_z \frac{d^4 v(x)}{dx^4} + \frac{d p_{zz}(x)}{dx} - p_{y}(x) = 0
+\sum F_y: \, E I_z \left. \frac{d^4 v}{dx^4} \right|_{x} + \left. \frac{d p_{zz}}{dx} \right|_{x} - p_{y}(x) = 0
 ```
 
 This DE alongside with the sufficient number of boundary conditions, completes the boundary-value problem (BVP) of an Euler-Bernoulli beam.
