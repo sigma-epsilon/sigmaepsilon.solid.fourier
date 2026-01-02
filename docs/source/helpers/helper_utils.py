@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import numpy as np
 
+__all__ = ["save_png_images"]
+
 
 def save_png_images(fig: plt.Figure, filename_base: str) -> None:
     """
