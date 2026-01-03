@@ -9,7 +9,7 @@ and with that knowledge, the reader should be able to follow the same steps for
 other problems. Also, there is a dedicated section about sign conventions for quick lookup.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    sign_conventions
    bernoulli_beams_navier

@@ -42,14 +42,14 @@ And the stress resultants $M_z$ and $V_y$ are defied by
 
 ```{math}
 :label: eq_def_Mz_beamXY
-M_z(x) = \int_A -y \, \sigma_x(x) dA
+M_z(x) = \int_A -y \, \sigma_x(x) \, dA
 ```
 
 and
 
 ```{math}
 :label: eq_def_Vy_beamXY
-V_y(x) = \int_A \tau_{xy}(x) dA.
+V_y(x) = \int_A \tau_{xy}(x) \, dA.
 ```
 
 If we rearrange {eq}`eq_mz_beamXY` for $V_y$, take the derivative wrt. $x$ and substitute it into {eq}`eq_fy_beamXY`, we arrive at the equation

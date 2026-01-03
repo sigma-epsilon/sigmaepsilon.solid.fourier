@@ -2,7 +2,47 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import numpy as np
 
-__all__ = ["save_png_images"]
+__all__ = ["save_png_images", "invert_light_image"]
+
+
+def invert_light_image(file_name_light: str, filename_base: str) -> None:
+    """
+    Invert a light mode PNG image to create a dark mode version and save it.
+
+    Parameters
+    ----------
+    file_name_light : str
+        Path to the light mode PNG image.
+    filename_base : str
+        The base filename for the output dark mode image.
+
+    Returns
+    -------
+    None
+    """
+    # Load image
+    img = Image.open(file_name_light).convert("RGB")
+    arr = np.array(img)
+
+    # PyData dark background color
+    bg_color = np.array([20, 24, 29], dtype=np.uint8)
+
+    # Threshold for detecting "white" background
+    white_thresh = 245
+
+    # Mask: background pixels (nearly white)
+    bg_mask = np.all(arr >= white_thresh, axis=2)
+
+    # Invert the whole image
+    inv = 255 - arr
+
+    # Replace background explicitly
+    inv[bg_mask] = bg_color
+
+    # Save result
+    file_name_dark = f"../_static/{filename_base}_dark.png"
+    Image.fromarray(inv).save(file_name_dark)
+    print(f"Saved dark mode image to: {file_name_dark}")
 
 
 def save_png_images(fig: plt.Figure, filename_base: str) -> None:
@@ -36,28 +76,9 @@ def save_png_images(fig: plt.Figure, filename_base: str) -> None:
     
     print(f"Saved light mode image to: {file_name_light}")
     
-    # Load image
-    img = Image.open(file_name_light).convert("RGB")
-    arr = np.array(img)
+    invert_light_image(file_name_light, filename_base)
 
-    # PyData dark background color
-    bg_color = np.array([20, 24, 29], dtype=np.uint8)
 
-    # Threshold for detecting "white" background
-    white_thresh = 245
 
-    # Mask: background pixels (nearly white)
-    bg_mask = np.all(arr >= white_thresh, axis=2)
-
-    # Invert the whole image
-    inv = 255 - arr
-
-    # Replace background explicitly
-    inv[bg_mask] = bg_color
-
-    # Save result
-    file_name_dark = f"../_static/{filename_base}_dark.png"
-    Image.fromarray(inv).save(file_name_dark)
-    print(f"Saved dark mode image to: {file_name_dark}")
     
     

@@ -30,11 +30,11 @@ where the internal forces for a plate of constant thickness $t$ are defined as:
 ```{math}
 :label: eq_internal_forces_kirchhoff
 \begin{align*}
-m_x(x,y) &= \int_{-t/2}^{t/2} z \, \sigma_x(x,y,z) dz, \\
-m_y(x,y) &= \int_{-t/2}^{t/2} z \, \sigma_y(x,y,z) dz, \\
-m_{xy}(x,y) &= \int_{-t/2}^{t/2} z \, \tau_{xy}(x,y,z) dz, \\
-v_x(x,y) &= \int_{-t/2}^{t/2} \tau_{xz}(x,y,z) dz, \\
-v_y(x,y) &= \int_{-t/2}^{t/2} \tau_{yz}(x,y,z) dz.
+m_x(x,y) &= \int_{-t/2}^{t/2} z \, \sigma_x(x,y,z) \, dz, \\
+m_y(x,y) &= \int_{-t/2}^{t/2} z \, \sigma_y(x,y,z) \, dz, \\
+m_{xy}(x,y) &= \int_{-t/2}^{t/2} z \, \tau_{xy}(x,y,z) \, dz, \\
+v_x(x,y) &= \int_{-t/2}^{t/2} \tau_{xz}(x,y,z) \, dz, \\
+v_y(x,y) &= \int_{-t/2}^{t/2} \tau_{yz}(x,y,z) \, dz.
 \end{align*}
 ```
 
