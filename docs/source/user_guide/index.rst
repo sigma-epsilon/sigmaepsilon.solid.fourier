@@ -25,6 +25,10 @@ The documentation is devoted to three main parts:
   to the library.** All of the chapters can be downloaded as Jupyter Notebooks from 
   the source repository of the library using the link at the top of the pages.
 
+* :ref:`Theory Guide <theory_guide>` - Provides a detailed explanation of the mathematical background and theoretical foundations behind the library. 
+  This section is ideal if you want to understand the underlying principles, derivations, and assumptions used in the implemented algorithms. 
+  It is recommended for users interested in the theory or planning to extend the library.
+
 * :ref:`API Reference <api_reference>` - The documentation of the classes and algorithms of the library. The API 
   Reference is rich in examples and explanations, and this should be the primary source 
   of information as to how to use the library. If you are a seasoned developer, you might consider 
