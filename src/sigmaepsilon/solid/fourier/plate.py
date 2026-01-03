@@ -20,7 +20,7 @@ __all__ = ["NavierPlate"]
 
 class NavierPlate(NavierProblem):
     """
-    A class to handle semi-analytic solutions of simply-supported Kirchhof-Love
+    A class to handle semi-analytic solutions of simply-supported Kirchhoff-Love
     and Mindlin-Reissner rectangular plates of constant thickness.
 
     Parameters
