@@ -112,7 +112,7 @@ class BeamLoadCaseResultLinStat(LoadCaseResultLinStat):
     The underlying data structure is a 2d NumPy array, where the first axis
     goes along the points of evaluation and the second axis goes along the
     following components:
-    
+
     .. hint::
         For a detailed explanation of the sign conventions, refer to the
         :ref:`theory guide <theory_guide>`.
@@ -165,7 +165,7 @@ class PlateLoadCaseResultLinStat(LoadCaseResultLinStat):
     .. hint::
         For a detailed explanation of the sign conventions, refer to the
         :ref:`theory guide <theory_guide>`.
-    
+
     +-------+-------+--------------------------------------------------+
     | Index | Name  | Description                                      |
     +=======+=======+==================================================+
