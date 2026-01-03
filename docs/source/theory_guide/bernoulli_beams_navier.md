@@ -38,7 +38,7 @@ for the vertical equilibrium along the $y$ axis, where
 - $p_{zz}$ is the distributed moment load,
 - $p_{y}$ is the distributed vertical load,
 
-And the stress resultants $M_z$ and $V_y$ are defied by
+And the stress resultants $M_z$ and $V_y$ are defined by
 
 ```{math}
 :label: eq_def_Mz_beamXY
