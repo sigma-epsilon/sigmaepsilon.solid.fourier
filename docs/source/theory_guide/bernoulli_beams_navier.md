@@ -138,7 +138,7 @@ v(0)=0, \quad v(L)=0, \quad \kappa_x(0)=0, \quad \kappa_x(L)=0
 specifying zero vertical displacements and curvatures at the boundaries. Equations {eq}`eq_bernoulli_beamXY_final` and {eq}`eq_bernoulli_beamXY_BC` together consitute the BVP of a simply-supported Euler-Bernoulli beam.
 
 (Navier_solution_simply_supported_bernoulli)=
-## Navier's solution of simply-supported Euler-Berboulli beams
+## Navier's solution of simply-supported Euler-Bernoulli beams
 
 The starting point of Navier's solution is to approximate the unknown function $v(x)$ as
 
