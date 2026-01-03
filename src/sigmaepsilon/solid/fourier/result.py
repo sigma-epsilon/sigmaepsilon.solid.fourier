@@ -112,26 +112,26 @@ class BeamLoadCaseResultLinStat(LoadCaseResultLinStat):
     The underlying data structure is a 2d NumPy array, where the first axis
     goes along the points of evaluation and the second axis goes along the
     following components:
+    
+    .. hint::
+        For a detailed explanation of the sign conventions, refer to the
+        :ref:`theory guide <theory_guide>`.
 
     +-------+-------+--------------------------------------------------+
     | Index | Name  | Description                                      |
     +=======+=======+==================================================+
-    | 0     | UY    | Displacement in local Y direction                |
+    | 0     | UY    | Displacement in Y direction                      |
     +-------+-------+--------------------------------------------------+
-    | 1     | ROTZ  | Rotation around local Z axis                     |
+    | 1     | ROTZ  | Rotation around Z axis                           |
     +-------+-------+--------------------------------------------------+
-    | 2     | CZ    | Curvature related to bending around local Z axis |
+    | 2     | CZ    | Curvature related to bending around Z axis       |
     +-------+-------+--------------------------------------------------+
-    | 3     | EXY   | Shear strain in local Y direction                |
+    | 3     | EXY   | Engineering shear strain in the X-Y plane        |
     +-------+-------+--------------------------------------------------+
-    | 4     | MZ    | Bending moment around local Z axis               |
+    | 4     | MZ    | Bending moment around Z axis                     |
     +-------+-------+--------------------------------------------------+
-    | 5     | SY    | Shear force in local Y direction                 |
+    | 5     | SY    | Shear force in Y direction                       |
     +-------+-------+--------------------------------------------------+
-
-    .. hint::
-        For a detailed explanation of the sign conventions, refer to
-        :ref:`this <beam_sign_conventions>` section of the theory guide.
 
     See also
     --------
@@ -162,39 +162,39 @@ class PlateLoadCaseResultLinStat(LoadCaseResultLinStat):
     goes along the points of evaluation and the second axis goes along the
     following components:
 
+    .. hint::
+        For a detailed explanation of the sign conventions, refer to the
+        :ref:`theory guide <theory_guide>`.
+    
     +-------+-------+--------------------------------------------------+
     | Index | Name  | Description                                      |
     +=======+=======+==================================================+
-    | 0     | UZ    | Displacement in local Z direction                |
+    | 0     | UZ    | Displacement in Z direction                      |
     +-------+-------+--------------------------------------------------+
-    | 1     | ROTX  | Rotation around local X axis (CW)                |
+    | 1     | ROTX  | Rotation around X axis (CCW)                     |
     +-------+-------+--------------------------------------------------+
-    | 2     | ROTY  | Rotation around local Y axis (CW)                |
+    | 2     | ROTY  | Rotation around Y axis (CCW)                     |
     +-------+-------+--------------------------------------------------+
-    | 3     | CX    | Curvature related to bending around local X axis |
+    | 3     | CX    | Curvature related to bending around X axis       |
     +-------+-------+--------------------------------------------------+
-    | 4     | CY    | Curvature related to bending around local Y axis |
+    | 4     | CY    | Curvature related to bending around Y axis       |
     +-------+-------+--------------------------------------------------+
     | 5     | CXY   | Twisting curvature                               |
     +-------+-------+--------------------------------------------------+
-    | 6     | EXZ   | Shear strain in local Y-Z plane                  |
+    | 6     | EXZ   | Engineering shear strain in X-Z plane            |
     +-------+-------+--------------------------------------------------+
-    | 7     | EYZ   | Shear strain in local X-Z plane                  |
+    | 7     | EYZ   | Engineering shear strain in Y-Z plane            |
     +-------+-------+--------------------------------------------------+
-    | 8     | MX    | Bending moment around local Y axis (CCW)         |
+    | 8     | MX    | Bending moment around Y axis (CW)                |
     +-------+-------+--------------------------------------------------+
-    | 9     | MY    | Bending moment around local X axis (CW)          |
+    | 9     | MY    | Bending moment around X axis (CCW)               |
     +-------+-------+--------------------------------------------------+
-    | 10    | MXY   | Twisting moment around local Z axis (CW)         |
+    | 10    | MXY   | Twisting moment                                  |
     +-------+-------+--------------------------------------------------+
-    | 11    | QX    | Shear force on the local Y-Z plane (+Z)          |
+    | 11    | QX    | Shear force on the X-Z plane (+Z)                |
     +-------+-------+--------------------------------------------------+
-    | 12    | QY    | Shear force on the local X-Z plane  (+Z)         |
+    | 12    | QY    | Shear force on the Y-Z plane  (+Z)               |
     +-------+-------+--------------------------------------------------+
-
-    .. hint::
-        For a detailed explanation of the sign conventions, refer to
-        :ref:`this <plate_sign_conventions>` section of the theory guide.
 
     See also
     --------
