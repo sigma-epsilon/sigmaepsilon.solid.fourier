@@ -16,7 +16,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 class LoadCaseResultLinStat:
     """
-    A class to store results of linear static analysis for a single load case.
+    A class to store results of a linear static analysis for a single load case.
     """
 
     __slots__ = ["_data", "_name", "_components"]
@@ -50,7 +50,7 @@ class LoadCaseResultLinStat:
     @property
     def strains(self) -> np.ndarray:
         """
-        Returns the results as a ``numpy.ndarray``.
+        Returns the strains as a ``numpy.ndarray``.
         """
         if self.strain_range is None:  # pragma: no cover
             raise ValueError("Strain range is not defined.")
@@ -113,25 +113,25 @@ class BeamLoadCaseResultLinStat(LoadCaseResultLinStat):
     goes along the points of evaluation and the second axis goes along the
     following components:
 
-    +-------+--------------------------------------------------+
-    | Name  | Description                                      |
-    +=======+==================================================+
-    | UY    | Displacement in local Y direction                |
-    +-------+--------------------------------------------------+
-    | ROTZ  | Rotation around local Z axis                     |
-    +-------+--------------------------------------------------+
-    | CZ    | Curvature related to bending around local Z axis |
-    +-------+--------------------------------------------------+
-    | EXY   | Shear strain in local Y direction                |
-    +-------+--------------------------------------------------+
-    | MZ    | Bending moment around local Z axis               |
-    +-------+--------------------------------------------------+
-    | SY    | Shear force in local Y direction                 |
-    +-------+--------------------------------------------------+
-
     .. hint::
-        For a detailed explanation of the sign conventions, refer to
-        :ref:`this <beam_sign_conventions>` section of the theory guide.
+        For a detailed explanation of the sign conventions, refer to the
+        :ref:`theory guide <theory_guide>`.
+
+    +-------+-------+--------------------------------------------------+
+    | Index | Name  | Description                                      |
+    +=======+=======+==================================================+
+    | 0     | UY    | Displacement in Y direction                      |
+    +-------+-------+--------------------------------------------------+
+    | 1     | ROTZ  | Rotation around Z axis                           |
+    +-------+-------+--------------------------------------------------+
+    | 2     | CZ    | Curvature related to bending around Z axis       |
+    +-------+-------+--------------------------------------------------+
+    | 3     | EXY   | Engineering shear strain in the X-Y plane        |
+    +-------+-------+--------------------------------------------------+
+    | 4     | MZ    | Bending moment around Z axis                     |
+    +-------+-------+--------------------------------------------------+
+    | 5     | SY    | Shear force in Y direction                       |
+    +-------+-------+--------------------------------------------------+
 
     See also
     --------
@@ -147,6 +147,7 @@ class BeamLoadCaseResultLinStat(LoadCaseResultLinStat):
         "MZ",
         "SY",
     ]
+    strain_range = range(2, 4)
 
 
 class PlateLoadCaseResultLinStat(LoadCaseResultLinStat):
@@ -161,39 +162,39 @@ class PlateLoadCaseResultLinStat(LoadCaseResultLinStat):
     goes along the points of evaluation and the second axis goes along the
     following components:
 
-    +-------+--------------------------------------------------+
-    | Name  | Description                                      |
-    +=======+==================================================+
-    | UZ    | Displacement in local Z direction                |
-    +-------+--------------------------------------------------+
-    | ROTX  | Rotation around local X axis (CW)                |
-    +-------+--------------------------------------------------+
-    | ROTY  | Rotation around local Y axis (CW)                |
-    +-------+--------------------------------------------------+
-    | CX    | Curvature related to bending around local X axis |
-    +-------+--------------------------------------------------+
-    | CY    | Curvature related to bending around local Y axis |
-    +-------+--------------------------------------------------+
-    | CXY   | Twisting curvature                               |
-    +-------+--------------------------------------------------+
-    | EXZ   | Shear strain in local Y-Z plane                  |
-    +-------+--------------------------------------------------+
-    | EYZ   | Shear strain in local X-Z plane                  |
-    +-------+--------------------------------------------------+
-    | MX    | Bending moment around local Y axis (CCW)         |
-    +-------+--------------------------------------------------+
-    | MY    | Bending moment around local X axis (CW)          |
-    +-------+--------------------------------------------------+
-    | MXY   | Twisting moment around local Z axis (CW)         |
-    +-------+--------------------------------------------------+
-    | QX    | Shear force on the local Y-Z plane (+Z)          |
-    +-------+--------------------------------------------------+
-    | QY    | Shear force on the local X-Z plane  (+Z)         |
-    +-------+--------------------------------------------------+
-
     .. hint::
-        For a detailed explanation of the sign conventions, refer to
-        :ref:`this <plate_sign_conventions>` section of the theory guide.
+        For a detailed explanation of the sign conventions, refer to the
+        :ref:`theory guide <theory_guide>`.
+
+    +-------+-------+--------------------------------------------------+
+    | Index | Name  | Description                                      |
+    +=======+=======+==================================================+
+    | 0     | UZ    | Displacement in Z direction                      |
+    +-------+-------+--------------------------------------------------+
+    | 1     | ROTX  | Rotation around X axis (CCW)                     |
+    +-------+-------+--------------------------------------------------+
+    | 2     | ROTY  | Rotation around Y axis (CCW)                     |
+    +-------+-------+--------------------------------------------------+
+    | 3     | CX    | Curvature related to bending around X axis       |
+    +-------+-------+--------------------------------------------------+
+    | 4     | CY    | Curvature related to bending around Y axis       |
+    +-------+-------+--------------------------------------------------+
+    | 5     | CXY   | Twisting curvature                               |
+    +-------+-------+--------------------------------------------------+
+    | 6     | EXZ   | Engineering shear strain in X-Z plane            |
+    +-------+-------+--------------------------------------------------+
+    | 7     | EYZ   | Engineering shear strain in Y-Z plane            |
+    +-------+-------+--------------------------------------------------+
+    | 8     | MX    | Bending moment around Y axis (CW)                |
+    +-------+-------+--------------------------------------------------+
+    | 9     | MY    | Bending moment around X axis (CCW)               |
+    +-------+-------+--------------------------------------------------+
+    | 10    | MXY   | Twisting moment                                  |
+    +-------+-------+--------------------------------------------------+
+    | 11    | QX    | Shear force on the X-Z plane (+Z)                |
+    +-------+-------+--------------------------------------------------+
+    | 12    | QY    | Shear force on the Y-Z plane  (+Z)               |
+    +-------+-------+--------------------------------------------------+
 
     See also
     --------
@@ -217,11 +218,3 @@ class PlateLoadCaseResultLinStat(LoadCaseResultLinStat):
         "QY",
     ]
     strain_range = range(3, 8)
-
-    @property
-    def strains(self) -> np.ndarray:
-        """
-        Returns the results as a ``numpy.ndarray``.
-        """
-        # return self._data[:, 3:8]
-        return self._data[:, list(self.strain_range)]

@@ -1,5 +1,6 @@
+
 ============================================================================================
-**SigmaEpsilon.Solid.Fourier** - Fourier Solutions of Some Plate and Beam Problems in Python
+**SigmaEpsilon.Solid.Fourier** – Fourier Solutions for Plate and Beam Problems in Python
 ============================================================================================
 
 .. toctree::
@@ -7,12 +8,18 @@
    :hidden:
 
    User Guide <user_guide>
+   Theory Guide <theory_guide/index>
    Gallery <examples_gallery>
    API Reference <api>
    Development <development>
 
 .. image:: _static/logo.png
    :align: center
+   :class: only-light
+
+.. image:: _static/logo_dark.png
+   :align: center
+   :class: only-dark
 
 **Version**: |version|
 
@@ -20,25 +27,21 @@
 :doc:`Installation <user_guide/installation>` |
 :ref:`Getting Started <getting_started>` |
 `Issue Tracker <https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier/issues>`_ | 
-`Source Repository <https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier>`_
+`Source Repository <https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier>`_ | 
+:doc:`Bibliography <bibliography>`
 
 .. include:: global_refs.rst
 
-The `sigmaepsilon.solid.fourier`_ library offers semi-analytic solutions to some beam and plate 
-bending problems, where the boundary conditions are a-priori satisfied by careful selection of the 
-approximating functions. Although the calculations only cover a handful of boundary conditions, 
-when they are applicable, they are significantly faster than let say a finite element solution. 
-For this reason, it is very useful for a couple of things:
 
-* experimentation
-* verification
-* concept validation
-* education
-* publication
+The `sigmaepsilon.solid.fourier`_ library provides semi-analytical solutions for selected beam and plate bending problems, where boundary conditions are inherently satisfied through the careful choice of approximating functions. While the available solutions cover only a limited set of boundary conditions, they are significantly faster than, for example, finite element methods when applicable. This makes the library especially valuable for:
 
-The implementations in the library all rely on fast and efficient algorithms provided by the goodies of
-`NumPy`_, `SciPy`_ and the likes. Where necessary, computationally intensive parts of the code are written
-using `Numba`_.
+* Experimentation
+* Verification
+* Concept validation
+* Education
+* Publication
+
+All implementations leverage the speed and efficiency of libraries such as `NumPy`_ and `SciPy`_, with performance-critical code sections accelerated using `Numba`_ where needed.
 
 .. _highlights:
 
@@ -55,11 +58,11 @@ Contents
     .. grid-item-card::
         :img-top: ../source/_static/index-images/getting_started.svg
 
+
         Getting Started
         ^^^^^^^^^^^^^^^
 
-        The getting started guide is your entry point. It helps you to set up
-        a development environment and make the first steps with the library.
+        Start here to set up your development environment and take your first steps with the library.
 
         +++
 
@@ -73,11 +76,11 @@ Contents
     .. grid-item-card::
         :img-top: ../source/_static/index-images/user_guide.svg
 
+
         User Guide
         ^^^^^^^^^^
 
-        The user guide provides a detailed walkthrough of the library, touching 
-        the key features with useful background information and explanation.
+        Explore the user guide for a comprehensive walkthrough of the library’s main features, with helpful background and explanations.
 
         +++
 
@@ -91,13 +94,11 @@ Contents
     .. grid-item-card::
         :img-top: ../source/_static/index-images/api.svg
 
+
         API Reference
         ^^^^^^^^^^^^^
 
-        The reference guide contains a detailed description of the functions,
-        modules, and objects included in the library. It describes how the
-        methods work and which parameters can be used. It assumes that you have an
-        understanding of the key concepts.
+        The reference guide details all functions, modules, and objects in the library, explaining their usage and parameters. Some familiarity with the core concepts is assumed.
 
         +++
 
@@ -111,11 +112,11 @@ Contents
     .. grid-item-card::
         :img-top: ../source/_static/index-images/contributor.svg
 
-        Contributor's Guide
+
+        Contributor’s Guide
         ^^^^^^^^^^^^^^^^^^^
 
-        Want to add to the codebase? The contributing guidelines will guide you through
-        the process of improving the library.
+        Interested in contributing? The guidelines will walk you through the process of improving the library.
 
         +++
 
@@ -130,9 +131,7 @@ Contents
 Indices and tables
 ==================
 
+* :doc:`Bibliography <bibliography>`
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-
-

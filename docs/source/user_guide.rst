@@ -21,7 +21,6 @@ please refer to the :doc:`api`.
     :caption: Contents
     
     user_guide/user_guide
-    theory_guide/index
 
 .. toctree::
     :maxdepth: 1

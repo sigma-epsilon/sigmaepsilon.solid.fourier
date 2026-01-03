@@ -9,6 +9,7 @@ from .enums import MechanicalModelType
 
 @runtime_checkable
 class NavierProblemProtocol(Protocol):
+    """Protocol for Navier problems."""
 
     result_class: ClassVar[LoadCaseResultLinStat]
 
@@ -32,6 +33,7 @@ class NavierProblemProtocol(Protocol):
 
 @runtime_checkable
 class LoadCaseProtocol(Protocol):
+    """Protocol for load cases."""
 
     @property
     def domain(self):
@@ -60,6 +62,8 @@ class LoadCaseProtocol(Protocol):
 
 @runtime_checkable
 class LoadGroupProtocol(Protocol):
+    """Protocol for load groups."""
+
     def groups(self, *args, **kwargs) -> Iterable["LoadGroupProtocol"]:
         pass
 

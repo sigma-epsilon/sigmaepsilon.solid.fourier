@@ -62,3 +62,9 @@ Results
 
 .. autoclass:: sigmaepsilon.solid.fourier.result.PlateLoadCaseResultLinStat
    :members:
+
+Protocols
+=========
+
+.. automodule:: sigmaepsilon.solid.fourier.protocols
+   :members:

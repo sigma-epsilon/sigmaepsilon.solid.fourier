@@ -27,6 +27,7 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
         The number of sampling points for Monte Carlo integration. If no value
         is provided, the global config value is used.
 
+
     .. hint::
         For a detailed explanation of the sign conventions, refer to
         :ref:`this <plate_sign_conventions>` section of the theory guide.
