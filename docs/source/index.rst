@@ -14,6 +14,11 @@
 
 .. image:: _static/logo.png
    :align: center
+   :class: only-light
+
+.. image:: _static/logo_dark.png
+   :align: center
+   :class: only-dark
 
 **Version**: |version|
 
