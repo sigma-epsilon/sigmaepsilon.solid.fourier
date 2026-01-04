@@ -185,9 +185,9 @@ class PlateLoadCaseResultLinStat(LoadCaseResultLinStat):
     +-------+-------+--------------------------------------------------+
     | 7     | EYZ   | Engineering shear strain in Y-Z plane            |
     +-------+-------+--------------------------------------------------+
-    | 8     | MX    | Bending moment around Y axis (CW)                |
+    | 8     | MX    | Bending moment around Y axis (CCW)               |
     +-------+-------+--------------------------------------------------+
-    | 9     | MY    | Bending moment around X axis (CCW)               |
+    | 9     | MY    | Bending moment around X axis (CW)                |
     +-------+-------+--------------------------------------------------+
     | 10    | MXY   | Twisting moment                                  |
     +-------+-------+--------------------------------------------------+
