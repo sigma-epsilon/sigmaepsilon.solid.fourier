@@ -99,7 +99,7 @@ class NavierPlate(NavierProblem):
 
         """
         linstat_timing_info = {}
-        
+
         if len(args) > 0:
 
             if len(args) > 2:
@@ -162,7 +162,7 @@ class NavierPlate(NavierProblem):
         result.lock()
         _dt = time() - _t
         linstat_timing_info["result_assembly_time_seconds"] = _dt
-        
+
         self._linstat_timing_info = linstat_timing_info
-        
+
         return result
