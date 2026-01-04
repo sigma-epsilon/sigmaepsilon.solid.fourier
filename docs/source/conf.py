@@ -145,6 +145,13 @@ mathjax3_config = {
     "tex": {"tags": "ams", "useLabelIds": True},
 }
 
+# -- Numbering of figures, tables and equations -----------------------------
+numfig = True
+math_numfig = True      # needs numfig
+# optional: number only labeled equations unless you want all displayed math numbered
+math_number_all = False  # or True if you want every .. math:: numbered
+numfig_secnum_depth = 1   # 1=section, 2=subsection, etc.
+
 # -- Image scapers configuration -------------------------------------------------
 
 image_scrapers = ("matplotlib",)
@@ -194,7 +201,7 @@ html_static_path = ["_static"]
 
 # This is processed by Jinja2 and inserted before each notebook
 nbsphinx_prolog = r"""
-{% set docname = "docs\\source\\" + env.doc2path(env.docname, base=None) %}
+{% set docname = "docs/source/" + env.doc2path(env.docname, base=None) %}
 
 .. raw:: html
 

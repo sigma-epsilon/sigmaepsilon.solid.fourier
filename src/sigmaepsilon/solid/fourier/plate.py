@@ -20,8 +20,8 @@ __all__ = ["NavierPlate"]
 
 class NavierPlate(NavierProblem):
     """
-    A class to handle semi-analytic solutions of rectangular plates with
-    specific boudary conditions.
+    A class to handle semi-analytic solutions of simply-supported Kirchhoff-Love
+    and Mindlin-Reissner rectangular plates of constant thickness.
 
     Parameters
     ----------
@@ -32,7 +32,7 @@ class NavierPlate(NavierProblem):
     D: Iterable
         3x3 flexural constitutive matrix.
     S: Iterable, Optional
-        2x2 shear constitutive matrix.
+        2x2 shear constitutive matrix. Only for Mindlin-Reissner plates. Default is None.
     loads: :class:`~sigmaepsilon.solid.fourier.loads.LoadGroup`, Optional
         The loads. Default is None.
     """
@@ -56,14 +56,17 @@ class NavierPlate(NavierProblem):
 
     @property
     def size(self) -> ndarray[float]:
+        """Returns the size of the rectangle."""
         return self._size
 
     @property
     def shape(self) -> ndarray[int]:
+        """Returns the shape (number of harmonic terms) in both directions."""
         return self._shape
 
     @property
     def model_type(self) -> MechanicalModelType:
+        """Returns the mechanical model type of the plate."""
         if self.S is None:
             return MechanicalModelType.KIRCHHOFF_LOVE_PLATE
         else:

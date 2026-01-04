@@ -1,9 +1,10 @@
-* Semi-analytic solutions of beam and plate problems.
-* Easy to use, high level interface to define various kinds of loads.
-* Support for arbitrary loads using Monte-Carlo based coefficient determination.
-* Industry-grade performance based on highly parallel, performant code.
-* Tight integration with popular Python libraries like NumPy, SciPy, xarray, etc.
-* A gallery of examples for plotting with Matplotlib for all types of problems.
-* A collection of downloadable Jupyter Notebooks ready for execution covering all available functionality.
-* Getting Started, User Guide and API Reference in the documentation.
-* The library is intensively tested on CircleCI and has a high coverage level (read more about testing below).
+
+* Provides semi-analytical solutions for beam and plate problems.
+* Features an intuitive, high-level interface for defining various load types.
+* Supports arbitrary load definitions using Monte Carlo-based coefficient calculation.
+* Delivers industry-grade performance through highly parallelized, efficient code.
+* Seamlessly integrates with popular Python libraries such as NumPy, SciPy, and xarray.
+* Includes a comprehensive gallery of Matplotlib examples for all problem types.
+* Offers a collection of ready-to-run, downloadable Jupyter Notebooks covering all features.
+* Comprehensive documentation, including Getting Started, User Guide, and API Reference.
+* Extensively tested on CircleCI, ensuring high code coverage and reliability.

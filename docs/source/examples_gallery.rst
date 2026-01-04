@@ -17,6 +17,7 @@ Beams
 
     gallery/timoshenko_matplotlib.ipynb
     gallery/plot_loads_1d.ipynb
+    gallery/bernoulli_beam_advanced_plot.ipynb
 
 Plates
 ======

@@ -4,93 +4,72 @@
 Introduction
 ============
 
-Welcome to the documentation of the library! This is the place where you can find all the information
 you need to use the library effectively. The documentation is divided into several parts, each of them
-serving a different purpose. The documentation is written in a way that it is easy to navigate and find
 the information you are looking for. If you are new to the library, we suggest you start with the
-:doc:`User Guide <user_guide>`.
 
-The structure of the documentation
-==================================
+Welcome to the library’s documentation! Here you’ll find everything you need to use the library effectively. The documentation is organized into several sections, each serving a specific purpose. It is designed for easy navigation, so you can quickly find the information you need. If you’re new to the library, we recommend starting with the :doc:`User Guide <user_guide>`.
 
-The documentation is devoted to three main parts:
 
-* :ref:`Getting Started Guide <getting_started>` - This very guide you are reading. It helps you to get started with the 
-  library by laying down the steps of a miniature course, through wich you hopefully get a hang of 
-  things.
+Documentation Structure
+=======================
 
-* :ref:`User Guide <user_guide>` - Introduces the concepts of the library and illustrates the usage of the classes 
-  and algorithms by small examples. The user guide also has a lot of references to other parts
-  of the documentation, including the API Reference. **This is the best place to start if you are new
-  to the library.** All of the chapters can be downloaded as Jupyter Notebooks from 
-  the source repository of the library using the link at the top of the pages.
+The documentation is divided into five main sections:
 
-* :ref:`API Reference <api_reference>` - The documentation of the classes and algorithms of the library. The API 
-  Reference is rich in examples and explanations, and this should be the primary source 
-  of information as to how to use the library. If you are a seasoned developer, you might consider 
-  jumping into the API Reference directly.
+* :ref:`Getting Started Guide <getting_started>` – This very guide. It walks you through the initial steps with the library, offering a brief course to help you get started.
 
-* :ref:`Gallery <examples_gallery>` - This is a collection of examples that involve some kind of visualization. The code 
-  is ususally provided as one big block of execution, with ocassional internal notes. These examples
-  doesn't have much explanation. If all this is new to you, we suggest to go through the User Guide first.
+* :ref:`User Guide <user_guide>` – Introduces the core concepts and demonstrates usage of the library’s classes and algorithms with concise examples. The user guide also references other documentation sections, including the API Reference. **If you’re new, this is the best place to begin.** All chapters are available as downloadable Jupyter Notebooks from the source repository (see the link at the top of each page).
+
+* :ref:`Theory Guide <theory_guide>` – Explains the mathematical background and theoretical foundations behind the library. This section is ideal for those who want to understand the underlying principles, derivations, and assumptions, or who plan to extend the library.
+
+* :ref:`API Reference <api_reference>` – Comprehensive documentation for all classes and algorithms. The API Reference is rich in examples and explanations, and is the primary resource for learning how to use the library. Experienced developers may want to jump straight to this section.
+
+* :ref:`Gallery <examples_gallery>` – A collection of visualization examples. Code is typically provided as a single executable block, with occasional notes. These examples are light on explanation, so if you’re new, we suggest starting with the User Guide.
 
 What is `sigmaepsilon.solid.fourier`?
 =====================================
 
-.. include:: ..\global_refs.rst
+.. include:: ../global_refs.rst
 
-The `sigmaepsilon.solid.fourier`_ library offers semi-analytic solutions to some beam and plate 
-bending problems, where the boundary conditions are a-priori satisfied by careful selection of the 
-approximating functions. Although the calculations only cover a handful of boundary conditions, 
-when they are applicable, they are significantly faster than let say a finite element solution. 
-For this reason, it is very useful for a couple of things:
 
-* experimentation
-* verification
-* concept validation
-* education
-* publication
+The `sigmaepsilon.solid.fourier`_ library provides semi-analytical solutions for certain beam and plate bending problems, where boundary conditions are inherently satisfied by carefully chosen approximating functions. While only a limited set of boundary conditions is supported, the solutions are significantly faster than, for example, finite element methods when applicable. This makes the library especially useful for:
+
+* Experimentation
+* Verification
+* Concept validation
+* Education
+* Publication
 
 Highlights
 ----------
 
 .. include:: ../highlights.rst
 
-Prerequisities
-==============
 
-In order to use the library effectively, you should be familiar with
+Prerequisites
+=============
 
-* Python - any level for usage, advanced for contribution
-* `NumPy`_, `SciPy`_ - intermediate level familiarity is required
+To use the library effectively, you should be familiar with:
 
-It is not crucial, but it`s better to have a basic understanding of
+* Python – any level for basic usage, advanced for contributing
+* `NumPy`_, `SciPy`_ – intermediate familiarity recommended
 
-* `Numba`_ - Numba is critical for the performance of the library as it does most of the heavy lifting, 
-  alongside NumPy and SciPy of course. In most cases it uses JIT-compilation to speed stuff up and 
-  it helps to understand how this all works. This is crucial if you consider to contribute to any of 
-  the libraries in the sigmaepsilon namespace.
+It’s also helpful, though not essential, to have a basic understanding of:
 
-It is recommended to be familiar with
+* `Numba`_ – Numba is critical for performance, handling much of the heavy lifting alongside NumPy and SciPy. It uses JIT compilation to accelerate code. Understanding how Numba works is especially important if you plan to contribute to the sigmaepsilon libraries.
 
-* `xarray`_ and `Pandas`_ - This is an optional dependency, but highly suggested to use either xarray or Pandas
-  to handle results. Otherwise, you will have to deal with multidimensional arrays and remembering
-  the meaning of each axis will be a pain.
+Recommended additional knowledge:
 
-* `Matplotlib`_ - Most of the examples and the user guide is full of plots, most of them using matplotlib. 
-  The plots are high quality, publication ready illustrations. It might be useful to learn how to use 
-  it if you have no prior experience. Also, by using the poltting facility, you can give some feedback 
-  if you feel something is missing, becoming a contributor yourself.
+* `xarray`_ and `Pandas`_ – These are optional dependencies, but highly recommended for handling results. Otherwise, you’ll need to manage multidimensional arrays and keep track of axis meanings manually.
+* `Matplotlib`_ – Most examples and the user guide include high-quality, publication-ready plots using Matplotlib. If you’re unfamiliar with it, learning the basics will be helpful. Using the plotting features also allows you to provide feedback or contribute improvements.
 
-What about performance?
-=======================
 
-Yes, it is. The library is designed to be fast, as it relies on the vector math capabilities of `NumPy`_ and `SciPy`_, 
-while other computationally sensitive calculations are JIT-compiled using `Numba`_. Thanks to `Numba`_, the 
-implemented algorithms are able to bypass the limitations of Python's GIL and are parallelized on multiple cores, 
-utilizing the full potential of what the hardware has to offer.
+Performance
+===========
+
+The library is designed for speed, leveraging the vectorized math capabilities of `NumPy`_ and `SciPy`_. Performance-critical computations are JIT-compiled with `Numba`_, allowing the algorithms to bypass Python’s GIL and run in parallel across multiple cores, making full use of your hardware.
 
 Installation
 ============
+
 
 To install the library, follow the instructions in the :doc:`Installation Guide <installation>`.

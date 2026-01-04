@@ -200,7 +200,12 @@ def postproc_Timoshenko(
 
 @njit(nogil=True, parallel=True, cache=True)
 def postproc_Mindlin(
-    size, shape: ndarray, points: ndarray, solution: ndarray, D: ndarray, S: ndarray
+    size: ndarray,
+    shape: ndarray,
+    points: ndarray,
+    solution: ndarray,
+    D: ndarray,
+    S: ndarray,
 ) -> ndarray:
     """
     JIT-compiled function that calculates post-processing quantities
@@ -317,7 +322,7 @@ def postproc_Mindlin(
 # fmt: off
 @njit(nogil=True, parallel=True, cache=True)
 def postproc_Kirchhoff(
-    size, shape: ndarray, points: ndarray, solution: ndarray, D: ndarray, loads: ndarray
+    size: ndarray, shape: ndarray, points: ndarray, solution: ndarray, D: ndarray, loads: ndarray
 ) -> ndarray:
     """
     JIT-compiled function that calculates post-processing quantities

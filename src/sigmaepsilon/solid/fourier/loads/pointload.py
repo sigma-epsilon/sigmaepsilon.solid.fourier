@@ -21,7 +21,7 @@ class PointLoad(LoadCase[float | Float1d, Float1d]):
         Load values for each dof. The order of the dofs for a beam
         is [F, M], for a plate it is [F, Mx, My].
 
-    
+
     .. hint::
         For a detailed explanation of the sign conventions, refer to
         :ref:`this <sign_conventions>` section of the theory guide.

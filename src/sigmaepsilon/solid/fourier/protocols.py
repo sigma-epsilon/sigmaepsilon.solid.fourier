@@ -63,7 +63,7 @@ class LoadCaseProtocol(Protocol):
 @runtime_checkable
 class LoadGroupProtocol(Protocol):
     """Protocol for load groups."""
-    
+
     def groups(self, *args, **kwargs) -> Iterable["LoadGroupProtocol"]:
         pass
 

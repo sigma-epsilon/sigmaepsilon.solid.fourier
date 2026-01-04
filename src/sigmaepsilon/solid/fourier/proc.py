@@ -6,9 +6,9 @@ from sigmaepsilon.math.linalg import inv2x2, inv3x3
 
 
 @njit(nogil=True, parallel=True, cache=True)
-def linsolve_Bernoulli(A: ndarray, B: ndarray):
+def linsolve_Bernoulli(A: ndarray, B: ndarray) -> ndarray:
     """
-    Calculates unknowns for Bernoulli Beams.
+    Calculates unknowns for Euler-Bernoulli Beams.
     """
     nLHS, N = A.shape
     nRHS = B.shape[0]
@@ -21,9 +21,9 @@ def linsolve_Bernoulli(A: ndarray, B: ndarray):
 
 
 @njit(nogil=True, parallel=True, cache=True)
-def linsolve_Timoshenko(A: ndarray, B: ndarray):
+def linsolve_Timoshenko(A: ndarray, B: ndarray) -> ndarray:
     """
-    Calculates unknowns for Timoshenko Beams.
+    Calculates unknowns for Timoshenko-Ehrenfest Beams.
     """
     nLHS, nMN = A.shape[:2]
     nRHS = B.shape[0]
@@ -36,7 +36,10 @@ def linsolve_Timoshenko(A: ndarray, B: ndarray):
 
 
 @njit(nogil=True, parallel=True, cache=True)
-def linsolve_Mindlin(A: ndarray, B: ndarray):
+def linsolve_Mindlin(A: ndarray, B: ndarray) -> ndarray:
+    """
+    Calculates unknowns for Mindlin-Reissner Plates.
+    """
     nLHS, nMN = A.shape[:2]
     nRHS = B.shape[0]
     res = np.zeros((nLHS, nRHS, nMN, 3))
@@ -48,7 +51,10 @@ def linsolve_Mindlin(A: ndarray, B: ndarray):
 
 
 @njit(nogil=True, parallel=True, cache=True)
-def linsolve_Kirchhoff(A: ndarray, B: ndarray):
+def linsolve_Kirchhoff(A: ndarray, B: ndarray) -> ndarray:
+    """
+    Calculates unknowns for Kirchhoff-Love Plates.
+    """
     nLHS, nMN = A.shape[:2]
     nRHS = B.shape[0]
     res = np.zeros((nLHS, nRHS, nMN))
