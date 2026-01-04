@@ -1,5 +1,6 @@
 from typing import Iterable, Hashable
 from types import NoneType
+from time import time
 
 import numpy as np
 from numpy import ndarray
@@ -97,6 +98,8 @@ class NavierPlate(NavierProblem):
             A dictionary with the same layout as the loads.
 
         """
+        linstat_timing_info = {}
+        
         if len(args) > 0:
 
             if len(args) > 2:
@@ -125,27 +128,41 @@ class NavierPlate(NavierProblem):
         lhs = lhs_Navier(self.size, self.shape, D=self.D, S=self.S)
 
         # LOADS
+        _t = time()
         rhs = np.stack(list(lc.rhs(problem=self) for lc in loads.cases()), axis=0)
+        if self.S is None:
+            rhs = rhs_Kirchhoff(rhs, self.size)
+        _dt = time() - _t
+        linstat_timing_info["rhs_assembly_time_seconds"] = _dt
         # rhs.shape = (nRHS, nMN, nComponent)
 
         # SOLUTION
+        _t = time()
         if self.S is None:
-            _rhs = rhs_Kirchhoff(rhs, self.size)
-            coeffs = linsolve_Kirchhoff(lhs, _rhs)
-            del _rhs
+            coeffs = linsolve_Kirchhoff(lhs, rhs)
             # coeffs.shape = (nLHS, nRHS, nMN)
         else:
             coeffs = linsolve_Mindlin(lhs, rhs)
             # coeffs.shape = (nLHS, nRHS, nMN, 3)
+        _dt = time() - _t
+        linstat_timing_info["solution_time_seconds"] = _dt
 
         # POSTPROCESSING
+        _t = time()
         points = atleast2d(points)
         res = postproc(self.size, self.shape, points, coeffs, rhs, self.D, self.S)
+        _dt = time() - _t
+        linstat_timing_info["postprocessing_time_seconds"] = _dt
         # res.shape = (nLHS, nRHS, nP, nX)
 
+        _t = time()
         result = DeepDict()
         for i, (addr, _) in enumerate(loads.items(deep=True, return_address=True)):
             result[addr] = self._postproc_linstat_load_case_result(res[0, i, :, :])
         result.lock()
-
+        _dt = time() - _t
+        linstat_timing_info["result_assembly_time_seconds"] = _dt
+        
+        self._linstat_timing_info = linstat_timing_info
+        
         return result
