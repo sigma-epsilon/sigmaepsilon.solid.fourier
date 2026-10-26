@@ -119,36 +119,30 @@ def _monte_carlo_2d_njit(
     factor_x = np.pi / Lx
     factor_y = np.pi / Ly
 
-    for m in prange(1, M + 1):
-        for n in prange(1, N + 1):
-            mn = (m - 1) * N + n - 1
-            out[mn, 0] += (
-                multi
-                * np.sum(
-                    np.sin(px * factor_x * m)
-                    * np.sin(py * factor_y * n)
-                    * fvalues[:, 0]
-                )
-                / num_MC_tot
+    for mn in prange(M * N):
+        m = mn // N + 1
+        n = mn % N + 1
+        out[mn, 0] += (
+            multi
+            * np.sum(
+                np.sin(px * factor_x * m) * np.sin(py * factor_y * n) * fvalues[:, 0]
             )
-            out[mn, 1] += (
-                multi
-                * np.sum(
-                    np.sin(px * factor_x * m)
-                    * np.cos(py * factor_y * n)
-                    * fvalues[:, 1]
-                )
-                / num_MC_tot
+            / num_MC_tot
+        )
+        out[mn, 1] += (
+            multi
+            * np.sum(
+                np.sin(px * factor_x * m) * np.cos(py * factor_y * n) * fvalues[:, 1]
             )
-            out[mn, 2] += (
-                multi
-                * np.sum(
-                    np.cos(px * factor_x * m)
-                    * np.sin(py * factor_y * n)
-                    * fvalues[:, 2]
-                )
-                / num_MC_tot
+            / num_MC_tot
+        )
+        out[mn, 2] += (
+            multi
+            * np.sum(
+                np.cos(px * factor_x * m) * np.sin(py * factor_y * n) * fvalues[:, 2]
             )
+            / num_MC_tot
+        )
 
     return out
 
