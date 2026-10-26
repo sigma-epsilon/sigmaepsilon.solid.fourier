@@ -236,6 +236,36 @@ class TestZeroOrderCoefficients(SigmaEpsilonTestCase):
             self.assertTrue(np.all(load.rhs0(self.plate) == 0))
 
 
+class TestLoadApproximation(SigmaEpsilonTestCase):
+    """
+    The Fourier series approximation of moment loads includes their
+    zero-order terms.
+    """
+
+    def test_beam_moment_load(self):
+        beam = NavierBeam(10.0, 200, EI=1.0)
+        x = [3.0, 5.0, 6.0]
+        full = LineLoad([0, 10.0], [0.0, 2.0]).eval_approx(beam, x)
+        self.assertTrue(np.allclose(full[:, 1], 2.0))
+        partial = LineLoad([2.0, 7.0], [0.0, 1.0]).eval_approx(beam, x)
+        self.assertTrue(np.allclose(partial[:, 1], 1.0, atol=1e-2))
+        outside = LineLoad([2.0, 7.0], [0.0, 1.0]).eval_approx(beam, [1.0, 8.5])
+        self.assertTrue(np.allclose(outside[:, 1], 0.0, atol=1e-2))
+
+    def test_plate_moment_load(self):
+        Lx, Ly = 2.0, 3.0
+        plate = NavierPlate((Lx, Ly), (100, 120), D=np.eye(3))
+        points = np.array([[1.0, 1.5], [0.7, 0.4], [1.4, 2.5]])
+        full = RectangleLoad([[0, 0], [Lx, Ly]], [0, 1.0, -2.0])
+        values = full.eval_approx(plate, points)
+        self.assertTrue(np.allclose(values[:, 1], 1.0, atol=2e-2))
+        self.assertTrue(np.allclose(values[:, 2], -2.0, atol=4e-2))
+        patch = RectangleLoad([[0.5, 0.7], [1.3, 1.9]], [0, 1.0, -2.0])
+        values = patch.eval_approx(plate, [[0.9, 1.3], [1.7, 2.5]])
+        self.assertTrue(np.allclose(values[:, 1], [1.0, 0.0], atol=2e-2))
+        self.assertTrue(np.allclose(values[:, 2], [-2.0, 0.0], atol=4e-2))
+
+
 class TestResultAssignment(SigmaEpsilonTestCase):
     def test_non_load_items_are_skipped(self):
         L = 10.0

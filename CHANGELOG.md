@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All models: the constant part of moment loads (the zero-order term of their cosine series) was dropped, and with it the shear forces that balance it (and the related rotations for Timoshenko-Ehrenfest beams and Uflyand-Mindlin plates).
 - Results were matched to load cases by position. Items of a `LoadGroup` that are not load cases caused errors or results being assigned to the wrong load case.
 - Sign of the moment loads in the Kirchhoff-Love plate theory guide.
+- `LoadCase.eval_approx` left out the zero-order terms of moment loads, e.g. it returned zero for a uniform moment load.
 
 ### Added
 

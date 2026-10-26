@@ -91,32 +91,47 @@ class LoadCase(Generic[LoadDomainType, LoadValueType]):
 
     def eval_approx(self, problem: NavierProblemProtocol, points: Iterable) -> ndarray:
         """
-        Evaluates the Fourier series approximation of the load at the given points.
+        Evaluates the Fourier series approximation of the load at the given points,
+        including the zero-order terms of the moment loads (see :func:`rhs0`).
 
-        The returned array is an 1d array with the same length as the number of points.
+        The returned array is a 2d array of shape (nP, nDOF), where nP is the number
+        of points and nDOF is the number of load components (2 for a beam, 3 for a
+        plate).
         """
         if problem.model_type.is_2d:
             length_X, length_Y = problem.size
             number_of_modes_X, number_of_modes_Y = problem.shape
             rhs = self.rhs(problem)
+            rhs0 = self.rhs0(problem)
             points = np.array(points, dtype=float)
-            return eval_loads_2d(
+            res = eval_loads_2d(
                 (length_X, length_Y),
                 (number_of_modes_X, number_of_modes_Y),
                 rhs,
                 points,
             )
+            # mx at the harmonics (m, 0) and my at the harmonics (0, n)
+            m = np.arange(1, number_of_modes_X + 1)
+            n = np.arange(1, number_of_modes_Y + 1)
+            Sm = np.sin(np.outer(points[:, 0], m) * np.pi / length_X)
+            Sn = np.sin(np.outer(points[:, 1], n) * np.pi / length_Y)
+            res[:, 1] += Sm @ rhs0[:number_of_modes_X, 1]
+            res[:, 2] += Sn @ rhs0[number_of_modes_X:, 2]
+            return res
         elif problem.model_type.is_1d:
             length_X = float(problem.size)
             number_of_modes_X = problem.shape
             rhs = self.rhs(problem)
             points = np.array(points, dtype=float)
-            return eval_loads_1d(
+            res = eval_loads_1d(
                 length_X,
                 number_of_modes_X,
                 rhs,
                 points,
             )
+            # the mean of the moment load
+            res[:, 1] += self.rhs0(problem)[1]
+            return res
         else:  # pragma: no cover
             raise NotImplementedError
 
