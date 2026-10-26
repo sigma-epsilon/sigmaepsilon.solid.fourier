@@ -187,6 +187,8 @@ V_y(x) \approx \overline{V}_y(x) &= \sum_{k=1}^{n} \overline{G} A \left( v^{(k)}
 \end{align*}
 ```
 
+The cosine series of $p_{zz}$ is complete only if it includes the constant term $p_{zz}^{(0)} = \frac{1}{L} \int_0^L p_{zz}(x) dx$, the mean of the moment load. For $k=0$, the basis function of $v$ vanishes, and the second row of the linear system above gives $\vartheta_z^{(0)} = p_{zz}^{(0)} / \overline{G} A$. Hence, the mean of the moment load adds a constant rotation $\vartheta_z^{(0)}$, a constant shear strain $-\vartheta_z^{(0)}$ and a constant shear force $-p_{zz}^{(0)}$ to the results, but no deflection or bending moment.
+
 ### Series representation of arbitrary loads
 
 This is identical to the procedure described for Euler-Bernoulli beams {ref}`here <Navier_series_representation_of_beam_loads>`.

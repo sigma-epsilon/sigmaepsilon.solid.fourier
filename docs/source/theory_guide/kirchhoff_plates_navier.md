@@ -247,7 +247,7 @@ satisfies the boundary conditions of {eq}`eq_BC_kirchhoff`. Substituting the app
 ```{math}
 :label: eq_solution_wij_kirchhoff
 w^{(ij)} = \frac
-{ p_z^{(ij)} - \frac{\pi \, i}{L_x} p_{yy}^{(ij)} - \frac{\pi \, j}{L_y} p_{xx}^{(ij)} }
+{ p_z^{(ij)} - \frac{\pi \, i}{L_x} p_{yy}^{(ij)} + \frac{\pi \, j}{L_y} p_{xx}^{(ij)} }
 { \frac{\pi^4}{L_x^4 \, L_y^4} \left[ D_{11} L_y^4 \, i^4 + D_{22} \, L_x^4 \, j^4 + 2 \, L_x^2 \, L_y^2 \, i^2 \, j^2 \left( D_{12} + 2 \, D_{66} \right) \right] }
 ```
 
@@ -260,4 +260,23 @@ p_z^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_z(x,y) \, S_i(x) 
 p_{xx}^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_{xx}(x,y) \, S_i(x) \, C_j(y) \, dxdy, \\
 p_{yy}^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_{yy}(x,y) \, C_i(x) \, S_j(y) \, dxdy.
 \end{align*}
+```
+
+### Zero-order terms of moment loads
+
+The series of $p_{xx}$ and $p_{yy}$ in {eq}`eq_approx_kirchhoff` are cosine series in $y$ and $x$ respectively, and as such, they are complete only if they include the terms with $j=0$ and $i=0$:
+
+```{math}
+:label: eq_zero_order_load_coeff_expressions_kirchhoff
+\begin{align*}
+p_{xx}^{(i0)} &= \frac{2}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_{xx}(x,y) \, S_i(x) \, dxdy, \\
+p_{yy}^{(0j)} &= \frac{2}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_{yy}(x,y) \, S_j(y) \, dxdy.
+\end{align*}
+```
+
+These terms are constant in one direction, hence they do not appear in the equivalent transverse load of {eq}`eq_solution_wij_kirchhoff` and cause no deflection. They are balanced by the shear forces alone, which receive the contributions
+
+```{math}
+v_x(x, y) \mathrel{+}= \sum_{j=1}^n p_{yy}^{(0j)} \, S_j(y), \qquad
+v_y(x, y) \mathrel{+}= - \sum_{i=1}^m p_{xx}^{(i0)} \, S_i(x).
 ```

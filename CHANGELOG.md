@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+**Results for moment loads were wrong in earlier versions.** If you applied non-zero moment loads (`mx`/`my` on plates, `M` on beams), recompute your results.
+
+### Fixed
+
+- Kirchhoff-Love plates: moment loads used the wrong sign for `mx` and the wrong harmonic index for both `mx` and `my`.
+- Euler-Bernoulli beams: the sign of moment loads was flipped, both in the solution and in the shear force.
+- Plates: concentrated moments (`PointLoad` with non-zero `mx`/`my`) were expanded in the wrong basis functions.
+- All models: the constant part of moment loads (the zero-order term of their cosine series) was dropped, and with it the shear forces that balance it (and the related rotations for Timoshenko-Ehrenfest beams and Uflyand-Mindlin plates).
+- Results were matched to load cases by position. Items of a `LoadGroup` that are not load cases caused errors or results being assigned to the wrong load case.
+- Sign of the moment loads in the Kirchhoff-Love plate theory guide.
+
+### Added
+
+- `LoadCase.rhs0`, returning the zero-order coefficients of moment loads.
+- `LoadGroup.cases` accepts `return_address=True` to yield `(address, case)` pairs.
+- Accuracy tests against closed-form solutions and between the thin/slender and shear-deformable models.
+
 ## [2.0.0] - 2024-10-9
 
 Version 2.0.0 comes with a completely renewed documentation.

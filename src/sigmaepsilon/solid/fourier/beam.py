@@ -167,8 +167,17 @@ class NavierBeam(NavierProblem):
         lhs = lhs_Navier(self.length, self.N, D=self.EI, S=self.GA)
 
         # LOADS
-        rhs = np.stack(list(lc.rhs(problem=self) for lc in loads.cases()), axis=0)
+        # The addresses and the cases are collected together, so that the results
+        # are assigned to the cases they belong to, regardless of any other items
+        # in the load group.
+        case_items = list(loads.cases(return_address=True))
+        if len(case_items) == 0:
+            raise ValueError("The load group contains no load cases.")
+        addresses, cases = zip(*case_items)
+        rhs = np.stack([lc.rhs(problem=self) for lc in cases], axis=0)
         # rhs.shape = (nRHS, nMN, nComponent)
+        rhs0 = np.stack([lc.rhs0(problem=self) for lc in cases], axis=0)
+        # zero-order coefficients of moment loads, see LoadCase.rhs0
 
         # SOLUTION
         if self.GA is None:
@@ -182,11 +191,13 @@ class NavierBeam(NavierProblem):
 
         # POSTPROCESSING
         points = atleast1d(points)
-        res = postproc(self.length, self.N, points, coeffs, rhs, self.EI, self.GA)
+        res = postproc(
+            self.length, self.N, points, coeffs, rhs, self.EI, self.GA, loads0=rhs0
+        )
         # res.shape = (nLHS, nRHS, nPoint, nComponent)
 
         result = DeepDict()
-        for i, (addr, _) in enumerate(loads.items(deep=True, return_address=True)):
+        for i, addr in enumerate(addresses):
             result[addr] = self._postproc_linstat_load_case_result(res[0, i, :, :])
         result.lock()
 
