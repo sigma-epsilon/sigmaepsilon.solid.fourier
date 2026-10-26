@@ -253,9 +253,9 @@ def lhs_Navier_Timoshenko(L: float, N: int, EI: ndarray, GA: ndarray) -> ndarray
 
 @njit(nogil=True, parallel=True, cache=True)
 def rhs_Kirchhoff(coeffs: ndarray, size: tuple, shape: tuple) -> ndarray:
-    """
+    r"""
     Calculates the coefficients of the equivalent transverse load
-    :math:`p_z + \\partial m_y / \\partial x - \\partial m_x / \\partial y`
+    :math:`p_z + \partial m_y / \partial x - \partial m_x / \partial y`
     for Kirchhoff plates.
     """
     Lx, Ly = size

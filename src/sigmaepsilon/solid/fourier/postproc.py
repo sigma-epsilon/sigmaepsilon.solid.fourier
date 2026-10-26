@@ -99,6 +99,7 @@ def postproc_zero_order(
     -------
     numpy.ndarray
         4d array of shape (nLHS, nRHS, nP, ...).
+
     """
     ftype = loads0.dtype
     itype = itype_of_ftype(ftype)

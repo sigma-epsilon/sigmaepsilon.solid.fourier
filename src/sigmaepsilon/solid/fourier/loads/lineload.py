@@ -63,8 +63,9 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
 
     def rhs0(self, problem: NavierProblemProtocol) -> ndarray:
         """
-        Returns the zero-order coefficients of the moment loads. See
-        :func:`~sigmaepsilon.solid.fourier.loads.LoadCase.rhs0` for details.
+        Returns the zero-order coefficients of the moment loads.
+
+        See :func:`~sigmaepsilon.solid.fourier.loads.LoadCase.rhs0` for details.
         """
         return self._rhs(problem, rhs0_line_const, rhs0_line_1d_mc, rhs0_line_2d_mc)
 

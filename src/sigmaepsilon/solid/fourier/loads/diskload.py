@@ -48,8 +48,9 @@ class DiskLoad(LoadCase[tuple[tuple[float, float], float], Iterable]):
 
     def rhs0(self, problem: NavierProblemProtocol) -> ndarray:
         """
-        Returns the zero-order coefficients of the moment loads. See
-        :func:`~sigmaepsilon.solid.fourier.loads.LoadCase.rhs0` for details.
+        Returns the zero-order coefficients of the moment loads.
+
+        See :func:`~sigmaepsilon.solid.fourier.loads.LoadCase.rhs0` for details.
         """
         return self._rhs(problem, rhs0_disk_mc)
 

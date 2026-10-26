@@ -17,7 +17,7 @@ Beyond that, the main risks are:
 
 | Severity | Count | Meaning |
 |---|---|---|
-| Critical | 4 | Wrong engineering results without any error being raised |
+| Critical | 4 (all solved in PR #37) | Wrong engineering results without any error being raised |
 | High | 6 | Wrong or misleading results in edge cases, or serious scalability limits |
 | Medium | 9 | Robustness, API and test-suite problems |
 | Low | 14 | Documentation, packaging, CI and repository upkeep |
@@ -38,7 +38,9 @@ Every finding marked **Confirmed** was reproduced by running code. **Unverified*
 
 ## Critical
 
-### C1. Kirchhoff plate: moment loads use the wrong sign and the wrong harmonic index — Confirmed
+### C1. Kirchhoff plate: moment loads use the wrong sign and the wrong harmonic index — ✅ Solved
+
+> **Status: Solved** in [PR #37](https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier/pull/37). Originally: Confirmed.
 
 [`preproc.py:262-266`](src/sigmaepsilon/solid/fourier/preproc.py#L262-L266)
 
@@ -74,7 +76,9 @@ rhs = f + mx * np.pi * n / Ly - my * np.pi * m / Lx
 
 `shape` must then be passed into `rhs_Kirchhoff`.
 
-### C2. Bernoulli beam: the moment-load sign is flipped in both the RHS and the shear force — Confirmed
+### C2. Bernoulli beam: the moment-load sign is flipped in both the RHS and the shear force — ✅ Solved
+
+> **Status: Solved** in [PR #37](https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier/pull/37). Originally: Confirmed.
 
 - [`preproc.py:280`](src/sigmaepsilon/solid/fourier/preproc.py#L280) computes `f − m·c·n`. The theory guide ([`bernoulli_beams_navier.md`, eq. `eq_bernoulli_beamXY_v_coefficient_formula`](docs/source/theory_guide/bernoulli_beams_navier.md)) gives `q_j + r_j·πj/L`.
 - [`postproc.py:133`](src/sigmaepsilon/solid/fourier/postproc.py#L133) computes `V = (EI·v·c³ + r)·cos`. The guide gives `(EI·v·c³ − r)·cos`.
@@ -83,7 +87,9 @@ rhs = f + mx * np.pi * n / Ly - my * np.pi * m / Lx
 
 The two errors cancel in the shear force, so today `SY` happens to agree with Timoshenko. **Fixing only the RHS makes `SY` wrong** (it oscillates as ±2r). Both lines have to be fixed together. With both fixed, all components match Timoshenko apart from C3 below.
 
-### C3. Every model drops the constant shear force caused by moment loads — Confirmed for beams, likely for plates
+### C3. Every model drops the constant shear force caused by moment loads — ✅ Solved
+
+> **Status: Solved** in [PR #37](https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier/pull/37). Originally: Confirmed for beams, likely for plates.
 
 Moment loads are expanded in `cos(kπx/L)` for `k ≥ 1`. That basis has no `k = 0` term, so the mean of the moment load, `m̄ = (1/L)∫m dx`, is discarded.
 
@@ -93,7 +99,9 @@ For a simply supported beam, a uniform moment load causes no deflection and no b
 
 **Fix.** Add the analytic `k = 0` correction in postprocessing: `V += m̄`, plus `θ += −m̄/GA` for Timoshenko, with the sign following the guide's convention. The plate cosine bases have the same gap in each direction, so `QX`/`QY` under `mx`/`my` loads are probably also missing a term that is constant in one direction. This needs its own check.
 
-### C4. Results are matched to load cases by position, and the two sequences can differ — Confirmed
+### C4. Results are matched to load cases by position, and the two sequences can differ — ✅ Solved
+
+> **Status: Solved** in [PR #37](https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier/pull/37). Originally: Confirmed.
 
 [`plate.py:128`](src/sigmaepsilon/solid/fourier/plate.py#L128) / [`plate.py:147-148`](src/sigmaepsilon/solid/fourier/plate.py#L147-L148) (and [`beam.py:170`](src/sigmaepsilon/solid/fourier/beam.py#L170), [`beam.py:189-190`](src/sigmaepsilon/solid/fourier/beam.py#L189-L190)):
 
@@ -228,9 +236,9 @@ These parts were checked and need no change:
 
 ## Recommended order of work
 
-1. **Fix C1, C2 and C4.** Each is a few lines. Add the slender/thin-limit consistency tests from M1 at the same time so they cannot come back.
+1. ✅ **Fix C1, C2 and C4.** *(Done in PR #37.)* Each is a few lines. Add the slender/thin-limit consistency tests from M1 at the same time so they cannot come back.
 2. **Release a patch version** whose changelog warns that results for moment loads on Kirchhoff plates and Bernoulli beams were wrong in earlier versions.
-3. **Fix C3 and verify the plate equivalent of the missing shear term.**
+3. ✅ **Fix C3 and verify the plate equivalent of the missing shear term.** *(Done in PR #37.)*
 4. **Fix H1 and H2 together**, by rewriting the postprocessing kernels to accumulate in place with one parallel loop over points.
 5. **Fix H3–H6:** input validation and the Monte Carlo fixes, ideally replacing Monte Carlo with quadrature.
 6. **Fix the medium and low items** opportunistically.
