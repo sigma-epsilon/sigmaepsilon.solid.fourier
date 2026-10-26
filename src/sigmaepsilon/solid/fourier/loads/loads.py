@@ -1,19 +1,19 @@
-from typing import Iterable, Any, Optional, TypeVar, Generic, TypeAlias, Hashable
-from types import NoneType
 from abc import abstractmethod
+from collections.abc import Hashable, Iterable
+from types import NoneType
+from typing import Any, Generic, Optional, TypeAlias, TypeVar
 
-from numpy import ndarray
 import numpy as np
-
+from numpy import ndarray
 from sigmaepsilon.deepdict import DeepDict
 
-from ..protocols import NavierProblemProtocol, LoadGroupProtocol, LoadCaseProtocol
-from ..postproc import eval_loads_1d, eval_loads_2d
-from ..enums import IntegrationMethod
 from ..config import Config
+from ..enums import IntegrationMethod
+from ..postproc import eval_loads_1d, eval_loads_2d
+from ..protocols import LoadCaseProtocol, LoadGroupProtocol, NavierProblemProtocol
 from ..utils import RNGType, to_positive_int
 
-__all__ = ["LoadGroup", "LoadCase"]
+__all__ = ["LoadCase", "LoadGroup"]
 
 
 Float1d: TypeAlias = Iterable[float]
@@ -94,7 +94,7 @@ class LoadCase(Generic[LoadDomainType, LoadValueType]):
 
     def _integration_options(self) -> dict:
         rng = Config.MC_SEED if self._rng is None else self._rng
-        return dict(method=self.integration, num_mc=self._num_mc, rng=rng)
+        return {"method": self.integration, "num_mc": self._num_mc, "rng": rng}
 
     @property
     def domain(self) -> LoadDomainType:

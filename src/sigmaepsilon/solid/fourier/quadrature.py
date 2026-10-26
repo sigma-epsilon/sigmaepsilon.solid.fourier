@@ -18,11 +18,11 @@ from numpy import ndarray
 from .config import Config
 
 __all__ = [
+    "disk_rule",
     "gauss_legendre",
     "line_1d_rule",
     "line_2d_rule",
     "rectangle_rule",
-    "disk_rule",
 ]
 
 

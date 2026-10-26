@@ -13,19 +13,18 @@ Every function returns the coefficients in the layout of
 in the layout of :func:`~sigmaepsilon.solid.fourier.loads.LoadCase.rhs0`.
 """
 
+from collections.abc import Callable, Iterable, Iterator
 from functools import partial
 from numbers import Real
-from typing import Callable, Iterable, Iterator
 
 import numpy as np
 from numpy import ndarray
-
 from sigmaepsilon.math.function import Function
 
 from .config import Config
 from .enums import IntegrationMethod
 from .mc import monte_carlo_samples
-from .quadrature import line_1d_rule, line_2d_rule, rectangle_rule, disk_rule
+from .quadrature import disk_rule, line_1d_rule, line_2d_rule, rectangle_rule
 from .utils import (
     RNGType,
     generate_random_points_in_disk,
@@ -35,10 +34,10 @@ from .utils import (
 )
 
 __all__ = [
+    "integrate_disk",
     "integrate_line_1d",
     "integrate_line_2d",
     "integrate_rectangle",
-    "integrate_disk",
 ]
 
 
@@ -53,7 +52,7 @@ def _load_functions(values: Iterable, variables: list[str]) -> list[float | Func
         elif isinstance(value, Real) and not isinstance(value, bool):
             functions.append(float(value))
         else:
-            raise ValueError(f"Invalid load value {value!r}.")
+            raise TypeError(f"Invalid load value {value!r}.")
     return functions
 
 
@@ -314,8 +313,7 @@ def integrate_rectangle(
 def integrate_disk(
     size: tuple,
     shape: tuple,
-    center: ndarray,
-    radius: float,
+    domain: tuple[ndarray, float],
     values: Iterable,
     *,
     zero_order: bool = False,
@@ -324,9 +322,10 @@ def integrate_disk(
     rng: RNGType = None,
 ) -> ndarray:
     """
-    Returns coefficients for arbitrary loads over a disk.
-    Values are expected in the order [f, mx, my].
+    Returns coefficients for arbitrary loads over a disk, given by its center
+    and radius. Values are expected in the order [f, mx, my].
     """
+    center, radius = domain
     out = _zeros_2d(shape, zero_order)
     if zero_order and _has_no_moment_load(values):
         return out

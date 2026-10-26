@@ -1,11 +1,11 @@
 import numpy as np
 from numpy import ndarray
 
-from ..preproc import rhs_line_const, rhs0_line_const
 from ..integration import integrate_line_1d, integrate_line_2d
+from ..preproc import rhs0_line_const, rhs_line_const
 from ..protocols import NavierProblemProtocol
-from .loads import LoadCase, Float1d, Float2d
-from ..utils import is_scalar, check_points_in_domain
+from ..utils import check_points_in_domain, is_scalar
+from .loads import Float1d, Float2d, LoadCase
 
 __all__ = ["LineLoad"]
 

@@ -1,13 +1,13 @@
-from typing import Iterable
+from collections.abc import Iterable
 
 import numpy as np
 from numpy import ndarray
 
-from ..preproc import rhs_rect_const, rhs0_rect_const
 from ..integration import integrate_rectangle
-from ..utils import points_to_rectangle_region, check_points_in_domain
+from ..preproc import rhs0_rect_const, rhs_rect_const
 from ..protocols import NavierProblemProtocol
-from .loads import LoadCase, Float1d, Float2d
+from ..utils import check_points_in_domain, points_to_rectangle_region
+from .loads import Float1d, Float2d, LoadCase
 
 __all__ = ["RectangleLoad"]
 

@@ -233,7 +233,7 @@ class TestIntegrationMethod(SigmaEpsilonTestCase):
 
     def test_invalid_load_value(self):
         plate = NavierPlate((1.0, 1.0), (2, 2), D=np.eye(3))
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             RectangleLoad(self.domain, ["x", None, 0]).rhs(plate)
 
 

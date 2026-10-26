@@ -1,12 +1,12 @@
-from typing import Iterable
+from collections.abc import Iterable
 
 import numpy as np
 from numpy import ndarray
 
 from ..integration import integrate_disk
 from ..protocols import NavierProblemProtocol
-from .loads import LoadCase
 from ..utils import check_points_in_domain, to_positive_float
+from .loads import LoadCase
 
 __all__ = ["DiskLoad"]
 
@@ -79,8 +79,7 @@ class DiskLoad(LoadCase[tuple[tuple[float, float], float], Iterable]):
         return integrate_disk(
             problem.size,
             problem.shape,
-            center,
-            radius,
+            (center, radius),
             self.value,
             zero_order=zero_order,
             **self._integration_options(),

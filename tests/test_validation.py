@@ -31,6 +31,8 @@ class TestBeamValidation(SigmaEpsilonTestCase):
             NavierBeam(self.L, 2.5, EI=1.0)
         beam = NavierBeam(self.L, np.int64(10), EI=1.0)
         self.assertEqual(beam.N, 10)
+        beam.N = np.array(12)
+        self.assertEqual(beam.N, 12)
         with self.assertRaises(ValueError):
             beam.shape = -1
 

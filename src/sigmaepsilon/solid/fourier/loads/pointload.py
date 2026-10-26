@@ -1,10 +1,10 @@
 import numpy as np
 from numpy import ndarray
 
-from ..preproc import rhs_conc_1d, rhs_conc_2d, rhs0_conc_1d, rhs0_conc_2d
+from ..preproc import rhs0_conc_1d, rhs0_conc_2d, rhs_conc_1d, rhs_conc_2d
 from ..protocols import NavierProblemProtocol
-from .loads import LoadCase, Float1d
 from ..utils import check_points_in_domain
+from .loads import Float1d, LoadCase
 
 __all__ = ["PointLoad"]
 

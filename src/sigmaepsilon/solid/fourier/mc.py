@@ -2,7 +2,7 @@
 Monte Carlo sampling of the integration domains of loads.
 """
 
-from typing import Callable, Iterator
+from collections.abc import Callable, Iterator
 
 import numpy as np
 from numpy import ndarray

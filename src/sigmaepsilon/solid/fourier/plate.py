@@ -1,19 +1,18 @@
-from typing import Iterable, Hashable
+from collections.abc import Hashable, Iterable
 from types import NoneType
 
 import numpy as np
 from numpy import ndarray
-
 from sigmaepsilon.deepdict import DeepDict
 
-from .problem import NavierProblem
-from .preproc import lhs_Navier, rhs_Kirchhoff
-from .postproc import postproc
-from .proc import linsolve_Kirchhoff, linsolve_Mindlin
-from .result import PlateLoadCaseResultLinStat
-from .protocols import LoadGroupProtocol
 from .enums import MechanicalModelType
-from .utils import to_positive_float, to_positive_int, check_points_in_domain
+from .postproc import postproc
+from .preproc import lhs_Navier, rhs_Kirchhoff
+from .problem import NavierProblem
+from .proc import linsolve_Kirchhoff, linsolve_Mindlin
+from .protocols import LoadGroupProtocol
+from .result import PlateLoadCaseResultLinStat
+from .utils import check_points_in_domain, to_positive_float, to_positive_int
 
 __all__ = ["NavierPlate"]
 

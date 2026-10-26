@@ -1,6 +1,7 @@
+from collections.abc import Iterable
 from numbers import Integral, Real
 from types import NoneType
-from typing import Any, Iterable
+from typing import Any
 
 import numpy as np
 from numpy import ndarray

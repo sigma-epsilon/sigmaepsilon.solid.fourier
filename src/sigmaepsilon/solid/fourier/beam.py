@@ -1,19 +1,18 @@
-from typing import Iterable, Hashable
+from collections.abc import Hashable, Iterable
 from types import NoneType
 
 import numpy as np
-
 from sigmaepsilon.deepdict import DeepDict
 from sigmaepsilon.math import atleast1d
 
-from .problem import NavierProblem
-from .preproc import lhs_Navier, rhs_Bernoulli
-from .postproc import postproc
-from .proc import linsolve_Bernoulli, linsolve_Timoshenko
-from .result import BeamLoadCaseResultLinStat
-from .protocols import LoadGroupProtocol
 from .enums import MechanicalModelType
-from .utils import to_positive_float, to_positive_int, check_points_in_domain
+from .postproc import postproc
+from .preproc import lhs_Navier, rhs_Bernoulli
+from .problem import NavierProblem
+from .proc import linsolve_Bernoulli, linsolve_Timoshenko
+from .protocols import LoadGroupProtocol
+from .result import BeamLoadCaseResultLinStat
+from .utils import check_points_in_domain, to_positive_float, to_positive_int
 
 __all__ = ["NavierBeam"]
 
@@ -142,6 +141,17 @@ class NavierBeam(NavierProblem):
         else:
             return MechanicalModelType.TIMOSHENKO_BEAM
 
+    def _check_points(self, points: float | Iterable | NoneType) -> np.ndarray:
+        if points is None:
+            raise ValueError("The points of evaluation must be provided.")
+        points = atleast1d(np.asarray(points, dtype=float))
+        if points.ndim != 1:
+            raise ValueError(
+                f"The points must be a scalar or an 1d iterable, got shape {points.shape}."
+            )
+        check_points_in_domain(points, self.length)
+        return points
+
     def linear_static_analysis(
         self,
         *args,
@@ -196,14 +206,7 @@ class NavierBeam(NavierProblem):
         if not isinstance(loads, LoadGroupProtocol):  # pragma: no cover
             raise TypeError("The loads must be an instance of LoadGroup.")
 
-        if points is None:
-            raise ValueError("The points of evaluation must be provided.")
-        points = atleast1d(np.asarray(points, dtype=float))
-        if points.ndim != 1:
-            raise ValueError(
-                f"The points must be a scalar or an 1d iterable, got shape {points.shape}."
-            )
-        check_points_in_domain(points, self.length)
+        points = self._check_points(points)
 
         # STIFFNESS
         lhs = lhs_Navier(self.length, self.N, D=self.EI, S=self.GA)
