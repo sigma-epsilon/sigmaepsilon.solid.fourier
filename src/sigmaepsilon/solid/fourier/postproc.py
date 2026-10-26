@@ -22,9 +22,14 @@ def postproc(
     loads: ndarray,
     D: float | ndarray,
     S: float | ndarray | NoneType = None,
+    loads0: ndarray | NoneType = None,
 ) -> ndarray:
     """
     Calculates postprocessing items.
+
+    If the zero-order load coefficients `loads0` are provided (see
+    :func:`~sigmaepsilon.solid.fourier.loads.LoadCase.rhs0`), the contributions
+    of the corresponding harmonics are added to the results.
     """
     ftype = solution.dtype
     itype = itype_of_ftype(ftype)
@@ -69,6 +74,175 @@ def postproc(
     # (N, nLHS, nRHS, nP, ...)
     res = np.sum(res, axis=0)
     # (nLHS, nRHS, nP, ...)
+
+    if loads0 is not None:
+        res += postproc_zero_order(size, shape, points, res.shape[0], loads0, D, S)
+
+    return res
+
+
+def postproc_zero_order(
+    size: float | Iterable[float],
+    shape: int | Iterable[int],
+    points: ndarray,
+    nLHS: int,
+    loads0: ndarray,
+    D: float | ndarray,
+    S: float | ndarray | NoneType = None,
+) -> ndarray:
+    """
+    Calculates the contributions of the zero-order harmonics of moment loads
+    to the postprocessing items. These harmonics have no transverse displacement
+    and a single unknown each, hence they are solved here in closed form.
+
+    Returns
+    -------
+    numpy.ndarray
+        4d array of shape (nLHS, nRHS, nP, ...).
+
+    """
+    ftype = loads0.dtype
+    itype = itype_of_ftype(ftype)
+    if not isinstance(size, Iterable):
+        points = atleast1d(points).astype(ftype)
+        loads0 = atleast2d(loads0)
+        if S is not None:
+            return postproc_Timoshenko_zero_order(points, loads0, atleast1d(S))
+        else:
+            return postproc_Bernoulli_zero_order(nLHS, points, loads0)
+    else:
+        size = np.array(size).astype(ftype)
+        shape = np.array(shape).astype(itype)
+        points = atleast2d(points).astype(ftype)
+        loads0 = atleast3d(loads0)
+        if S is not None:
+            return postproc_Mindlin_zero_order(
+                size, shape, points, loads0, atleast3d(D), atleast3d(S)
+            )
+        else:
+            return postproc_Kirchhoff_zero_order(nLHS, size, shape, points, loads0)
+
+
+@njit(nogil=True, parallel=True, cache=True)
+def postproc_Bernoulli_zero_order(
+    nLHS: int, points: ndarray, loads0: ndarray
+) -> ndarray:
+    """
+    Contributions of the mean of the moment loads for Euler-Bernoulli beams,
+    as a 4d array of shape (nLHS, nRHS, nP, 6). `loads0` is a 2d array of shape
+    (nRHS, 2).
+    """
+    nP = points.shape[0]
+    nRHS = loads0.shape[0]
+    res = np.zeros((nLHS, nRHS, nP, 6), dtype=loads0.dtype)
+    for iRHS in prange(nRHS):
+        r0 = loads0[iRHS, 1]
+        for iLHS in range(nLHS):
+            for iP in range(nP):
+                res[iLHS, iRHS, iP, 5] = -r0
+    return res
+
+
+@njit(nogil=True, parallel=True, cache=True)
+def postproc_Timoshenko_zero_order(
+    points: ndarray, loads0: ndarray, GA: ndarray
+) -> ndarray:
+    """
+    Contributions of the mean of the moment loads for Timoshenko-Ehrenfest beams,
+    as a 4d array of shape (nLHS, nRHS, nP, 6). `loads0` is a 2d array of shape
+    (nRHS, 2).
+    """
+    nP = points.shape[0]
+    nRHS = loads0.shape[0]
+    nLHS = GA.shape[0]
+    res = np.zeros((nLHS, nRHS, nP, 6), dtype=loads0.dtype)
+    for iRHS in prange(nRHS):
+        r0 = loads0[iRHS, 1]
+        for iLHS in range(nLHS):
+            rot0 = r0 / GA[iLHS]
+            for iP in range(nP):
+                res[iLHS, iRHS, iP, 1] = rot0
+                res[iLHS, iRHS, iP, 3] = -rot0
+                res[iLHS, iRHS, iP, 5] = -r0
+    return res
+
+
+@njit(nogil=True, parallel=True, cache=True)
+def postproc_Kirchhoff_zero_order(
+    nLHS: int, size: ndarray, shape: ndarray, points: ndarray, loads0: ndarray
+) -> ndarray:
+    """
+    Contributions of the harmonics (m, 0) of mx and (0, n) of my for Kirchhoff-Love
+    plates, as a 4d array of shape (nLHS, nRHS, nP, 13). `loads0` is a 3d array of
+    shape (nRHS, M + N, 3).
+    """
+    Lx, Ly = size
+    M, N = shape
+    nP = points.shape[0]
+    nRHS = loads0.shape[0]
+    res = np.zeros((nLHS, nRHS, nP, 13), dtype=loads0.dtype)
+    for iRHS in prange(nRHS):
+        for iP in range(nP):
+            x, y = points[iP, :2]
+            qx, qy = 0.0, 0.0
+            for m in range(1, M + 1):
+                qy -= loads0[iRHS, m - 1, 1] * sin(PI * m * x / Lx)
+            for n in range(1, N + 1):
+                qx += loads0[iRHS, M + n - 1, 2] * sin(PI * n * y / Ly)
+            for iLHS in range(nLHS):
+                res[iLHS, iRHS, iP, QX] = qx
+                res[iLHS, iRHS, iP, QY] = qy
+    return res
+
+
+@njit(nogil=True, parallel=True, cache=True)
+def postproc_Mindlin_zero_order(
+    size: ndarray,
+    shape: ndarray,
+    points: ndarray,
+    loads0: ndarray,
+    D: ndarray,
+    S: ndarray,
+) -> ndarray:
+    """
+    Contributions of the harmonics (m, 0) of mx and (0, n) of my for Uflyand-Mindlin
+    plates, as a 4d array of shape (nLHS, nRHS, nP, 13). `loads0` is a 3d array of
+    shape (nRHS, M + N, 3).
+    """
+    Lx, Ly = size
+    M, N = shape
+    nP = points.shape[0]
+    nRHS = loads0.shape[0]
+    nLHS = D.shape[0]
+    res = np.zeros((nLHS, nRHS, nP, 13), dtype=loads0.dtype)
+    for iRHS in prange(nRHS):
+        for iLHS in range(nLHS):
+            D66 = D[iLHS, 2, 2]
+            S44, S55 = S[iLHS, 0, 0], S[iLHS, 1, 1]
+            for iP in range(nP):
+                x, y = points[iP, :2]
+                # harmonics (m, 0): only the rotation x is non-zero
+                for m in range(1, M + 1):
+                    Bm0 = loads0[iRHS, m - 1, 1] / (PI**2 * D66 * m**2 / Lx**2 + S44)
+                    Sm = sin(PI * m * x / Lx)
+                    Cm = cos(PI * m * x / Lx)
+                    res[iLHS, iRHS, iP, ROTX] += Bm0 * Sm
+                    res[iLHS, iRHS, iP, CXY] += -PI * Bm0 * m * Cm / Lx
+                    res[iLHS, iRHS, iP, EYZ] += -Bm0 * Sm
+                    res[iLHS, iRHS, iP, MXY] += -PI * Bm0 * D66 * m * Cm / Lx
+                    res[iLHS, iRHS, iP, QY] += -Bm0 * S44 * Sm
+                # harmonics (0, n): only the rotation y is non-zero
+                for n in range(1, N + 1):
+                    C0n = loads0[iRHS, M + n - 1, 2] / (
+                        PI**2 * D66 * n**2 / Ly**2 + S55
+                    )
+                    Sn = sin(PI * n * y / Ly)
+                    Cn = cos(PI * n * y / Ly)
+                    res[iLHS, iRHS, iP, ROTY] += C0n * Sn
+                    res[iLHS, iRHS, iP, CXY] += PI * C0n * n * Cn / Ly
+                    res[iLHS, iRHS, iP, EXZ] += C0n * Sn
+                    res[iLHS, iRHS, iP, MXY] += PI * C0n * D66 * n * Cn / Ly
+                    res[iLHS, iRHS, iP, QX] += C0n * S55 * Sn
     return res
 
 
@@ -130,7 +304,7 @@ def postproc_Bernoulli(
                     res[iN, iLHS, iRHS, iP, 1] = vn * arg * Cn
                     res[iN, iLHS, iRHS, iP, 2] = -vn * arg**2 * Sn
                     res[iN, iLHS, iRHS, iP, 4] = -EI[iLHS] * vn * arg**2 * Sn
-                    res[iN, iLHS, iRHS, iP, 5] = (EI[iLHS] * vn * arg**3 + q) * Cn
+                    res[iN, iLHS, iRHS, iP, 5] = (EI[iLHS] * vn * arg**3 - q) * Cn
     return res
 
 

@@ -37,6 +37,21 @@ def _monte_carlo_1d_njit(
     return out
 
 
+@njit(nogil=True, cache=True)
+def _monte_carlo_1d_zero_order_njit(
+    size: float,
+    shape: int,
+    points: ndarray,
+    fvalues: ndarray,
+    dsize: float,
+    num_MC_tot: int,
+    out: ndarray,
+) -> ndarray:
+    # the mean of the moment load, see `preproc.rhs0_line_1d_mc`
+    out[1] += (dsize / size) * np.sum(fvalues[:, 1]) / num_MC_tot
+    return out
+
+
 def _monte_carlo_1d(
     size: float,
     shape: int,
@@ -46,6 +61,7 @@ def _monte_carlo_1d(
     rpg: Callable[[int], ndarray],
     out: ndarray | NoneType,
     n_MC: int | NoneType = None,
+    kernel: Callable = _monte_carlo_1d_njit,
 ) -> ndarray:
     functions = []
     for i in range(2):
@@ -71,7 +87,7 @@ def _monte_carlo_1d(
         rpg(MC_batch_size, out=points)
         for i in range(2):
             f_vals[:, i] = functions[i]([points])
-        _monte_carlo_1d_njit(size, shape, points, f_vals, dsize, num_MC_samples, out)
+        kernel(size, shape, points, f_vals, dsize, num_MC_samples, out)
 
     MC_batch_size = remaining_MC_points
     if remaining_MC_points > 1:
@@ -80,7 +96,7 @@ def _monte_carlo_1d(
         rpg(MC_batch_size, out=points)
         for i in range(2):
             f_vals[:, i] = functions[i]([points])
-        _monte_carlo_1d_njit(size, shape, points, f_vals, dsize, num_MC_samples, out)
+        kernel(size, shape, points, f_vals, dsize, num_MC_samples, out)
 
     return out
 
@@ -137,6 +153,39 @@ def _monte_carlo_2d_njit(
     return out
 
 
+@njit(nogil=True, parallel=True, cache=True)
+def _monte_carlo_2d_zero_order_njit(
+    size: tuple,
+    shape: tuple,
+    points: ndarray,
+    fvalues: ndarray,
+    dsize: float,
+    num_MC_tot: int,
+    out: ndarray,
+) -> ndarray:
+    # coefficients of the harmonics (m, 0) for mx and (0, n) for my,
+    # see `preproc.rhs0_rect_mc`
+    M, N = shape
+    Lx, Ly = size
+    multi = (2 / Lx / Ly) * dsize
+    px = points[:, 0]
+    py = points[:, 1]
+    factor_x = np.pi / Lx
+    factor_y = np.pi / Ly
+
+    for m in prange(1, M + 1):
+        out[m - 1, 1] += (
+            multi * np.sum(np.sin(px * factor_x * m) * fvalues[:, 1]) / num_MC_tot
+        )
+
+    for n in prange(1, N + 1):
+        out[M + n - 1, 2] += (
+            multi * np.sum(np.sin(py * factor_y * n) * fvalues[:, 2]) / num_MC_tot
+        )
+
+    return out
+
+
 def _monte_carlo_2d(
     size: tuple,
     shape: tuple,
@@ -146,6 +195,7 @@ def _monte_carlo_2d(
     rpg: Callable[[int], ndarray],
     out: ndarray | NoneType,
     n_MC: int | NoneType = None,
+    kernel: Callable = _monte_carlo_2d_njit,
 ) -> ndarray:
     functions = []
     for i in range(3):
@@ -171,7 +221,7 @@ def _monte_carlo_2d(
         rpg(MC_batch_size, out=points)
         for i in range(3):
             f_vals[:, i] = functions[i](points.T)
-        _monte_carlo_2d_njit(size, shape, points, f_vals, dsize, num_MC_samples, out)
+        kernel(size, shape, points, f_vals, dsize, num_MC_samples, out)
 
     MC_batch_size = remaining_MC_points
     if remaining_MC_points > 1:
@@ -180,6 +230,6 @@ def _monte_carlo_2d(
         rpg(MC_batch_size, out=points)
         for i in range(3):
             f_vals[:, i] = functions[i](points.T)
-        _monte_carlo_2d_njit(size, shape, points, f_vals, dsize, num_MC_samples, out)
+        kernel(size, shape, points, f_vals, dsize, num_MC_samples, out)
 
     return out

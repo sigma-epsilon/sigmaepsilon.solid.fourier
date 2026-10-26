@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import ndarray
 
-from ..preproc import rhs_conc_1d, rhs_conc_2d
+from ..preproc import rhs_conc_1d, rhs_conc_2d, rhs0_conc_1d, rhs0_conc_2d
 from ..protocols import NavierProblemProtocol
 from .loads import LoadCase, Float1d
 
@@ -44,14 +44,27 @@ class PointLoad(LoadCase[float | Float1d, Float1d]):
             2d float array of shape (H, 3), where H is the total number
             of harmonic terms involved (defined for the problem).
         """
+        return self._rhs(problem, rhs_conc_1d, rhs_conc_2d)
+
+    def rhs0(self, problem: NavierProblemProtocol) -> ndarray:
+        """
+        Returns the zero-order coefficients of the moment loads.
+
+        See :func:`~sigmaepsilon.solid.fourier.loads.LoadCase.rhs0` for details.
+        """
+        return self._rhs(problem, rhs0_conc_1d, rhs0_conc_2d)
+
+    def _rhs(
+        self, problem: NavierProblemProtocol, evaluator_1d, evaluator_2d
+    ) -> ndarray:
         values = np.array(self.value, dtype=float)
 
         if problem.model_type.is_2d:
             domain = np.array(self.domain, dtype=float)
-            evaluator = rhs_conc_2d
+            evaluator = evaluator_2d
         elif problem.model_type.is_1d:
             domain = float(self.domain)
-            evaluator = rhs_conc_1d
+            evaluator = evaluator_1d
         else:  # pragma: no cover
             raise NotImplementedError
 

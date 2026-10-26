@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Critical Rules
+
+Never read the .env file in the repository.
+
+The commit messages shouldn't include any details on ownership at all.
+
+Never add "Co-Authored-By: Claude..." or similar AI contributor lines to commit messages. Commit messages are not the place to make ownership statements — ownership of code is governed by company policies and agreements between employer and employee, or by the individual repository owner if no organization is involved.
+
 ## Project
 
 `sigmaepsilon.solid.fourier` computes semi-analytic Navier (Fourier series) solutions for simply supported beams (Euler-Bernoulli, Timoshenko) and rectangular plates (Kirchhoff-Love, Uflyand-Mindlin). It is part of the `sigmaepsilon.*` namespace package family and depends heavily on `sigmaepsilon.deepdict`, `sigmaepsilon.math`, `sigmaepsilon.mesh` and `sigmaepsilon.solid.material`. Python 3.10–3.12, managed with uv (hatchling build backend). Source lives under `src/sigmaepsilon/solid/fourier/` (namespace package, no `__init__.py` above `fourier/`).

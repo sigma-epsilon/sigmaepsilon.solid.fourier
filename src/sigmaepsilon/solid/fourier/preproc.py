@@ -8,7 +8,12 @@ from numpy import ndarray, sin, cos
 
 from sigmaepsilon.math import atleast1d, atleast3d
 
-from .mc import _monte_carlo_1d, _monte_carlo_2d
+from .mc import (
+    _monte_carlo_1d,
+    _monte_carlo_2d,
+    _monte_carlo_1d_zero_order_njit,
+    _monte_carlo_2d_zero_order_njit,
+)
 from .utils import (
     generate_random_points_in_disk,
     generate_random_points_in_rectangle,
@@ -247,23 +252,28 @@ def lhs_Navier_Timoshenko(L: float, N: int, EI: ndarray, GA: ndarray) -> ndarray
 
 
 @njit(nogil=True, parallel=True, cache=True)
-def rhs_Kirchhoff(coeffs: ndarray, size: tuple) -> ndarray:
-    """
-    Calculates unknowns for Kirchhoff plates.
+def rhs_Kirchhoff(coeffs: ndarray, size: tuple, shape: tuple) -> ndarray:
+    r"""Calculates the equivalent transverse load coefficients for Kirchhoff plates.
+
+    The equivalent load is
+    :math:`p_z + \partial m_y / \partial x - \partial m_x / \partial y`.
     """
     Lx, Ly = size
-    nRHS, N = coeffs.shape[:2]
-    res = np.zeros((nRHS, N))
+    M, N = shape
+    nRHS = coeffs.shape[0]
+    res = np.zeros((nRHS, M * N))
     PI = np.pi
     cx = PI / Lx
     cy = PI / Ly
     for i in prange(nRHS):
-        for n in prange(N):
-            res[i, n] = (
-                coeffs[i, n, 0]
-                - coeffs[i, n, 1] * cy * (n + 1)
-                - coeffs[i, n, 2] * cx * (n + 1)
-            )
+        for m in prange(1, M + 1):
+            for n in prange(1, N + 1):
+                iMN = (m - 1) * N + n - 1
+                res[i, iMN] = (
+                    coeffs[i, iMN, 0]
+                    + coeffs[i, iMN, 1] * cy * n
+                    - coeffs[i, iMN, 2] * cx * m
+                )
     return res
 
 
@@ -277,7 +287,7 @@ def rhs_Bernoulli(coeffs: ndarray, L: float) -> ndarray:
     c = np.pi / L
     for i in prange(nRHS):
         for n in prange(N):
-            res[i, n] = coeffs[i, n, 0] - coeffs[i, n, 1] * c * (n + 1)
+            res[i, n] = coeffs[i, n, 0] + coeffs[i, n, 1] * c * (n + 1)
     return res
 
 
@@ -385,8 +395,8 @@ def _rhs_conc_2d(size: tuple, shape: tuple, point: ndarray, values: ndarray) -> 
         for n in prange(1, N + 1):
             mn = (m - 1) * N + n - 1
             rhs[mn, 0] = c * fz * sin(m * Sx) * sin(n * Sy)
-            rhs[mn, 1] = c * mx * cos(m * Sx) * sin(n * Sy)
-            rhs[mn, 2] = c * my * sin(m * Sx) * cos(n * Sy)
+            rhs[mn, 1] = c * mx * sin(m * Sx) * cos(n * Sy)
+            rhs[mn, 2] = c * my * cos(m * Sx) * sin(n * Sy)
     return rhs
 
 
@@ -499,4 +509,222 @@ def rhs_disk_mc(
     rhs = np.zeros((np.prod(shape), 3), dtype=float)
     rpg = partial(generate_random_points_in_disk, center, radius)
     _monte_carlo_2d(size, shape, values, area, rpg=rpg, n_MC=n_MC, out=rhs)
+    return rhs
+
+
+# ZERO-ORDER RIGHT HAND SIDES
+#
+# Moment loads are expanded in series that are cosines in one direction, but the
+# coefficients above only cover the harmonics with a non-zero index in that direction.
+# The functions below return the missing zero-order coefficients. For beams, this is
+# an 1d array of shape (2,), where the second item is the mean of the moment load
+# (the first one is always zero). For plates, it is a 2d array of shape (M + N, 3),
+# where the first M rows hold the coefficients of `mx` for the harmonics (m, 0),
+# the next N rows hold the coefficients of `my` for the harmonics (0, n).
+
+
+@njit(nogil=True, parallel=True, cache=True)
+def _rhs0_rect_const(
+    size: tuple, shape: tuple, domain: ndarray, values: ndarray
+) -> ndarray:
+    Lx, Ly = size
+    M, N = shape
+    PI = np.pi
+    _, mx, my = values
+    rhs = np.zeros((M + N, 3), dtype=domain.dtype)
+    xmin, ymin = domain[0]
+    xmax, ymax = domain[1]
+    xc = (xmin + xmax) / 2
+    yc = (ymin + ymax) / 2
+    w = np.abs(xmax - xmin)
+    h = np.abs(ymax - ymin)
+    for m in prange(1, M + 1):
+        rhs[m - 1, 1] = (
+            4 * mx * h * sin(PI * m * w / (Lx * 2)) * sin(PI * m * xc / Lx)
+        ) / (PI * m * Ly)
+    for n in prange(1, N + 1):
+        rhs[M + n - 1, 2] = (
+            4 * my * w * sin(PI * n * h / (Ly * 2)) * sin(PI * n * yc / Ly)
+        ) / (PI * n * Lx)
+    return rhs
+
+
+@njit(nogil=True, parallel=True, cache=True)
+def _rhs0_conc_2d(
+    size: tuple, shape: tuple, point: ndarray, values: ndarray
+) -> ndarray:
+    Lx, Ly = size
+    M, N = shape
+    rhs = np.zeros((M + N, 3), dtype=point.dtype)
+    x, y = point
+    _, mx, my = values
+    Sx = np.pi * x / Lx
+    Sy = np.pi * y / Ly
+    c = 2 / Lx / Ly
+    for m in prange(1, M + 1):
+        rhs[m - 1, 1] = c * mx * sin(m * Sx)
+    for n in prange(1, N + 1):
+        rhs[M + n - 1, 2] = c * my * sin(n * Sy)
+    return rhs
+
+
+def _has_no_moment_load(values: Iterable) -> bool:
+    return all(isinstance(v, (float, int)) and v == 0 for v in values[1:])
+
+
+def rhs0_conc_1d(L: float, N: int, domain: float, values: ndarray) -> ndarray:
+    """
+    Returns zero-order coefficients for a concentrated load on a beam.
+    Load values are expected in the order [f, m].
+    """
+    return np.array([0.0, values[1] / L])
+
+
+def rhs0_conc_2d(
+    size: tuple, shape: tuple, domain: ndarray, values: ndarray
+) -> ndarray:
+    """
+    Returns zero-order coefficients for a concentrated load on a plate.
+    Load values are expected in the order [f, mx, my].
+    """
+    return _rhs0_conc_2d(size, shape, domain, values)
+
+
+def rhs0_line_const(L: float, N: int, domain: ndarray, values: ndarray) -> ndarray:
+    """
+    Returns zero-order coefficients for constant loads over line segments.
+    Values are expected in the order [f, m].
+    """
+    return np.array([0.0, values[1] * (domain[1] - domain[0]) / L])
+
+
+def rhs0_line_1d_mc(
+    size: float,
+    shape: int,
+    domain: ndarray,
+    values: Iterable,
+    *,
+    n_MC: int | NoneType = None,
+) -> ndarray:
+    """
+    Returns zero-order coefficients for arbitrary loads over line segments.
+    Values are expected in the order [f, m].
+    """
+    rhs = np.zeros((2,), dtype=float)
+    if _has_no_moment_load(values):
+        return rhs
+    length = domain[1] - domain[0]
+    rpg = partial(generate_random_points_on_line_segment_1d, domain[0], domain[1])
+    _monte_carlo_1d(
+        size,
+        shape,
+        values,
+        length,
+        rpg=rpg,
+        n_MC=n_MC,
+        out=rhs,
+        kernel=_monte_carlo_1d_zero_order_njit,
+    )
+    return rhs
+
+
+def rhs0_line_2d_mc(
+    size: tuple,
+    shape: tuple,
+    domain: ndarray,
+    values: Iterable,
+    *,
+    n_MC: int | NoneType = None,
+) -> ndarray:
+    """
+    Returns zero-order coefficients for arbitrary line loads for 2d problems.
+    Values are expected in the order [f, mx, my].
+    """
+    rhs = np.zeros((np.sum(shape), 3), dtype=float)
+    if _has_no_moment_load(values):
+        return rhs
+    length = np.linalg.norm(domain[1] - domain[0])
+    rpg = partial(generate_random_points_on_line_segment_2d, domain[0], domain[1])
+    _monte_carlo_2d(
+        size,
+        shape,
+        values,
+        length,
+        rpg=rpg,
+        n_MC=n_MC,
+        out=rhs,
+        kernel=_monte_carlo_2d_zero_order_njit,
+    )
+    return rhs
+
+
+def rhs0_rect_const(
+    size: tuple, shape: tuple, domain: ndarray, values: ndarray
+) -> ndarray:
+    """
+    Returns zero-order coefficients for constant loads over rectangular patches
+    in the order [f, mx, my].
+    """
+    return _rhs0_rect_const(size, shape, domain, values)
+
+
+def rhs0_rect_mc(
+    size: tuple,
+    shape: tuple,
+    domain: ndarray,
+    values: Iterable,
+    *,
+    n_MC: int | NoneType = None,
+) -> ndarray:
+    """
+    Returns zero-order coefficients for arbitrary loads over a rectangle.
+    Load values are expected in the order [f, mx, my].
+    """
+    rhs = np.zeros((np.sum(shape), 3), dtype=float)
+    if _has_no_moment_load(values):
+        return rhs
+    area = np.abs(domain[1, 0] - domain[0, 0]) * np.abs(domain[1, 1] - domain[0, 1])
+    rpg = partial(generate_random_points_in_rectangle, domain[0], domain[1])
+    _monte_carlo_2d(
+        size,
+        shape,
+        values,
+        area,
+        rpg=rpg,
+        n_MC=n_MC,
+        out=rhs,
+        kernel=_monte_carlo_2d_zero_order_njit,
+    )
+    return rhs
+
+
+def rhs0_disk_mc(
+    size: tuple,
+    shape: tuple,
+    domain: ndarray,
+    values: Iterable,
+    *,
+    n_MC: int | NoneType = None,
+) -> ndarray:
+    """
+    Returns zero-order coefficients for arbitrary loads over a disk.
+    Load values are expected in the order [f, mx, my].
+    """
+    rhs = np.zeros((np.sum(shape), 3), dtype=float)
+    if _has_no_moment_load(values):
+        return rhs
+    center = domain[0]
+    radius = domain[1]
+    area = np.pi * radius**2
+    rpg = partial(generate_random_points_in_disk, center, radius)
+    _monte_carlo_2d(
+        size,
+        shape,
+        values,
+        area,
+        rpg=rpg,
+        n_MC=n_MC,
+        out=rhs,
+        kernel=_monte_carlo_2d_zero_order_njit,
+    )
     return rhs

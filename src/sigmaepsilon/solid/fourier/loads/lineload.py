@@ -3,7 +3,14 @@ from functools import partial
 import numpy as np
 from numpy import ndarray
 
-from ..preproc import rhs_line_const, rhs_line_1d_mc, rhs_line_2d_mc
+from ..preproc import (
+    rhs_line_const,
+    rhs_line_1d_mc,
+    rhs_line_2d_mc,
+    rhs0_line_const,
+    rhs0_line_1d_mc,
+    rhs0_line_2d_mc,
+)
 from ..protocols import NavierProblemProtocol
 from .loads import LoadCase, Float1d, Float2d
 from ..utils import is_scalar
@@ -52,6 +59,23 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
             2d float array of shape (H, 3), where H is the total number
             of harmonic terms involved (defined for the problem).
         """
+        return self._rhs(problem, rhs_line_const, rhs_line_1d_mc, rhs_line_2d_mc)
+
+    def rhs0(self, problem: NavierProblemProtocol) -> ndarray:
+        """
+        Returns the zero-order coefficients of the moment loads.
+
+        See :func:`~sigmaepsilon.solid.fourier.loads.LoadCase.rhs0` for details.
+        """
+        return self._rhs(problem, rhs0_line_const, rhs0_line_1d_mc, rhs0_line_2d_mc)
+
+    def _rhs(
+        self,
+        problem: NavierProblemProtocol,
+        evaluator_const,
+        evaluator_1d_mc,
+        evaluator_2d_mc,
+    ) -> ndarray:
         domain = np.array(self.domain, dtype=float)
         values = self.value
         n_MC = self._num_mc or Config.NUM_MC_SAMPLES_PLATE
@@ -62,7 +86,7 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
             ), f"Invalid shape {domain.shape} for the domain."
             assert len(values) == 3, "Invalid shape for load intensities."
 
-            evaluator = partial(rhs_line_2d_mc, n_MC=n_MC)
+            evaluator = partial(evaluator_2d_mc, n_MC=n_MC)
         elif problem.model_type.is_1d:
             assert (
                 len(domain.shape) == 1
@@ -73,9 +97,9 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
 
             if is_scalar(values[0]) and is_scalar(values[1]):
                 values = np.array(values, dtype=float)
-                evaluator = rhs_line_const
+                evaluator = evaluator_const
             else:
-                evaluator = partial(rhs_line_1d_mc, n_MC=n_MC)
+                evaluator = partial(evaluator_1d_mc, n_MC=n_MC)
         else:  # pragma: no cover
             raise NotImplementedError
 

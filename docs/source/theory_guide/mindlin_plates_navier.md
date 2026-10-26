@@ -316,3 +316,29 @@ p_{xx}^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_{xx}(x,y) \, S
 p_{yy}^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_{yy}(x,y) \, C_i(x) \, S_j(y) \, dxdy.
 \end{align*}
 ```
+
+### Zero-order terms of moment loads
+
+The series of $p_{xx}$ and $p_{yy}$ in {eq}`eq_approx_mindlin` are cosine series in $y$ and $x$ respectively, and as such, they are complete only if they include the terms with $j=0$ and $i=0$:
+
+```{math}
+:label: eq_zero_order_load_coeff_expressions_mindlin
+\begin{align*}
+p_{xx}^{(i0)} &= \frac{2}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_{xx}(x,y) \, S_i(x) \, dxdy, \\
+p_{yy}^{(0j)} &= \frac{2}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_{yy}(x,y) \, S_j(y) \, dxdy.
+\end{align*}
+```
+
+For the harmonics $(i, 0)$, the basis functions of $w$ and $\vartheta_y$ vanish identically, and the second row of {eq}`eq_solution_ij_mindlin` decouples into
+
+```{math}
+\vartheta_x^{(i0)} = \frac{p_{xx}^{(i0)}}{\frac{\pi^{2} D_{66} i^{2}}{L_{x}^{2}} + S_{44}}.
+```
+
+Similarly, for the harmonics $(0, j)$, only $\vartheta_y$ is non-zero and
+
+```{math}
+\vartheta_y^{(0j)} = \frac{p_{yy}^{(0j)}}{\frac{\pi^{2} D_{66} j^{2}}{L_{y}^{2}} + S_{55}}.
+```
+
+The contributions of these harmonics to the postprocessing quantities are obtained by substituting $j=0$ or $i=0$ into the general expressions.

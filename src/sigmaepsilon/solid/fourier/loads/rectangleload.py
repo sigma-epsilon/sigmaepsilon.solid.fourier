@@ -3,7 +3,7 @@ from typing import Iterable
 import numpy as np
 from numpy import ndarray
 
-from ..preproc import rhs_rect_const, rhs_rect_mc
+from ..preproc import rhs_rect_const, rhs_rect_mc, rhs0_rect_const, rhs0_rect_mc
 from ..utils import points_to_rectangle_region
 from ..protocols import NavierProblemProtocol
 from .loads import LoadCase, Float1d, Float2d
@@ -59,6 +59,18 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
             2d float array of shape (H, 3), where H is the total number
             of harmonic terms involved (defined for the problem).
         """
+        return self._rhs(problem, rhs_rect_const, rhs_rect_mc)
+
+    def rhs0(self, problem: NavierProblemProtocol) -> ndarray:
+        """
+        Returns the zero-order coefficients of the moment loads. See
+        :func:`~sigmaepsilon.solid.fourier.loads.LoadCase.rhs0` for details.
+        """
+        return self._rhs(problem, rhs0_rect_const, rhs0_rect_mc)
+
+    def _rhs(
+        self, problem: NavierProblemProtocol, evaluator_const, evaluator_mc
+    ) -> ndarray:
         assert problem.model_type.is_2d, f"Invalid model type {problem.model_type}."
 
         domain = np.array(self.domain, dtype=float)
@@ -67,7 +79,7 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
 
         has_symbolic_load = any(not isinstance(vi, (float, int)) for vi in values)
         if has_symbolic_load:
-            return rhs_rect_mc(problem.size, problem.shape, domain, values, n_MC=n_MC)
+            return evaluator_mc(problem.size, problem.shape, domain, values, n_MC=n_MC)
         else:
             values = np.array(values, dtype=float)
-            return rhs_rect_const(problem.size, problem.shape, domain, values)
+            return evaluator_const(problem.size, problem.shape, domain, values)

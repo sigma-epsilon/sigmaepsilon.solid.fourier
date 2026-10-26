@@ -74,34 +74,64 @@ class LoadCase(Generic[LoadDomainType, LoadValueType]):
     def rhs(self, problem: NavierProblemProtocol) -> ndarray:
         raise NotImplementedError("The method 'rhs' must be implemented.")
 
+    @abstractmethod
+    def rhs0(self, problem: NavierProblemProtocol) -> ndarray:
+        """
+        Returns the zero-order coefficients of the moment loads. Moment loads are
+        expanded in series that are cosines in one direction, and the terms with a
+        zero index in that direction are not covered by :func:`rhs`.
+
+        For a beam, the result is an 1d array of shape (2,), where the second item
+        is the mean of the moment load over the span. For a plate, it is a 2d array
+        of shape (M + N, 3), where the first M rows hold the coefficients of
+        :math:`m_x` for the harmonics :math:`(m, 0)` and the next N rows hold the
+        coefficients of :math:`m_y` for the harmonics :math:`(0, n)`.
+        """
+        raise NotImplementedError("The method 'rhs0' must be implemented.")
+
     def eval_approx(self, problem: NavierProblemProtocol, points: Iterable) -> ndarray:
         """
-        Evaluates the Fourier series approximation of the load at the given points.
+        Evaluates the Fourier series approximation of the load at the given points,
+        including the zero-order terms of the moment loads (see :func:`rhs0`).
 
-        The returned array is an 1d array with the same length as the number of points.
+        The returned array is a 2d array of shape (nP, nDOF), where nP is the number
+        of points and nDOF is the number of load components (2 for a beam, 3 for a
+        plate).
         """
         if problem.model_type.is_2d:
             length_X, length_Y = problem.size
             number_of_modes_X, number_of_modes_Y = problem.shape
             rhs = self.rhs(problem)
+            rhs0 = self.rhs0(problem)
             points = np.array(points, dtype=float)
-            return eval_loads_2d(
+            res = eval_loads_2d(
                 (length_X, length_Y),
                 (number_of_modes_X, number_of_modes_Y),
                 rhs,
                 points,
             )
+            # mx at the harmonics (m, 0) and my at the harmonics (0, n)
+            m = np.arange(1, number_of_modes_X + 1)
+            n = np.arange(1, number_of_modes_Y + 1)
+            Sm = np.sin(np.outer(points[:, 0], m) * np.pi / length_X)
+            Sn = np.sin(np.outer(points[:, 1], n) * np.pi / length_Y)
+            res[:, 1] += Sm @ rhs0[:number_of_modes_X, 1]
+            res[:, 2] += Sn @ rhs0[number_of_modes_X:, 2]
+            return res
         elif problem.model_type.is_1d:
             length_X = float(problem.size)
             number_of_modes_X = problem.shape
             rhs = self.rhs(problem)
             points = np.array(points, dtype=float)
-            return eval_loads_1d(
+            res = eval_loads_1d(
                 length_X,
                 number_of_modes_X,
                 rhs,
                 points,
             )
+            # the mean of the moment load
+            res[:, 1] += self.rhs0(problem)[1]
+            return res
         else:  # pragma: no cover
             raise NotImplementedError
 
@@ -193,7 +223,9 @@ class LoadGroup(DeepDict[Hashable, LoadGroupProtocol | LoadCaseProtocol | Any]):
     def cases(
         self,
         case_type: Any = None,
-    ) -> Iterable[LoadCaseProtocol]:
+        *,
+        return_address: bool = False,
+    ) -> Iterable[LoadCaseProtocol] | Iterable[tuple[list, LoadCaseProtocol]]:
         """
         Returns a generator that yields the load cases in the group.
 
@@ -202,13 +234,17 @@ class LoadGroup(DeepDict[Hashable, LoadGroupProtocol | LoadCaseProtocol | Any]):
         case_type: Any, Optional
             The type of the load cases to return. Default is None, that
             returns all types.
+        return_address: bool, Optional
+            If ``True``, the generator yields ``(address, case)`` pairs, where
+            the address is the position of the case in the group.
+            Default is ``False``.
 
         Yields
         ------
         :class:`~sigmaepsilon.solid.fourier.loads.LoadCase`
         """
         case_type = LoadCase if case_type is None else case_type
-        return filter(
-            lambda i: isinstance(i, case_type),
-            self.values(deep=True),
-        )
+        items = self.items(deep=True, return_address=True, vtype=case_type)
+        if return_address:
+            return items
+        return (case for _, case in items)
