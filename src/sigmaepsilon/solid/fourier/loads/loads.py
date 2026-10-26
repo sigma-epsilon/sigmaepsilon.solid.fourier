@@ -9,6 +9,9 @@ from sigmaepsilon.deepdict import DeepDict
 
 from ..protocols import NavierProblemProtocol, LoadGroupProtocol, LoadCaseProtocol
 from ..postproc import eval_loads_1d, eval_loads_2d
+from ..enums import IntegrationMethod
+from ..config import Config
+from ..utils import RNGType, to_positive_int
 
 __all__ = ["LoadGroup", "LoadCase"]
 
@@ -34,8 +37,20 @@ class LoadCase(Generic[LoadDomainType, LoadValueType]):
     value: LoadValueType
         The value of the load.
     num_mc: int, Optional
-        The number of sampling points for Monte Carlo integration.
-        If no value is provided, the global config value is used.
+        The number of sampling points for Monte Carlo integration. If no value
+        is provided, the global config value is used. Providing it selects Monte
+        Carlo integration, unless `integration` says otherwise.
+    integration: str or :class:`~sigmaepsilon.solid.fourier.enums.IntegrationMethod`, Optional
+        The method of numerical integration of the load coefficients, either
+        ``"quadrature"`` (Gauss-Legendre) or ``"mc"`` (Monte Carlo). It is used
+        for loads whose coefficients have no closed form, for instance if any of
+        the values is a string expression. If not provided, it is ``"mc"`` if
+        `num_mc` is provided, and `Config.INTEGRATION_METHOD` otherwise.
+    rng: int or numpy.random.Generator, Optional
+        The seed or the random generator of Monte Carlo integration, see
+        :func:`numpy.random.default_rng`. With a seed, the coefficients are the
+        same every time they are calculated. If not provided, `Config.MC_SEED`
+        is used. The global random state is never used.
 
     """
 
@@ -44,11 +59,42 @@ class LoadCase(Generic[LoadDomainType, LoadValueType]):
         domain: LoadDomainType,
         value: LoadValueType,
         num_mc: int | NoneType = None,
+        *,
+        integration: str | IntegrationMethod | NoneType = None,
+        rng: RNGType = None,
     ):
         super().__init__()
         self._domain = domain
         self._value = value
-        self._num_mc = num_mc
+        self._num_mc = None if num_mc is None else to_positive_int(num_mc, "num_mc")
+        self._integration = (
+            None if integration is None else IntegrationMethod.from_value(integration)
+        )
+        self._rng = rng
+
+    @property
+    def integration(self) -> IntegrationMethod:
+        """
+        Returns the method of numerical integration of the load coefficients.
+        """
+        if self._integration is not None:
+            return self._integration
+        if self._num_mc is not None:
+            return IntegrationMethod.MONTE_CARLO
+        return IntegrationMethod.from_value(Config.INTEGRATION_METHOD)
+
+    @integration.setter
+    def integration(self, value: str | IntegrationMethod | NoneType) -> None:
+        """
+        Sets the method of numerical integration of the load coefficients.
+        """
+        self._integration = (
+            None if value is None else IntegrationMethod.from_value(value)
+        )
+
+    def _integration_options(self) -> dict:
+        rng = Config.MC_SEED if self._rng is None else self._rng
+        return dict(method=self.integration, num_mc=self._num_mc, rng=rng)
 
     @property
     def domain(self) -> LoadDomainType:

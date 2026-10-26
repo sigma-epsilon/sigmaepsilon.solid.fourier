@@ -4,6 +4,7 @@ from numpy import ndarray
 from ..preproc import rhs_conc_1d, rhs_conc_2d, rhs0_conc_1d, rhs0_conc_2d
 from ..protocols import NavierProblemProtocol
 from .loads import LoadCase, Float1d
+from ..utils import check_points_in_domain
 
 __all__ = ["PointLoad"]
 
@@ -68,4 +69,5 @@ class PointLoad(LoadCase[float | Float1d, Float1d]):
         else:  # pragma: no cover
             raise NotImplementedError
 
+        check_points_in_domain(domain, problem.size, "point of application")
         return evaluator(problem.size, problem.shape, domain, values)

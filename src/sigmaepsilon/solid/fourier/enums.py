@@ -25,3 +25,31 @@ class MechanicalModelType(Enum):
             MechanicalModelType.UFLYAND_MINDLIN_PLATE,
             MechanicalModelType.KIRCHHOFF_LOVE_PLATE,
         }
+
+
+@unique
+class IntegrationMethod(Enum):
+    """Enumeration of the numerical integration methods of load coefficients."""
+
+    QUADRATURE = "quadrature"
+    MONTE_CARLO = "mc"
+
+    @classmethod
+    def from_value(cls, value: "str | IntegrationMethod") -> "IntegrationMethod":
+        """
+        Returns the method from an instance or a string. Besides the values of
+        the members, "monte_carlo" is accepted for Monte Carlo integration.
+        """
+        if isinstance(value, cls):
+            return value
+        if isinstance(value, str):
+            key = value.lower()
+            if key == "monte_carlo":
+                return cls.MONTE_CARLO
+            for method in cls:
+                if method.value == key:
+                    return method
+        raise ValueError(
+            f"Invalid integration method {value!r}. "
+            f"Valid options are {[m.value for m in cls]}."
+        )
