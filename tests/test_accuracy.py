@@ -10,6 +10,7 @@ from sigmaepsilon.solid.fourier import (
     PointLoad,
     LineLoad,
     RectangleLoad,
+    DiskLoad,
 )
 
 # Indices of the shear strains, which are identically zero for the
@@ -173,6 +174,68 @@ class TestPlateAccuracy(SigmaEpsilonTestCase):
             self.assertTrue(np.allclose(my[:, 11], 1.0, atol=1e-2))
 
 
+class TestZeroOrderCoefficients(SigmaEpsilonTestCase):
+    """
+    Compares the Monte Carlo zero-order coefficients of moment loads with
+    closed-form ones of equivalent loads.
+    """
+
+    plate = NavierPlate((2.0, 3.0), (10, 14), D=np.eye(3))
+
+    def setUp(self):
+        np.random.seed(0)
+
+    def assertCoefficientsClose(self, values, reference, rtol):
+        scale = np.max(np.abs(reference))
+        self.assertGreater(scale, 0.0)
+        self.assertLess(np.max(np.abs(values - reference)) / scale, rtol)
+
+    def test_rectangle_load(self):
+        domain = [[0.5, 0.7], [1.3, 1.9]]
+        mc = RectangleLoad(domain, ["0", 1.0, -2.0], num_mc=200_000)
+        const = RectangleLoad(domain, [0, 1.0, -2.0])
+        self.assertCoefficientsClose(
+            mc.rhs0(self.plate), const.rhs0(self.plate), rtol=1e-2
+        )
+
+    def test_line_load_on_plate(self):
+        # a line load along y is the limit of a thin rectangle
+        h = 1e-4
+        line = LineLoad([[0.8, 0.5], [0.8, 2.0]], [0, 1.0, 1.0], num_mc=200_000)
+        rect = RectangleLoad(
+            [[0.8 - h / 2, 0.5], [0.8 + h / 2, 2.0]], [0, 1 / h, 1 / h]
+        )
+        self.assertCoefficientsClose(
+            line.rhs0(self.plate), rect.rhs0(self.plate), rtol=1e-2
+        )
+
+    def test_line_load_on_beam(self):
+        beam = NavierBeam(10.0, 10, EI=1.0)
+        mc = LineLoad([2.0, 7.0], ["0", 1.5], num_mc=200_000)
+        const = LineLoad([2.0, 7.0], [0.0, 1.5])
+        self.assertTrue(np.allclose(mc.rhs0(beam), const.rhs0(beam)))
+        self.assertTrue(np.allclose(const.rhs0(beam), [0.0, 0.75]))
+
+    def test_disk_load(self):
+        # a small disk is close to a point load with the same resultant
+        r = 0.005
+        area = np.pi * r**2
+        disk = DiskLoad(((1.0, 1.5), r), [0, 1.0, 1.0], num_mc=200_000)
+        point = PointLoad([1.0, 1.5], [0, area, area])
+        self.assertCoefficientsClose(
+            disk.rhs0(self.plate), point.rhs0(self.plate), rtol=1e-2
+        )
+
+    def test_no_moment_load(self):
+        loads = [
+            DiskLoad(((1.0, 1.5), 0.3), [1.0, 0, 0]),
+            LineLoad([[0.8, 0.5], [0.8, 2.0]], [1.0, 0, 0]),
+            RectangleLoad([[0.5, 0.7], [1.3, 1.9]], ["x", 0, 0]),
+        ]
+        for load in loads:
+            self.assertTrue(np.all(load.rhs0(self.plate) == 0))
+
+
 class TestResultAssignment(SigmaEpsilonTestCase):
     def test_non_load_items_are_skipped(self):
         L = 10.0
@@ -208,6 +271,9 @@ class TestResultAssignment(SigmaEpsilonTestCase):
         beam = NavierBeam(10.0, 20, EI=1.0)
         with self.assertRaises(ValueError):
             beam.linear_static_analysis([1.0], LoadGroup(meta="note"))
+        plate = NavierPlate((2.0, 3.0), (10, 10), D=np.eye(3))
+        with self.assertRaises(ValueError):
+            plate.linear_static_analysis([[1.0, 1.0]], LoadGroup(meta="note"))
 
 
 if __name__ == "__main__":
