@@ -18,7 +18,7 @@ Beyond that, the main risks are:
 | Severity | Count | Meaning |
 |---|---|---|
 | Critical | 4 (all solved in PR #37) | Wrong engineering results without any error being raised |
-| High | 6 (H1–H2 solved) | Wrong or misleading results in edge cases, or serious scalability limits |
+| High | 6 (all solved in PRs #40 and the `fix/high-audit-h3-h6` branch) | Wrong or misleading results in edge cases, or serious scalability limits |
 | Medium | 9 | Robustness, API and test-suite problems |
 | Low | 14 | Documentation, packaging, CI and repository upkeep |
 
@@ -139,7 +139,9 @@ Every kernel nests `prange` loops. Numba parallelises only the outermost one and
 
 **Fix.** Put the single `prange` over points (postprocessing) or harmonics (pre- and processing).
 
-### H3. Invalid inputs produce plausible-looking output instead of errors — Confirmed
+### H3. Invalid inputs produce plausible-looking output instead of errors — ✅ Solved
+
+> **Status: Solved** on branch `fix/high-audit-h3-h6`. Originally: Confirmed. `NavierBeam` and `NavierPlate` now validate `length`/`size`, `N`/`shape`, `EI`, `GA`, `D` and `S` when they are set, and raise for non-scalar beam stiffnesses, for non-zero `D16`/`D26`/`S12`, and for non-symmetric or non-positive stiffness matrices. `linear_static_analysis` requires the points and checks that they lie on the structure. Every load checks that its domain lies within the structure, and beam line loads must not be reversed.
 
 | Input | Behaviour |
 |---|---|
@@ -153,17 +155,23 @@ Every kernel nests `prange` loops. Numba parallelises only the outermost one and
 
 **Fix.** Validate in the constructors and in `linear_static_analysis`. Raise when `D16`, `D26` or `S12` is non-zero, or at least warn.
 
-### H4. Monte Carlo drops a final batch of exactly one sample — Confirmed
+### H4. Monte Carlo drops a final batch of exactly one sample — ✅ Solved
+
+> **Status: Solved** on branch `fix/high-audit-h3-h6`, together with [issue #39](https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier/issues/39). Originally: Confirmed. Monte Carlo is now an opt-in method, and its sampler (`mc.monte_carlo_samples`) always emits the remaining samples as a last batch.
 
 [`mc.py:77`](src/sigmaepsilon/solid/fourier/mc.py#L77) and [`mc.py:177`](src/sigmaepsilon/solid/fourier/mc.py#L177) use `if remaining_MC_points > 1`, but the sum is still divided by the full `num_MC_samples`. With `num_mc=5001`, the first coefficient came out 3.0 % low (1.572 vs exact 1.621). The comparison should be `> 0`.
 
-### H5. Monte Carlo results are not reproducible and use the global RNG — Confirmed
+### H5. Monte Carlo results are not reproducible and use the global RNG — ✅ Solved
+
+> **Status: Solved** on branch `fix/high-audit-h3-h6`, together with [issue #39](https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier/issues/39). Originally: Confirmed. Load coefficients are now integrated with composite Gauss–Legendre quadrature by default (tensor-product on rectangles, polar coordinates on disks), with node counts derived from the number of harmonics, and projected onto the Fourier basis with matrix products. They match the closed forms to machine precision, and on 40×40 harmonics they are about 60× faster than the previous 100 000-sample Monte Carlo default. Monte Carlo remains available (`integration="mc"`, or by passing `num_mc`), and takes an `rng` seed or `numpy.random.Generator`; the global random state is no longer used.
 
 `utils.generate_random_points_*` call `np.random.uniform`. Two identical calls gave 1.6220 and 1.6199. This also changes the caller's global random state.
 
 The integration domains are all rectangles, line segments or disks, so Gauss–Legendre quadrature (polar coordinates for disks) would give deterministic and far more accurate coefficients at lower cost. Short of that, accept a `seed` or a `numpy.random.Generator`.
 
-### H6. Beam line loads ignore the beam Monte Carlo settings — Confirmed by reading
+### H6. Beam line loads ignore the beam Monte Carlo settings — ✅ Solved
+
+> **Status: Solved** on branch `fix/high-audit-h3-h6`. Originally: Confirmed by reading. Beam line loads now use `Config.NUM_MC_SAMPLES_BEAM` and `Config.MC_BATCH_SIZE_BEAM`.
 
 [`loads/lineload.py:57`](src/sigmaepsilon/solid/fourier/loads/lineload.py#L57) uses `Config.NUM_MC_SAMPLES_PLATE` for beams as well, so `Config.NUM_MC_SAMPLES_BEAM` is never used for line loads.
 
@@ -180,7 +188,7 @@ The integration domains are all rectangles, line segments or disks, so Gauss–L
 - **M3. NumPy integer load values crash.** In [`rectangleload.py:68`](src/sigmaepsilon/solid/fourier/loads/rectangleload.py#L68) (and `utils.is_scalar`), `np.int64` is not an `int` subclass, so `np.array([1, 0, 0])` is treated as a symbolic expression and raises `ValueError: Invalid value 1`. Check against `numbers.Real` instead.
 - **M4. Integer evaluation points are rejected on beams.** [`beam.py:153`](src/sigmaepsilon/solid/fourier/beam.py#L153) checks for `(float, Iterable)`, so `linear_static_analysis(5, loads)` raises `TypeError`.
 - **M5. Abstract methods are not enforced.** `LoadCase` and `NavierProblem` use `@abstractmethod` without `ABC`, so incomplete subclasses can be instantiated.
-- **M6. Constant-value Monte Carlo closures work only by accident.** In `mc.py:56` and `:156`, `def function(points): ... values[i]` captures the loop variable `i` late. It gives the right value only because the later loop that calls these functions reuses the same variable name `i`. Bind it explicitly (`lambda p, v=values[i]: ...`).
+- **M6. ✅ Solved on branch `fix/high-audit-h3-h6`. Constant-value Monte Carlo closures work only by accident.** In `mc.py:56` and `:156`, `def function(points): ... values[i]` captures the loop variable `i` late. It gives the right value only because the later loop that calls these functions reuses the same variable name `i`. Bind it explicitly (`lambda p, v=values[i]: ...`).
 - **M7. The multi-stiffness capability is half exposed.** Every kernel supports `nLHS > 1`, but the public API always takes `res[0, ...]`. Either expose it properly (useful for parameter sweeps) or remove it from the kernels.
 - **M8. `linear_static_analysis` argument parsing is duplicated** between `NavierBeam` and `NavierPlate`. It belongs in `NavierProblem`, along with the shared RHS/solve/result-assembly code.
 - **M9. The order of shear strains in `strains` is unverified.** The result's `strains` slice returns `[CX, CY, CXY, EXZ, EYZ]` and the FastAPI app passes it to `MindlinPlateSection.utilization`. `sigmaepsilon.solid.material` orders shear components as `yz, xz` elsewhere. For isotropic single-layer sections the order makes no difference. For orthotropic or layered sections it could swap the shear-stress profiles. **Unverified**; worth a dedicated test.
@@ -244,5 +252,5 @@ These parts were checked and need no change:
 2. **Release a patch version** whose changelog warns that results for moment loads on Kirchhoff plates and Bernoulli beams were wrong in earlier versions.
 3. ✅ **Fix C3 and verify the plate equivalent of the missing shear term.** *(Done in PR #37.)*
 4. ✅ **Fix H1 and H2 together**, by rewriting the postprocessing kernels to accumulate in place with one parallel loop over points. *(Done in PR #40.)*
-5. **Fix H3–H6:** input validation and the Monte Carlo fixes, ideally replacing Monte Carlo with quadrature.
+5. ✅ **Fix H3–H6:** input validation and the Monte Carlo fixes, ideally replacing Monte Carlo with quadrature. *(Done on branch `fix/high-audit-h3-h6`; Monte Carlo is kept as an option.)*
 6. **Fix the medium and low items** opportunistically.
