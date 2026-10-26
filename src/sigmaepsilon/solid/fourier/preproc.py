@@ -1,6 +1,5 @@
 from collections.abc import Iterable
 from types import NoneType
-from typing import Union
 
 import numpy as np
 from numba import njit, prange
@@ -9,11 +8,11 @@ from sigmaepsilon.math import atleast1d, atleast3d
 
 
 def lhs_Navier(
-    size: Union[float, tuple[float]],
-    shape: Union[int, tuple[int]],
+    size: float | tuple[float],
+    shape: int | tuple[int],
     *,
-    D: Union[float, ndarray],
-    S: Union[float, ndarray, NoneType] = None,
+    D: float | ndarray,
+    S: float | ndarray | NoneType = None,
     **kw,
 ) -> ndarray:
     """
@@ -22,14 +21,14 @@ def lhs_Navier(
 
     Parameters
     ----------
-    size: Union[float, tuple[float]]
+    size: float | tuple[float]
         The size of the problem. Scalar for a beam, 2-tuple for a plate.
-    shape: Union[int, tuple[int]]
+    shape: int | tuple[int]
         The number of harmonic terms used. Scalar for a beam, 2-tuple for a plate.
-    D: Union[float, ndarray]
+    D: float | ndarray
         2d or 3d float array of bending stiffnesses for a plate, scalar or 1d float array
         for a beam.
-    S: Union[float, ndarray], Optional
+    S: float | ndarray, Optional
         2d or 3d float array of shear stiffnesses for a plate, scalar or 1d float array
         for a beam. Only for Mindlin-Reissner plates and Euler-Bernoulli beams.
         plates. Default is None.
