@@ -13,9 +13,9 @@ def linsolve_Bernoulli(A: ndarray, B: ndarray) -> ndarray:
     nLHS, N = A.shape
     nRHS = B.shape[0]
     res = np.zeros((nLHS, nRHS, N))
-    for i in prange(nRHS):
-        for j in prange(nLHS):
-            for n in prange(N):
+    for n in prange(N):
+        for i in range(nRHS):
+            for j in range(nLHS):
                 res[j, i, n] = B[i, n] / A[j, n]
     return res
 
@@ -28,9 +28,9 @@ def linsolve_Timoshenko(A: ndarray, B: ndarray) -> ndarray:
     nLHS, nMN = A.shape[:2]
     nRHS = B.shape[0]
     res = np.zeros((nLHS, nRHS, nMN, 2))
-    for i in prange(nRHS):
-        for j in prange(nLHS):
-            for k in prange(nMN):
+    for k in prange(nMN):
+        for i in range(nRHS):
+            for j in range(nLHS):
                 res[j, i, k] = inv2x2(A[j, k]) @ B[i, k]
     return res
 
@@ -43,9 +43,9 @@ def linsolve_Mindlin(A: ndarray, B: ndarray) -> ndarray:
     nLHS, nMN = A.shape[:2]
     nRHS = B.shape[0]
     res = np.zeros((nLHS, nRHS, nMN, 3))
-    for i in prange(nRHS):
-        for j in prange(nLHS):
-            for k in prange(nMN):
+    for k in prange(nMN):
+        for i in range(nRHS):
+            for j in range(nLHS):
                 res[j, i, k] = inv3x3(A[j, k]) @ B[i, k]
     return res
 
@@ -58,8 +58,8 @@ def linsolve_Kirchhoff(A: ndarray, B: ndarray) -> ndarray:
     nLHS, nMN = A.shape[:2]
     nRHS = B.shape[0]
     res = np.zeros((nLHS, nRHS, nMN))
-    for i in prange(nRHS):
-        for j in prange(nLHS):
-            for k in prange(nMN):
+    for k in prange(nMN):
+        for i in range(nRHS):
+            for j in range(nLHS):
                 res[j, i, k] = B[i, k] / A[j, k]
     return res

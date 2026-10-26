@@ -109,32 +109,37 @@ def lhs_Navier_Mindlin(size: tuple, shape: tuple, D: ndarray, S: ndarray) -> nda
     M, N = shape
     PI = np.pi
     res = np.zeros((nLHS, M * N, 3, 3), dtype=D.dtype)
-    for iLHS in prange(nLHS):
-        D11, D12, D22, D66 = D[iLHS, 0, 0], D[iLHS, 0, 1], D[iLHS, 1, 1], D[iLHS, 2, 2]
-        S44, S55 = S[iLHS, 0, 0], S[iLHS, 1, 1]
-        for m in prange(1, M + 1):
-            for n in prange(1, N + 1):
-                iMN = (m - 1) * N + n - 1
-                # sum Fx
-                res[iLHS, iMN, 0, 0] = (
-                    PI**2 * S44 * n**2 / Ly**2 + PI**2 * S55 * m**2 / Lx**2
-                )
-                res[iLHS, iMN, 0, 1] = -PI * S44 * n / Ly
-                res[iLHS, iMN, 0, 2] = PI * S55 * m / Lx
-                # sum Mx
-                res[iLHS, iMN, 1, 0] = res[iLHS, iMN, 0, 1]
-                res[iLHS, iMN, 1, 1] = (
-                    (PI**2) * D22 * n**2 / Ly**2 + PI**2 * D66 * m**2 / Lx**2 + S44
-                )
-                res[iLHS, iMN, 1, 2] = -(PI**2) * D12 * m * n / (
-                    Lx * Ly
-                ) - PI**2 * D66 * m * n / (Lx * Ly)
-                # sum My
-                res[iLHS, iMN, 2, 0] = res[iLHS, iMN, 0, 2]
-                res[iLHS, iMN, 2, 1] = res[iLHS, iMN, 1, 2]
-                res[iLHS, iMN, 2, 2] = (
-                    PI**2 * D11 * m**2 / Lx**2 + PI**2 * D66 * n**2 / Ly**2 + S55
-                )
+    for iMN in prange(M * N):
+        m = iMN // N + 1
+        n = iMN % N + 1
+        for iLHS in range(nLHS):
+            D11, D12, D22, D66 = (
+                D[iLHS, 0, 0],
+                D[iLHS, 0, 1],
+                D[iLHS, 1, 1],
+                D[iLHS, 2, 2],
+            )
+            S44, S55 = S[iLHS, 0, 0], S[iLHS, 1, 1]
+            # sum Fx
+            res[iLHS, iMN, 0, 0] = (
+                PI**2 * S44 * n**2 / Ly**2 + PI**2 * S55 * m**2 / Lx**2
+            )
+            res[iLHS, iMN, 0, 1] = -PI * S44 * n / Ly
+            res[iLHS, iMN, 0, 2] = PI * S55 * m / Lx
+            # sum Mx
+            res[iLHS, iMN, 1, 0] = res[iLHS, iMN, 0, 1]
+            res[iLHS, iMN, 1, 1] = (
+                (PI**2) * D22 * n**2 / Ly**2 + PI**2 * D66 * m**2 / Lx**2 + S44
+            )
+            res[iLHS, iMN, 1, 2] = -(PI**2) * D12 * m * n / (
+                Lx * Ly
+            ) - PI**2 * D66 * m * n / (Lx * Ly)
+            # sum My
+            res[iLHS, iMN, 2, 0] = res[iLHS, iMN, 0, 2]
+            res[iLHS, iMN, 2, 1] = res[iLHS, iMN, 1, 2]
+            res[iLHS, iMN, 2, 2] = (
+                PI**2 * D11 * m**2 / Lx**2 + PI**2 * D66 * n**2 / Ly**2 + S55
+            )
     return res
 
 
@@ -164,17 +169,22 @@ def lhs_Navier_Kirchhoff(size: tuple, shape: tuple, D: ndarray) -> ndarray:
     M, N = shape
     PI = np.pi
     res = np.zeros((nLHS, M * N), dtype=D.dtype)
-    for iLHS in prange(nLHS):
-        D11, D12, D22, D66 = D[iLHS, 0, 0], D[iLHS, 0, 1], D[iLHS, 1, 1], D[iLHS, 2, 2]
-        for m in prange(1, M + 1):
-            for n in prange(1, N + 1):
-                iMN = (m - 1) * N + n - 1
-                res[iLHS, iMN] = (
-                    PI**4 * D11 * m**4 / Lx**4
-                    + 2 * PI**4 * D12 * m**2 * n**2 / (Lx**2 * Ly**2)
-                    + PI**4 * D22 * n**4 / Ly**4
-                    + 4 * PI**4 * D66 * m**2 * n**2 / (Lx**2 * Ly**2)
-                )
+    for iMN in prange(M * N):
+        m = iMN // N + 1
+        n = iMN % N + 1
+        for iLHS in range(nLHS):
+            D11, D12, D22, D66 = (
+                D[iLHS, 0, 0],
+                D[iLHS, 0, 1],
+                D[iLHS, 1, 1],
+                D[iLHS, 2, 2],
+            )
+            res[iLHS, iMN] = (
+                PI**4 * D11 * m**4 / Lx**4
+                + 2 * PI**4 * D12 * m**2 * n**2 / (Lx**2 * Ly**2)
+                + PI**4 * D22 * n**4 / Ly**4
+                + 4 * PI**4 * D66 * m**2 * n**2 / (Lx**2 * Ly**2)
+            )
     return res
 
 
@@ -201,8 +211,8 @@ def lhs_Navier_Bernoulli(L: float, N: int, EI: ndarray) -> ndarray:
     nLHS = EI.shape[0]
     PI = np.pi
     res = np.zeros((nLHS, N), dtype=EI.dtype)
-    for iLHS in prange(nLHS):
-        for n in prange(1, N + 1):
+    for n in prange(1, N + 1):
+        for iLHS in range(nLHS):
             res[iLHS, n - 1] = PI**4 * EI[iLHS] * n**4 / L**4
     return res
 
@@ -236,11 +246,11 @@ def lhs_Navier_Timoshenko(L: float, N: int, EI: ndarray, GA: ndarray) -> ndarray
     nLHS = EI.shape[0]
     PI = np.pi
     res = np.zeros((nLHS, N, 2, 2), dtype=EI.dtype)
-    for iLHS in prange(nLHS):
-        for n in prange(1, N + 1):
-            iN = n - 1
-            c1 = PI * n / L
-            c2 = c1 * PI * n / L
+    for n in prange(1, N + 1):
+        iN = n - 1
+        c1 = PI * n / L
+        c2 = c1 * PI * n / L
+        for iLHS in range(nLHS):
             res[iLHS, iN, 0, 0] = c2 * GA[iLHS]
             res[iLHS, iN, 0, 1] = -c1 * GA[iLHS]
             res[iLHS, iN, 1, 0] = res[iLHS, iN, 0, 1]
@@ -265,15 +275,15 @@ def rhs_Kirchhoff(coeffs: ndarray, size: tuple, shape: tuple) -> ndarray:
     PI = np.pi
     cx = PI / Lx
     cy = PI / Ly
-    for i in prange(nRHS):
-        for m in prange(1, M + 1):
-            for n in prange(1, N + 1):
-                iMN = (m - 1) * N + n - 1
-                res[i, iMN] = (
-                    coeffs[i, iMN, 0]
-                    + coeffs[i, iMN, 1] * cy * n
-                    - coeffs[i, iMN, 2] * cx * m
-                )
+    for iMN in prange(M * N):
+        m = iMN // N + 1
+        n = iMN % N + 1
+        for i in range(nRHS):
+            res[i, iMN] = (
+                coeffs[i, iMN, 0]
+                + coeffs[i, iMN, 1] * cy * n
+                - coeffs[i, iMN, 2] * cx * m
+            )
     return res
 
 
@@ -285,8 +295,8 @@ def rhs_Bernoulli(coeffs: ndarray, L: float) -> ndarray:
     nRHS, N = coeffs.shape[:2]
     res = np.zeros((nRHS, N))
     c = np.pi / L
-    for i in prange(nRHS):
-        for n in prange(N):
+    for n in prange(N):
+        for i in range(nRHS):
             res[i, n] = coeffs[i, n, 0] + coeffs[i, n, 1] * c * (n + 1)
     return res
 
@@ -358,12 +368,10 @@ def _rhs_rect_const(
     yc = (ymin + ymax) / 2
     w = np.abs(xmax - xmin)
     h = np.abs(ymax - ymin)
-    for m in prange(1, M + 1):
-        for n in prange(1, N + 1):
-            mn = (m - 1) * N + n - 1
-            rhs[mn, :] = _rhs_rect_const_single_harmonic(
-                size, m, n, xc, yc, w, h, values
-            )
+    for mn in prange(M * N):
+        m = mn // N + 1
+        n = mn % N + 1
+        rhs[mn, :] = _rhs_rect_const_single_harmonic(size, m, n, xc, yc, w, h, values)
     return rhs
 
 
@@ -391,12 +399,12 @@ def _rhs_conc_2d(size: tuple, shape: tuple, point: ndarray, values: ndarray) -> 
     Sx = np.pi * x / Lx
     Sy = np.pi * y / Ly
     c = 4 / Lx / Ly
-    for m in prange(1, M + 1):
-        for n in prange(1, N + 1):
-            mn = (m - 1) * N + n - 1
-            rhs[mn, 0] = c * fz * sin(m * Sx) * sin(n * Sy)
-            rhs[mn, 1] = c * mx * sin(m * Sx) * cos(n * Sy)
-            rhs[mn, 2] = c * my * cos(m * Sx) * sin(n * Sy)
+    for mn in prange(M * N):
+        m = mn // N + 1
+        n = mn % N + 1
+        rhs[mn, 0] = c * fz * sin(m * Sx) * sin(n * Sy)
+        rhs[mn, 1] = c * mx * sin(m * Sx) * cos(n * Sy)
+        rhs[mn, 2] = c * my * cos(m * Sx) * sin(n * Sy)
     return rhs
 
 
