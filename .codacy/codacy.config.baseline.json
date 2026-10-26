@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "metadata": {
+    "source": "local",
+    "provider": null,
+    "organization": null,
+    "repositoryId": null,
+    "repositoryName": null,
+    "createdAt": "2026-10-26T18:39:51.602Z",
+    "updatedAt": "2026-10-26T18:39:51.602Z",
+    "languages": [
+      "CSS",
+      "JSON",
+      "Javascript",
+      "Markdown",
+      "Python",
+      "Shell",
+      "YAML"
+    ]
+  },
+  "tools": [
+    {
+      "toolId": "Ruff",
+      "localConfigurationFile": "pyproject.toml",
+      "useLocalConfigurationFile": true,
+      "patterns": []
+    },
+    {
+      "toolId": "PyLintPython3",
+      "localConfigurationFile": "pyproject.toml",
+      "useLocalConfigurationFile": true,
+      "patterns": []
+    }
+  ],
+  "exclude": []
+}

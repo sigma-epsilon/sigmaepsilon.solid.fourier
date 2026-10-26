@@ -4,22 +4,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-`sigmaepsilon.solid.fourier` computes semi-analytic Navier (Fourier series) solutions for simply supported beams (Euler-Bernoulli, Timoshenko) and rectangular plates (Kirchhoff-Love, Uflyand-Mindlin). It is part of the `sigmaepsilon.*` namespace package family and depends heavily on `sigmaepsilon.deepdict`, `sigmaepsilon.math`, `sigmaepsilon.mesh` and `sigmaepsilon.solid.material`. Python 3.10–3.12, managed with Poetry. Source lives under `src/sigmaepsilon/solid/fourier/` (namespace package, no `__init__.py` above `fourier/`).
+`sigmaepsilon.solid.fourier` computes semi-analytic Navier (Fourier series) solutions for simply supported beams (Euler-Bernoulli, Timoshenko) and rectangular plates (Kirchhoff-Love, Uflyand-Mindlin). It is part of the `sigmaepsilon.*` namespace package family and depends heavily on `sigmaepsilon.deepdict`, `sigmaepsilon.math`, `sigmaepsilon.mesh` and `sigmaepsilon.solid.material`. Python 3.10–3.12, managed with uv (hatchling build backend). Source lives under `src/sigmaepsilon/solid/fourier/` (namespace package, no `__init__.py` above `fourier/`).
 
 ## Commands
 
 ```shell
-poetry install --with dev,test,docs          # dev setup (all groups are optional)
-poetry run pytest                             # all tests
-poetry run pytest tests/test_plates.py::TestMindlinPlate::test_mindlin_plate_smoke   # single test
-poetry run pytest --cov-report=html --cov-config=.coveragerc --cov=sigmaepsilon.solid.fourier   # coverage (CI uses --cov-report=xml)
+uv sync --group dev --group test --group docs   # dev setup (no group is installed by default)
+uv run pytest                                 # all tests
+uv run pytest tests/test_plates.py::TestMindlinPlate::test_mindlin_plate_smoke   # single test
+uv run pytest --cov-report=html --cov-config=.coveragerc --cov=sigmaepsilon.solid.fourier   # coverage (CI uses --cov-report=xml)
 ./run_tests_with_coverage.sh NUMBA_DISABLE_JIT   # coverage with Numba JIT off, so jitted code is measured (uses .coveragerc_nojit)
 cd docs && make html                          # Sphinx docs (needs the docs group)
 ```
 
 - Formatting: `black` (in the dev group). No linter is configured.
 - `NUMBA_DISABLE_JIT=1` is also useful when debugging inside jitted functions. The default `.coveragerc` excludes `@njit` code from coverage.
-- To work against sibling `sigmaepsilon.*` checkouts in editable mode: `poetry run pip install -e ../sigmaepsilon.<pkg>`.
+- To work against sibling `sigmaepsilon.*` checkouts in editable mode: `uv pip install -e ../sigmaepsilon.<pkg>` (undone by the next `uv sync`).
 - CI (CircleCI) runs tests on Python 3.12; pushes to `main` publish to PyPI and pushes to `test` publish to TestPyPI, so the version in `pyproject.toml` matters on those branches.
 
 ## Architecture
@@ -44,4 +44,4 @@ Key conventions that span files:
 
 - Docstrings use NumPy style. Docs are Sphinx (pydata theme, nbsphinx, myst, bibtex); the example notebooks in `docs/source/examples/` are rendered into the gallery, and `docs/source/theory_guide/` holds the derivations.
 - Tests build plate sections with `sigmaepsilon.solid.material` and use `sigmaepsilon.core.testing.SigmaEpsilonTestCase`; most are smoke tests plus input-validation checks.
-- `apps/` contains standalone demo applications (FastAPI, Dash, a papermill/PyVista/Azure pipeline) with their own optional Poetry groups; they are not part of the package.
+- `apps/` contains standalone demo applications (FastAPI, Dash, a papermill/PyVista/Azure pipeline) with their own optional dependency groups; they are not part of the package.
