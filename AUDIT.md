@@ -118,7 +118,7 @@ For a simply supported beam, a uniform moment load causes no deflection and no b
 
 ### H1. Postprocessing memory grows with harmonics × points — ✅ Solved
 
-> **Status: Solved** on branch `perf/h1-h2-postproc-memory-parallel`. Originally: Confirmed. The kernels now accumulate into the `(nLHS, nRHS, nP, ncomp)` output directly. On the 60×60 / 10 000-point Mindlin problem, the whole process now peaks at 176 MiB of RSS.
+> **Status: Solved** in [PR #40](https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier/pull/40). Originally: Confirmed. The kernels now accumulate into the `(nLHS, nRHS, nP, ncomp)` output directly. On the 60×60 / 10 000-point Mindlin problem, the whole process now peaks at 176 MiB of RSS.
 
 Every `postproc_*` kernel allocates `(M·N, nLHS, nRHS, nP, 13)` and only then sums over the harmonic axis ([`postproc.py:70`](src/sigmaepsilon/solid/fourier/postproc.py#L70)).
 
@@ -133,7 +133,7 @@ The FastAPI demo evaluates 30 000 points with harmonic counts chosen by the clie
 
 ### H2. Numba parallelism is mostly ineffective — ✅ Solved
 
-> **Status: Solved** on branch `perf/h1-h2-postproc-memory-parallel`. Originally: Confirmed. Every kernel now has a single `prange`: over points in postprocessing, and over harmonics in the pre-processing, solve and Monte Carlo kernels. On the 40×40 / 5 000-point Mindlin problem, the full analysis takes 0.019 s on 11 threads and 0.108 s on 1 thread. Before the change it took 0.241 s and 0.836 s. Part of the single-thread gain comes from computing the y-direction sines and cosines once per point. The results are bit-identical to the previous implementation.
+> **Status: Solved** in [PR #40](https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier/pull/40). Originally: Confirmed. Every kernel now has a single `prange`: over points in postprocessing, and over harmonics in the pre-processing, solve and Monte Carlo kernels. On the 40×40 / 5 000-point Mindlin problem, the full analysis takes 0.019 s on 11 threads and 0.108 s on 1 thread. Before the change it took 0.241 s and 0.836 s. Part of the single-thread gain comes from computing the y-direction sines and cosines once per point. The results are bit-identical to the previous implementation.
 
 Every kernel nests `prange` loops. Numba parallelises only the outermost one and runs the inner ones serially. The outermost loop is usually `nRHS`, the number of load cases, which is often 1. Measured result: 11 threads take 0.81 s and 1 thread takes 0.93 s on the same 40×40 / 5 000-point problem, a 1.15× speedup.
 
@@ -243,6 +243,6 @@ These parts were checked and need no change:
 1. ✅ **Fix C1, C2 and C4.** *(Done in PR #37.)* Each is a few lines. Add the slender/thin-limit consistency tests from M1 at the same time so they cannot come back.
 2. **Release a patch version** whose changelog warns that results for moment loads on Kirchhoff plates and Bernoulli beams were wrong in earlier versions.
 3. ✅ **Fix C3 and verify the plate equivalent of the missing shear term.** *(Done in PR #37.)*
-4. ✅ **Fix H1 and H2 together**, by rewriting the postprocessing kernels to accumulate in place with one parallel loop over points. *(Done on branch `perf/h1-h2-postproc-memory-parallel`.)*
+4. ✅ **Fix H1 and H2 together**, by rewriting the postprocessing kernels to accumulate in place with one parallel loop over points. *(Done in PR #40.)*
 5. **Fix H3–H6:** input validation and the Monte Carlo fixes, ideally replacing Monte Carlo with quadrature.
 6. **Fix the medium and low items** opportunistically.
