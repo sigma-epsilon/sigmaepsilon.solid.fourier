@@ -1,20 +1,11 @@
-from functools import partial
-
 import numpy as np
 from numpy import ndarray
 
-from ..preproc import (
-    rhs_line_const,
-    rhs_line_1d_mc,
-    rhs_line_2d_mc,
-    rhs0_line_const,
-    rhs0_line_1d_mc,
-    rhs0_line_2d_mc,
-)
+from ..integration import integrate_line_1d, integrate_line_2d
+from ..preproc import rhs0_line_const, rhs_line_const
 from ..protocols import NavierProblemProtocol
-from .loads import LoadCase, Float1d, Float2d
-from ..utils import is_scalar
-from ..config import Config
+from ..utils import check_points_in_domain, is_scalar
+from .loads import Float1d, Float2d, LoadCase
 
 __all__ = ["LineLoad"]
 
@@ -35,6 +26,18 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
     num_mc: int, Optional
         The number of sampling points for Monte Carlo integration.
         If no value is provided, the global config value is used.
+    integration: str, Optional
+        The method of numerical integration, see
+        :class:`~sigmaepsilon.solid.fourier.loads.LoadCase`.
+    rng: int or numpy.random.Generator, Optional
+        The seed or the random generator of Monte Carlo integration, see
+        :class:`~sigmaepsilon.solid.fourier.loads.LoadCase`.
+
+    Note
+    ----
+    On a beam, the coefficients of constant loads are calculated in closed
+    form. On a plate, and for loads given as string expressions, they are
+    integrated numerically.
 
 
     .. hint::
@@ -59,7 +62,7 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
             2d float array of shape (H, 3), where H is the total number
             of harmonic terms involved (defined for the problem).
         """
-        return self._rhs(problem, rhs_line_const, rhs_line_1d_mc, rhs_line_2d_mc)
+        return self._rhs(problem, zero_order=False)
 
     def rhs0(self, problem: NavierProblemProtocol) -> ndarray:
         """
@@ -67,26 +70,27 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
 
         See :func:`~sigmaepsilon.solid.fourier.loads.LoadCase.rhs0` for details.
         """
-        return self._rhs(problem, rhs0_line_const, rhs0_line_1d_mc, rhs0_line_2d_mc)
+        return self._rhs(problem, zero_order=True)
 
-    def _rhs(
-        self,
-        problem: NavierProblemProtocol,
-        evaluator_const,
-        evaluator_1d_mc,
-        evaluator_2d_mc,
-    ) -> ndarray:
+    def _rhs(self, problem: NavierProblemProtocol, zero_order: bool) -> ndarray:
         domain = np.array(self.domain, dtype=float)
         values = self.value
-        n_MC = self._num_mc or Config.NUM_MC_SAMPLES_PLATE
 
         if problem.model_type.is_2d:
             assert (
                 len(domain.shape) == 2
             ), f"Invalid shape {domain.shape} for the domain."
             assert len(values) == 3, "Invalid shape for load intensities."
+            check_points_in_domain(domain, problem.size, "end points of the line")
 
-            evaluator = partial(evaluator_2d_mc, n_MC=n_MC)
+            return integrate_line_2d(
+                problem.size,
+                problem.shape,
+                domain,
+                values,
+                zero_order=zero_order,
+                **self._integration_options(),
+            )
         elif problem.model_type.is_1d:
             assert (
                 len(domain.shape) == 1
@@ -94,13 +98,24 @@ class LineLoad(LoadCase[Float1d | Float2d, Float1d]):
             assert (
                 len(values) == 2
             ), f"Invalid shape {values.shape} for load intensities."
+            check_points_in_domain(domain, problem.size, "end points of the line")
+            if domain[0] > domain[1]:
+                raise ValueError(
+                    f"The start of the line must not be after its end, got {domain}."
+                )
 
             if is_scalar(values[0]) and is_scalar(values[1]):
                 values = np.array(values, dtype=float)
-                evaluator = evaluator_const
-            else:
-                evaluator = partial(evaluator_1d_mc, n_MC=n_MC)
+                evaluator = rhs0_line_const if zero_order else rhs_line_const
+                return evaluator(problem.size, problem.shape, domain, values)
+
+            return integrate_line_1d(
+                problem.size,
+                problem.shape,
+                domain,
+                values,
+                zero_order=zero_order,
+                **self._integration_options(),
+            )
         else:  # pragma: no cover
             raise NotImplementedError
-
-        return evaluator(problem.size, problem.shape, domain, values)

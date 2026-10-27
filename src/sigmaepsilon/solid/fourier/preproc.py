@@ -1,33 +1,18 @@
-from typing import Iterable, Union, Tuple
+from collections.abc import Iterable
 from types import NoneType
-from functools import partial
 
 import numpy as np
 from numba import njit, prange
-from numpy import ndarray, sin, cos
-
+from numpy import cos, ndarray, sin
 from sigmaepsilon.math import atleast1d, atleast3d
-
-from .mc import (
-    _monte_carlo_1d,
-    _monte_carlo_2d,
-    _monte_carlo_1d_zero_order_njit,
-    _monte_carlo_2d_zero_order_njit,
-)
-from .utils import (
-    generate_random_points_in_disk,
-    generate_random_points_in_rectangle,
-    generate_random_points_on_line_segment_1d,
-    generate_random_points_on_line_segment_2d,
-)
 
 
 def lhs_Navier(
-    size: Union[float, Tuple[float]],
-    shape: Union[int, Tuple[int]],
+    size: float | tuple[float],
+    shape: int | tuple[int],
     *,
-    D: Union[float, ndarray],
-    S: Union[float, ndarray, NoneType] = None,
+    D: float | ndarray,
+    S: float | ndarray | NoneType = None,
     **kw,
 ) -> ndarray:
     """
@@ -36,14 +21,14 @@ def lhs_Navier(
 
     Parameters
     ----------
-    size: Union[float, Tuple[float]]
+    size: float | tuple[float]
         The size of the problem. Scalar for a beam, 2-tuple for a plate.
-    shape: Union[int, Tuple[int]]
+    shape: int | tuple[int]
         The number of harmonic terms used. Scalar for a beam, 2-tuple for a plate.
-    D: Union[float, ndarray]
+    D: float | ndarray
         2d or 3d float array of bending stiffnesses for a plate, scalar or 1d float array
         for a beam.
-    S: Union[float, ndarray], Optional
+    S: float | ndarray, Optional
         2d or 3d float array of shear stiffnesses for a plate, scalar or 1d float array
         for a beam. Only for Mindlin-Reissner plates and Euler-Bernoulli beams.
         plates. Default is None.
@@ -432,44 +417,6 @@ def rhs_line_const(L: float, N: int, domain: ndarray, values: ndarray) -> ndarra
     return _rhs_line_const(L, N, domain, values)
 
 
-def rhs_line_1d_mc(
-    size: float,
-    shape: int,
-    domain: ndarray,
-    values: Iterable,
-    *,
-    n_MC: int | NoneType = None,
-) -> ndarray:
-    """
-    Returns coefficients for arbitrary loads over line segments.
-    Values are expected in the order [f, m].
-    """
-    length = domain[1] - domain[0]
-    rhs = np.zeros((shape, 2), dtype=float)
-    rpg = partial(generate_random_points_on_line_segment_1d, domain[0], domain[1])
-    _monte_carlo_1d(size, shape, values, length, rpg=rpg, n_MC=n_MC, out=rhs)
-    return rhs
-
-
-def rhs_line_2d_mc(
-    size: tuple,
-    shape: tuple,
-    domain: ndarray,
-    values: Iterable,
-    *,
-    n_MC: int | NoneType = None,
-) -> ndarray:
-    """
-    Returns coefficients for arbitrary line loads for 2d problems.
-    Values are expected in the order [f, mx, my].
-    """
-    length = np.linalg.norm(domain[1] - domain[0])
-    rhs = np.zeros((np.prod(shape), 3), dtype=float)
-    rpg = partial(generate_random_points_on_line_segment_2d, domain[0], domain[1])
-    _monte_carlo_2d(size, shape, values, length, rpg=rpg, n_MC=n_MC, out=rhs)
-    return rhs
-
-
 def rhs_rect_const(
     size: tuple, shape: tuple, domain: ndarray, values: ndarray
 ) -> ndarray:
@@ -478,46 +425,6 @@ def rhs_rect_const(
     in the order [f, mx, my].
     """
     return _rhs_rect_const(size, shape, domain, values)
-
-
-def rhs_rect_mc(
-    size: tuple,
-    shape: tuple,
-    domain: ndarray,
-    values: Iterable,
-    *,
-    n_MC: int | NoneType = None,
-) -> ndarray:
-    """
-    Returns coefficients for arbitrary loads over a rectangle.
-    Load values are expected in the order [f, mx, my].
-    """
-    area = np.abs(domain[1, 0] - domain[0, 0]) * np.abs(domain[1, 1] - domain[0, 1])
-    rhs = np.zeros((np.prod(shape), 3), dtype=float)
-    rpg = partial(generate_random_points_in_rectangle, domain[0], domain[1])
-    _monte_carlo_2d(size, shape, values, area, rpg=rpg, n_MC=n_MC, out=rhs)
-    return rhs
-
-
-def rhs_disk_mc(
-    size: tuple,
-    shape: tuple,
-    domain: ndarray,
-    values: Iterable,
-    *,
-    n_MC: int | NoneType = None,
-) -> ndarray:
-    """
-    Returns coefficients for arbitrary loads over a disk.
-    Load values are expected in the order [f, mx, my].
-    """
-    center = domain[0]
-    radius = domain[1]
-    area = np.pi * radius**2
-    rhs = np.zeros((np.prod(shape), 3), dtype=float)
-    rpg = partial(generate_random_points_in_disk, center, radius)
-    _monte_carlo_2d(size, shape, values, area, rpg=rpg, n_MC=n_MC, out=rhs)
-    return rhs
 
 
 # ZERO-ORDER RIGHT HAND SIDES
@@ -576,10 +483,6 @@ def _rhs0_conc_2d(
     return rhs
 
 
-def _has_no_moment_load(values: Iterable) -> bool:
-    return all(isinstance(v, (float, int)) and v == 0 for v in values[1:])
-
-
 def rhs0_conc_1d(L: float, N: int, domain: float, values: ndarray) -> ndarray:
     """
     Returns zero-order coefficients for a concentrated load on a beam.
@@ -606,66 +509,6 @@ def rhs0_line_const(L: float, N: int, domain: ndarray, values: ndarray) -> ndarr
     return np.array([0.0, values[1] * (domain[1] - domain[0]) / L])
 
 
-def rhs0_line_1d_mc(
-    size: float,
-    shape: int,
-    domain: ndarray,
-    values: Iterable,
-    *,
-    n_MC: int | NoneType = None,
-) -> ndarray:
-    """
-    Returns zero-order coefficients for arbitrary loads over line segments.
-    Values are expected in the order [f, m].
-    """
-    rhs = np.zeros((2,), dtype=float)
-    if _has_no_moment_load(values):
-        return rhs
-    length = domain[1] - domain[0]
-    rpg = partial(generate_random_points_on_line_segment_1d, domain[0], domain[1])
-    _monte_carlo_1d(
-        size,
-        shape,
-        values,
-        length,
-        rpg=rpg,
-        n_MC=n_MC,
-        out=rhs,
-        kernel=_monte_carlo_1d_zero_order_njit,
-    )
-    return rhs
-
-
-def rhs0_line_2d_mc(
-    size: tuple,
-    shape: tuple,
-    domain: ndarray,
-    values: Iterable,
-    *,
-    n_MC: int | NoneType = None,
-) -> ndarray:
-    """
-    Returns zero-order coefficients for arbitrary line loads for 2d problems.
-    Values are expected in the order [f, mx, my].
-    """
-    rhs = np.zeros((np.sum(shape), 3), dtype=float)
-    if _has_no_moment_load(values):
-        return rhs
-    length = np.linalg.norm(domain[1] - domain[0])
-    rpg = partial(generate_random_points_on_line_segment_2d, domain[0], domain[1])
-    _monte_carlo_2d(
-        size,
-        shape,
-        values,
-        length,
-        rpg=rpg,
-        n_MC=n_MC,
-        out=rhs,
-        kernel=_monte_carlo_2d_zero_order_njit,
-    )
-    return rhs
-
-
 def rhs0_rect_const(
     size: tuple, shape: tuple, domain: ndarray, values: ndarray
 ) -> ndarray:
@@ -674,65 +517,3 @@ def rhs0_rect_const(
     in the order [f, mx, my].
     """
     return _rhs0_rect_const(size, shape, domain, values)
-
-
-def rhs0_rect_mc(
-    size: tuple,
-    shape: tuple,
-    domain: ndarray,
-    values: Iterable,
-    *,
-    n_MC: int | NoneType = None,
-) -> ndarray:
-    """
-    Returns zero-order coefficients for arbitrary loads over a rectangle.
-    Load values are expected in the order [f, mx, my].
-    """
-    rhs = np.zeros((np.sum(shape), 3), dtype=float)
-    if _has_no_moment_load(values):
-        return rhs
-    area = np.abs(domain[1, 0] - domain[0, 0]) * np.abs(domain[1, 1] - domain[0, 1])
-    rpg = partial(generate_random_points_in_rectangle, domain[0], domain[1])
-    _monte_carlo_2d(
-        size,
-        shape,
-        values,
-        area,
-        rpg=rpg,
-        n_MC=n_MC,
-        out=rhs,
-        kernel=_monte_carlo_2d_zero_order_njit,
-    )
-    return rhs
-
-
-def rhs0_disk_mc(
-    size: tuple,
-    shape: tuple,
-    domain: ndarray,
-    values: Iterable,
-    *,
-    n_MC: int | NoneType = None,
-) -> ndarray:
-    """
-    Returns zero-order coefficients for arbitrary loads over a disk.
-    Load values are expected in the order [f, mx, my].
-    """
-    rhs = np.zeros((np.sum(shape), 3), dtype=float)
-    if _has_no_moment_load(values):
-        return rhs
-    center = domain[0]
-    radius = domain[1]
-    area = np.pi * radius**2
-    rpg = partial(generate_random_points_in_disk, center, radius)
-    _monte_carlo_2d(
-        size,
-        shape,
-        values,
-        area,
-        rpg=rpg,
-        n_MC=n_MC,
-        out=rhs,
-        kernel=_monte_carlo_2d_zero_order_njit,
-    )
-    return rhs

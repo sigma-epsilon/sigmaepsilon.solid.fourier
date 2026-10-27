@@ -144,7 +144,7 @@ class TestPlateLoads(SigmaEpsilonTestCase):
             (number_of_modes_X, number_of_modes_Y),
             D=bending_stiffness,
         )
-        load_case = DiskLoad(((length_X / 2, length_Y / 2), 100), [10, 0, 0], num_mc=100)
+        load_case = DiskLoad(((length_X / 2, length_Y / 2), 2), [10, 0, 0], num_mc=100)
         load_case.rhs(kirchhoff_plate)
         
     def test_line_load_2d(self):

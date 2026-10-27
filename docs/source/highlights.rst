@@ -1,7 +1,7 @@
 
 * Provides semi-analytical solutions for beam and plate problems.
 * Features an intuitive, high-level interface for defining various load types.
-* Supports arbitrary load definitions using Monte Carlo-based coefficient calculation.
+* Supports arbitrary load definitions, with coefficients calculated by Gauss-Legendre quadrature or, optionally, Monte Carlo integration.
 * Delivers industry-grade performance through highly parallelized, efficient code.
 * Seamlessly integrates with popular Python libraries such as NumPy, SciPy, and xarray.
 * Includes a comprehensive gallery of Matplotlib examples for all problem types.

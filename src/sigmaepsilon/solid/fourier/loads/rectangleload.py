@@ -1,13 +1,13 @@
-from typing import Iterable
+from collections.abc import Iterable
 
 import numpy as np
 from numpy import ndarray
 
-from ..preproc import rhs_rect_const, rhs_rect_mc, rhs0_rect_const, rhs0_rect_mc
-from ..utils import points_to_rectangle_region
+from ..integration import integrate_rectangle
+from ..preproc import rhs0_rect_const, rhs_rect_const
 from ..protocols import NavierProblemProtocol
-from .loads import LoadCase, Float1d, Float2d
-from ..config import Config
+from ..utils import check_points_in_domain, points_to_rectangle_region
+from .loads import Float1d, Float2d, LoadCase
 
 __all__ = ["RectangleLoad"]
 
@@ -26,6 +26,17 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
     num_mc: int, Optional
         The number of sampling points for Monte Carlo integration. If no value
         is provided, the global config value is used.
+    integration: str, Optional
+        The method of numerical integration, see
+        :class:`~sigmaepsilon.solid.fourier.loads.LoadCase`.
+    rng: int or numpy.random.Generator, Optional
+        The seed or the random generator of Monte Carlo integration, see
+        :class:`~sigmaepsilon.solid.fourier.loads.LoadCase`.
+
+    Note
+    ----
+    The coefficients of constant loads are calculated in closed form, the ones
+    of loads given as string expressions are integrated numerically.
 
 
     .. hint::
@@ -59,27 +70,33 @@ class RectangleLoad(LoadCase[Float2d, Float1d]):
             2d float array of shape (H, 3), where H is the total number
             of harmonic terms involved (defined for the problem).
         """
-        return self._rhs(problem, rhs_rect_const, rhs_rect_mc)
+        return self._rhs(problem, zero_order=False)
 
     def rhs0(self, problem: NavierProblemProtocol) -> ndarray:
         """
         Returns the zero-order coefficients of the moment loads. See
         :func:`~sigmaepsilon.solid.fourier.loads.LoadCase.rhs0` for details.
         """
-        return self._rhs(problem, rhs0_rect_const, rhs0_rect_mc)
+        return self._rhs(problem, zero_order=True)
 
-    def _rhs(
-        self, problem: NavierProblemProtocol, evaluator_const, evaluator_mc
-    ) -> ndarray:
+    def _rhs(self, problem: NavierProblemProtocol, zero_order: bool) -> ndarray:
         assert problem.model_type.is_2d, f"Invalid model type {problem.model_type}."
 
         domain = np.array(self.domain, dtype=float)
         values = self.value
-        n_MC = self._num_mc or Config.NUM_MC_SAMPLES_PLATE
+        check_points_in_domain(domain, problem.size, "corners of the rectangle")
 
         has_symbolic_load = any(not isinstance(vi, (float, int)) for vi in values)
         if has_symbolic_load:
-            return evaluator_mc(problem.size, problem.shape, domain, values, n_MC=n_MC)
+            return integrate_rectangle(
+                problem.size,
+                problem.shape,
+                domain,
+                values,
+                zero_order=zero_order,
+                **self._integration_options(),
+            )
         else:
             values = np.array(values, dtype=float)
-            return evaluator_const(problem.size, problem.shape, domain, values)
+            evaluator = rhs0_rect_const if zero_order else rhs_rect_const
+            return evaluator(problem.size, problem.shape, domain, values)
