@@ -29,6 +29,7 @@ dependencies = [
     "sigmaepsilon-deepdict>=2.0.0,<3",
     "sigmaepsilon-mesh>=3.0.2,<4",
     "sigmaepsilon-solid-material>=1.0.2,<2",
+    "pydantic>=2,<3",
 ]
 
 [project.urls]

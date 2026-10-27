@@ -3015,6 +3015,7 @@ name = "sigmaepsilon-solid-fourier"
 version = "2.2.0"
 source = { editable = "." }
 dependencies = [
+    { name = "pydantic" },
     { name = "sigmaepsilon-deepdict" },
     { name = "sigmaepsilon-mesh" },
     { name = "sigmaepsilon-solid-material" },
@@ -3077,6 +3078,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
+    { name = "pydantic", specifier = ">=2,<3" },
     { name = "sigmaepsilon-deepdict", specifier = ">=2.0.0,<3" },
     { name = "sigmaepsilon-mesh", specifier = ">=3.0.2,<4" },
     { name = "sigmaepsilon-solid-material", specifier = ">=1.0.2,<2" },

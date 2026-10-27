@@ -40,7 +40,7 @@ def postproc(
     """
     ftype = solution.dtype
     itype = itype_of_ftype(ftype)
-    if PostprocMethod.from_value(Config.POSTPROC_METHOD) is PostprocMethod.BLAS:
+    if Config.POSTPROC_METHOD is PostprocMethod.BLAS:
         mindlin, kirchhoff = postproc_Mindlin_gemm, postproc_Kirchhoff_gemm
     else:
         mindlin, kirchhoff = postproc_Mindlin, postproc_Kirchhoff

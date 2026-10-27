@@ -81,7 +81,7 @@ class LoadCase(Generic[LoadDomainType, LoadValueType]):
             return self._integration
         if self._num_mc is not None:
             return IntegrationMethod.MONTE_CARLO
-        return IntegrationMethod.from_value(Config.INTEGRATION_METHOD)
+        return Config.INTEGRATION_METHOD
 
     @integration.setter
     def integration(self, value: str | IntegrationMethod | NoneType) -> None:
