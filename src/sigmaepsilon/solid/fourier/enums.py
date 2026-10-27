@@ -53,3 +53,25 @@ class IntegrationMethod(Enum):
             f"Invalid integration method {value!r}. "
             f"Valid options are {[m.value for m in cls]}."
         )
+
+
+@unique
+class PostprocMethod(Enum):
+    """Enumeration of the methods of postprocessing plates."""
+
+    BLAS = "blas"
+    NUMBA = "numba"
+
+    @classmethod
+    def from_value(cls, value: "str | PostprocMethod") -> "PostprocMethod":
+        """Returns the method from an instance or a string."""
+        if isinstance(value, cls):
+            return value
+        if isinstance(value, str):
+            for method in cls:
+                if method.value == value.lower():
+                    return method
+        raise ValueError(
+            f"Invalid postprocessing method {value!r}. "
+            f"Valid options are {[m.value for m in cls]}."
+        )

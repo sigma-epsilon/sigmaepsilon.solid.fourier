@@ -1,14 +1,17 @@
-from typing import Iterable
 from types import NoneType
+from typing import Iterable
 
 import numpy as np
-from numpy import sin, cos, ndarray, pi as PI
 from numba import njit, prange
-
+from numpy import cos, ndarray, sin
+from numpy import pi as PI
 from sigmaepsilon.math import atleast1d, atleast2d, atleast3d, atleast4d, itype_of_ftype
 
+from .config import Config
+from .enums import PostprocMethod
+from .postproc_gemm import postproc_Kirchhoff_gemm, postproc_Mindlin_gemm
 
-__all__ = ["postproc", "postproc_Mindlin", "postproc_Kirchhoff"]
+__all__ = ["postproc", "postproc_Kirchhoff", "postproc_Mindlin"]
 
 
 UZ, ROTX, ROTY, CX, CY, CXY, EXZ, EYZ, MX, MY, MXY, QX, QY = list(range(13))
@@ -30,9 +33,17 @@ def postproc(
     If the zero-order load coefficients `loads0` are provided (see
     :func:`~sigmaepsilon.solid.fourier.loads.LoadCase.rhs0`), the contributions
     of the corresponding harmonics are added to the results.
+
+    Plates are postprocessed with dense matrix products (see :mod:`.postproc_gemm`)
+    or with the Numba kernels, depending on `Config.POSTPROC_METHOD`. Beams always
+    use the Numba kernels.
     """
     ftype = solution.dtype
     itype = itype_of_ftype(ftype)
+    if PostprocMethod.from_value(Config.POSTPROC_METHOD) is PostprocMethod.BLAS:
+        mindlin, kirchhoff = postproc_Mindlin_gemm, postproc_Kirchhoff_gemm
+    else:
+        mindlin, kirchhoff = postproc_Mindlin, postproc_Kirchhoff
     if S is not None:
         if not isinstance(size, Iterable):
             res = postproc_Timoshenko(
@@ -44,7 +55,7 @@ def postproc(
                 atleast1d(S),
             )
         else:
-            res = postproc_Mindlin(
+            res = mindlin(
                 np.array(size).astype(ftype),
                 np.array(shape).astype(itype),
                 atleast2d(points).astype(ftype),
@@ -63,7 +74,7 @@ def postproc(
                 loads,
             )
         else:
-            res = postproc_Kirchhoff(
+            res = kirchhoff(
                 np.array(size).astype(ftype),
                 np.array(shape).astype(itype),
                 atleast2d(points).astype(ftype),

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Plates are postprocessed with dense matrix products (BLAS) instead of the Numba kernels, about 2× faster on scattered points. If the points form a full or partial tensor-product grid, in any order, the results are evaluated on the grid, which is 20× faster or more. The Numba kernels remain available with `Config.POSTPROC_METHOD = "numba"`.
+
+### Added
+
+- `Config.POSTPROC_METHOD` and `Config.POSTPROC_BUFFER_SIZE`.
+
 ## [2.2.0] - 2026-10-26
 
 **Results for moment loads were wrong in earlier versions.** If you applied non-zero moment loads (`mx`/`my` on plates, `M` on beams), recompute your results.

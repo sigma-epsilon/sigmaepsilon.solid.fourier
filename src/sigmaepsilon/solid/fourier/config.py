@@ -17,3 +17,8 @@ class Config:
     MC_BATCH_SIZE_BEAM: int = 5000
     # The default seed of Monte Carlo integration. None means fresh entropy.
     MC_SEED: int | None = None
+    # The method of postprocessing plates. Either "blas" (dense matrix products)
+    # or "numba" (the reference kernels).
+    POSTPROC_METHOD: str = "blas"
+    # The number of floats in the buffers of the "blas" postprocessing.
+    POSTPROC_BUFFER_SIZE: int = 2**22
