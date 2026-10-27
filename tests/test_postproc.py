@@ -2,11 +2,12 @@ import unittest
 from unittest import mock
 
 import numpy as np
-
 from sigmaepsilon.core.testing import SigmaEpsilonTestCase
+
+import sigmaepsilon.solid.fourier.postproc_gemm as postproc_gemm
 from sigmaepsilon.solid.fourier import (
-    NavierPlate,
     LoadGroup,
+    NavierPlate,
     PointLoad,
     RectangleLoad,
 )
@@ -21,7 +22,6 @@ from sigmaepsilon.solid.fourier.postproc_gemm import (
     postproc_Kirchhoff_gemm,
     postproc_Mindlin_gemm,
 )
-import sigmaepsilon.solid.fourier.postproc_gemm as postproc_gemm
 
 
 def max_relative_error(values: np.ndarray, reference: np.ndarray) -> float:
@@ -164,12 +164,14 @@ class TestPostprocMethod(SigmaEpsilonTestCase):
                 )
                 self.assertLess(error, 1e-12, msg=f"load case {key}")
 
-    def test_explicit_method(self):
+    def test_config_method(self):
         test = TestGemmVsNumba()
         test.setUp()
         args = (test.size, test.shape, test.scattered, test.solution_M, None, test.D)
-        blas = postproc(*args, test.S, method=PostprocMethod.BLAS)
-        numba = postproc(*args, test.S, method="NUMBA")
+        with mock.patch.object(Config, "POSTPROC_METHOD", PostprocMethod.BLAS):
+            blas = postproc(*args, test.S)
+        with mock.patch.object(Config, "POSTPROC_METHOD", "NUMBA"):
+            numba = postproc(*args, test.S)
         self.assertLess(max_relative_error(blas, numba), 1e-12)
 
     def test_invalid_method(self):

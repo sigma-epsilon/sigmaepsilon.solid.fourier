@@ -23,11 +23,12 @@ much cheaper than evaluating them point by point.
 """
 
 import numpy as np
-from numpy import ndarray, pi as PI
+from numpy import ndarray
+from numpy import pi as PI
 
 from .config import Config
 
-__all__ = ["postproc_Mindlin_gemm", "postproc_Kirchhoff_gemm"]
+__all__ = ["postproc_Kirchhoff_gemm", "postproc_Mindlin_gemm"]
 
 
 UZ, ROTX, ROTY, CX, CY, CXY, EXZ, EYZ, MX, MY, MXY, QX, QY = list(range(13))
@@ -199,7 +200,7 @@ def _evaluate_grid(
 ) -> None:
     # x and y are the coordinates of the grid lines, ix and iy are the indices
     # of the grid lines of the points
-    M, N = shape
+    N = shape[1]
     nLHS, nRHS = res.shape[:2]
     nx, ny = len(x), len(y)
     a, b = _wave_numbers(size, shape)
