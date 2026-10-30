@@ -63,13 +63,13 @@ Sphinx. For this, navigate to the `docs` directory and run the following command
 
 .. code-block:: shell
 
-   poetry run make html
+   uv run make html
 
 Or run this commend from the root directory of the project:
 
 .. code-block:: shell
 
-   poetry run sphinx-build -b html docs/source docs/build
+   uv run sphinx-build -b html docs/source docs/build
 
 These commands will generate the HTML documentation in the `docs/build` directory. To open
 the documentation in a browser, navigate to the `docs/build/html` directory and open

@@ -1,102 +1,97 @@
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "sigmaepsilon.solid.fourier"
-version = "2.1.3"
+version = "2.2.0"
 description = "Fourier solutions of some plate and beam bending problems in Python"
-classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-        "Programming Language :: Python :: 3 :: Only",
-        "Operating System :: OS Independent",
-]
 readme = "README.md"
-authors = ["Bence Balogh <bencebalogh@sigmaepsilon.com>"]
-maintainers = ["Bence Balogh <bencebalogh@sigmaepsilon.com>"]
+requires-python = ">=3.10,<3.13"
 license = "MIT"
+authors = [{ name = "Bence Balogh", email = "bencebalogh@sigmaepsilon.com" }]
+maintainers = [{ name = "Bence Balogh", email = "bencebalogh@sigmaepsilon.com" }]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: OS Independent",
+]
 keywords = [
-    "engineering", "fourier", "benchmark", "mechanics", 
+    "engineering", "fourier", "benchmark", "mechanics",
     "solid mechanics", "elasticity", "mindlin", "kirchhoff", "euler",
     "timoshenko", "beam", "plate", "uflyand", "bernoulli", "bensys",
     "programming", "Python"
 ]
-homepage = "https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier"
-repository = "https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier"
-documentation = "https://sigmaepsilonsolidfourier.readthedocs.io/en/latest/?badge=latest"
-packages = [{ include = "sigmaepsilon", from = "src" }]
+dependencies = [
+    "sigmaepsilon-deepdict>=2.0.0,<3",
+    "sigmaepsilon-mesh>=3.0.2,<4",
+    "sigmaepsilon-solid-material>=1.0.2,<2",
+    "pydantic>=2,<3",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.10,<3.13"
-sigmaepsilon-deepdict = "^2.0.0"
-sigmaepsilon-mesh = "^3.0.2"
-sigmaepsilon-solid-material = "^1.0.2"
+[project.urls]
+Homepage = "https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier"
+Repository = "https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier"
+Documentation = "https://sigmaepsilonsolidfourier.readthedocs.io/en/latest/?badge=latest"
 
-[tool.poetry.group.dev]
-optional = true
+[tool.hatch.build.targets.wheel]
+packages = ["src/sigmaepsilon"]
 
-[tool.poetry.group.test]
-optional = true
+[tool.hatch.build.targets.sdist]
+include = ["src/sigmaepsilon", "README.md", "LICENSE"]
 
-[tool.poetry.group.docs]
-optional = true
+[tool.uv]
+# Poetry groups were opt-in; keep it that way (`uv sync --group <name>`).
+default-groups = []
 
-[tool.poetry.group.dist]
-optional = true
-
-[tool.poetry.group.app-navier-plate-calculator-concentrated-load]
-optional = true
-
-[tool.poetry.group.app-fastapi]
-optional = true
-
-[tool.poetry.group.dev.dependencies]
-matplotlib = "^3.8.3"
-texttable = "^1.7.0"
-pandas = "^2.2.0"
-pyyaml = "^6.0.1"
-ipykernel = "^6.29.5"
-black = "^24.8.0"
-xarray = "^2024.6.0"
-
-[tool.poetry.group.test.dependencies]
-coverage = "^7.4.1"
-pytest = "^8.0.1"
-pytest-cov = "^4.1.0"
-pyyaml = "^6.0.1"
-xarray = "^2024.6.0"
-
-[tool.poetry.group.dist.dependencies]
-dask = "^2024.2.0"
-distributed = "^2024.2.0"
-
-[tool.poetry.group.docs.dependencies]
-ipython = "^8.21.0"
-myst-parser = "^2.0.0"
-nbsphinx = "^0.9.3"
-sphinx-gallery = "^0.15.0"
-sphinx-copybutton = "^0.5.2"
-sphinxcontrib-bibtex = "^2.6.2"
-nbsphinx-link = "^1.3.0"
-sphinxcontrib-svg2pdfconverter = "^1.2.2"
-sphinx-design = "^0.5.0"
-sphinx-inline-tabs = "^2023.4.21"
-pydata-sphinx-theme = "^0.15.2"
-matplotlib = "^3.8.3"
-setuptools = ">=65.5.1"
-numpy = ">=1.22.2"
-pillow = ">=10.0.1"
-tornado = ">=6.3.3"
-fonttools = ">=4.43.0"
-
-[tool.poetry.group.app-navier-plate-calculator-concentrated-load.dependencies]
-pyarrow = "^19.0.1"
-pyvista = "^0.44.2"
-papermill = "^2.6.0"
-
-[tool.poetry.group.app-fastapi.dependencies]
-fastapi = "^0.115.11"
+[dependency-groups]
+dev = [
+    "matplotlib>=3.8.3,<4",
+    "texttable>=1.7.0,<2",
+    "pandas>=2.2.0,<3",
+    "pyyaml>=6.0.1,<7",
+    "ipykernel>=6.29.5,<7",
+    "black>=24.8.0,<25",
+    "xarray>=2024.6.0,<2025",
+]
+test = [
+    "coverage>=7.4.1,<8",
+    "pytest>=8.0.1,<9",
+    "pytest-cov>=4.1.0,<5",
+    "pyyaml>=6.0.1,<7",
+    "xarray>=2024.6.0,<2025",
+]
+dist = [
+    "dask>=2024.2.0,<2025",
+    "distributed>=2024.2.0,<2025",
+]
+docs = [
+    "ipython>=8.21.0,<9",
+    "myst-parser>=2.0.0,<3",
+    "nbsphinx>=0.9.3,<0.10",
+    "sphinx-gallery>=0.15.0,<0.16",
+    "sphinx-copybutton>=0.5.2,<0.6",
+    "sphinxcontrib-bibtex>=2.6.2,<3",
+    "nbsphinx-link>=1.3.0,<2",
+    "sphinxcontrib-svg2pdfconverter>=1.2.2,<2",
+    "sphinx-design>=0.5.0,<0.6",
+    "sphinx-inline-tabs>=2023.4.21,<2024",
+    "pydata-sphinx-theme>=0.15.2,<0.16",
+    "matplotlib>=3.8.3,<4",
+    "setuptools>=65.5.1",
+    "numpy>=1.22.2",
+    "pillow>=10.0.1",
+    "tornado>=6.3.3",
+    "fonttools>=4.43.0",
+]
+app-navier-plate-calculator-concentrated-load = [
+    "pyarrow>=19.0.1,<20",
+    "pyvista>=0.44.2,<0.45",
+    "papermill>=2.6.0,<3",
+]
+app-fastapi = [
+    "fastapi>=0.115.11,<0.116",
+]

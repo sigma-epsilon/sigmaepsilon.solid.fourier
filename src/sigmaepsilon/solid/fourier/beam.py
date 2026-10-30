@@ -1,25 +1,25 @@
-from typing import Iterable, Hashable
+from collections.abc import Hashable, Iterable
 from types import NoneType
 
 import numpy as np
-
 from sigmaepsilon.deepdict import DeepDict
 from sigmaepsilon.math import atleast1d
 
-from .problem import NavierProblem
-from .preproc import lhs_Navier, rhs_Bernoulli
-from .postproc import postproc
-from .proc import linsolve_Bernoulli, linsolve_Timoshenko
-from .result import BeamLoadCaseResultLinStat
-from .protocols import LoadGroupProtocol
 from .enums import MechanicalModelType
+from .postproc import postproc
+from .preproc import lhs_Navier, rhs_Bernoulli
+from .problem import NavierProblem
+from .proc import linsolve_Bernoulli, linsolve_Timoshenko
+from .protocols import LoadGroupProtocol
+from .result import BeamLoadCaseResultLinStat
+from .utils import check_points_in_domain, to_positive_float, to_positive_int
 
 __all__ = ["NavierBeam"]
 
 
 class NavierBeam(NavierProblem):
     """
-    A class designed to handle simply-supported plates bent in the X-Y plane
+    A class designed to handle simply-supported beams bent in the X-Y plane
     and solve them using Navier's method.
 
     The beam model can be either Euler-Bernoulli or Timoshenko, depending on whether shear
@@ -28,14 +28,15 @@ class NavierBeam(NavierProblem):
     Parameters
     ----------
     length: float
-        The length of the beam.
+        The length of the beam, a positive number.
     N: int, Optional
-        The number of harmonic terms involved in the approximation.
-        Default is 100.
+        The number of harmonic terms involved in the approximation, a positive
+        integer. Default is 100.
     EI: float
-        Bending stiffness.
+        Bending stiffness, a positive number.
     GA: float, Optional
-        Shear stiffness. Only for Timoshenko beams. Default is None.
+        Shear stiffness, a positive number. Only for Timoshenko beams.
+        Default is None.
     loads: LoadGroup, Optional
         The loads. Default is None.
 
@@ -67,7 +68,7 @@ class NavierBeam(NavierProblem):
         loads: LoadGroupProtocol | None = None,
     ):
         super().__init__(loads=loads)
-        self._length = length
+        self.length = length
         self.EI = EI
         self.GA = GA
         self.N = N
@@ -80,7 +81,37 @@ class NavierBeam(NavierProblem):
     @length.setter
     def length(self, value: float):
         """Sets the length of the beam."""
-        self._length = value
+        self._length = to_positive_float(value, "length")
+
+    @property
+    def N(self) -> int:
+        """The number of harmonic terms involved in the approximation."""
+        return self._N
+
+    @N.setter
+    def N(self, value: int):
+        """Sets the number of harmonic terms involved in the approximation."""
+        self._N = to_positive_int(value, "N")
+
+    @property
+    def EI(self) -> float:
+        """The bending stiffness of the beam."""
+        return self._EI
+
+    @EI.setter
+    def EI(self, value: float):
+        """Sets the bending stiffness of the beam."""
+        self._EI = to_positive_float(value, "EI")
+
+    @property
+    def GA(self) -> float | None:
+        """The shear stiffness of the beam, or None for an Euler-Bernoulli beam."""
+        return self._GA
+
+    @GA.setter
+    def GA(self, value: float | None):
+        """Sets the shear stiffness of the beam."""
+        self._GA = None if value is None else to_positive_float(value, "GA")
 
     @property
     def size(self) -> float | int:
@@ -110,6 +141,17 @@ class NavierBeam(NavierProblem):
         else:
             return MechanicalModelType.TIMOSHENKO_BEAM
 
+    def _check_points(self, points: float | Iterable | NoneType) -> np.ndarray:
+        if points is None:
+            raise ValueError("The points of evaluation must be provided.")
+        points = atleast1d(np.asarray(points, dtype=float))
+        if points.ndim != 1:
+            raise ValueError(
+                f"The points must be a scalar or an 1d iterable, got shape {points.shape}."
+            )
+        check_points_in_domain(points, self.length)
+        return points
+
     def linear_static_analysis(
         self,
         *args,
@@ -126,12 +168,13 @@ class NavierBeam(NavierProblem):
             The loads and the points, in any order.
         loads: :class:`~sigmaepsilon.solid.fourier.loads.LoadGroup`, Optional
             The loads.
-        points: float or Iterable, Optional
+        points: float or Iterable
             A float or an 1d iterable of coordinates, where the results are
             to be evaluated. If it is a scalar, the resulting dictionary
             contains 1d arrays for every quantity, for every load case. If
             there are multiple points, the result attached to a load case is
-            a 2d array, where the first axis goes along the points.
+            a 2d array, where the first axis goes along the points. The points
+            must lie on the beam and they are required.
 
         Returns
         -------
@@ -163,12 +206,23 @@ class NavierBeam(NavierProblem):
         if not isinstance(loads, LoadGroupProtocol):  # pragma: no cover
             raise TypeError("The loads must be an instance of LoadGroup.")
 
+        points = self._check_points(points)
+
         # STIFFNESS
         lhs = lhs_Navier(self.length, self.N, D=self.EI, S=self.GA)
 
         # LOADS
-        rhs = np.stack(list(lc.rhs(problem=self) for lc in loads.cases()), axis=0)
+        # The addresses and the cases are collected together, so that the results
+        # are assigned to the cases they belong to, regardless of any other items
+        # in the load group.
+        case_items = list(loads.cases(return_address=True))
+        if len(case_items) == 0:
+            raise ValueError("The load group contains no load cases.")
+        addresses, cases = zip(*case_items)
+        rhs = np.stack([lc.rhs(problem=self) for lc in cases], axis=0)
         # rhs.shape = (nRHS, nMN, nComponent)
+        rhs0 = np.stack([lc.rhs0(problem=self) for lc in cases], axis=0)
+        # zero-order coefficients of moment loads, see LoadCase.rhs0
 
         # SOLUTION
         if self.GA is None:
@@ -181,12 +235,13 @@ class NavierBeam(NavierProblem):
             # coeffs.shape = (nLHS, nRHS, nMN, 2)
 
         # POSTPROCESSING
-        points = atleast1d(points)
-        res = postproc(self.length, self.N, points, coeffs, rhs, self.EI, self.GA)
+        res = postproc(
+            self.length, self.N, points, coeffs, rhs, self.EI, self.GA, loads0=rhs0
+        )
         # res.shape = (nLHS, nRHS, nPoint, nComponent)
 
         result = DeepDict()
-        for i, (addr, _) in enumerate(loads.items(deep=True, return_address=True)):
+        for i, addr in enumerate(addresses):
             result[addr] = self._postproc_linstat_load_case_result(res[0, i, :, :])
         result.lock()
 

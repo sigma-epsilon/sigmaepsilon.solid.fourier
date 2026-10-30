@@ -201,6 +201,15 @@ V_y(x) \approx \overline{V}_y(x) &= \sum_{k=1}^{n} \left[ v_k \, EI_z \, \left( 
 \end{align*}
 ```
 
+The cosine series of $p_{zz}$ is complete only if it includes the constant term
+
+```{math}
+:label: eq_bernoulli_beamXY_r0
+r_0 = \frac{1}{L} \int_0^L p_{zz}(x) dx,
+```
+
+the mean of the moment load. A constant moment load does not bend a simply-supported beam, but it is balanced by a constant shear force $-r_0$ that has to be added to $\overline{V}_y(x)$.
+
 (Navier_series_representation_of_beam_loads)=
 ### Series representation of arbitrary loads
 

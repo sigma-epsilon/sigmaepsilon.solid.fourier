@@ -68,3 +68,11 @@ Protocols
 
 .. automodule:: sigmaepsilon.solid.fourier.protocols
    :members:
+
+Configuration
+=============
+
+.. autoclass:: sigmaepsilon.solid.fourier.config.FourierConfig
+
+.. autodata:: sigmaepsilon.solid.fourier.config.Config
+   :annotation:
