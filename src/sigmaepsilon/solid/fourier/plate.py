@@ -1,4 +1,5 @@
-from collections.abc import Hashable, Iterable
+from collections.abc import Callable, Hashable, Iterable
+from functools import partial
 from types import NoneType
 
 import numpy as np
@@ -139,6 +140,12 @@ class NavierPlate(NavierProblem):
         else:
             return MechanicalModelType.UFLYAND_MINDLIN_PLATE
 
+    def _stiffness(self) -> tuple:
+        return self.D, self.S
+
+    def _points_checker(self) -> Callable[[Iterable], np.ndarray]:
+        return partial(check_points_in_domain, size=np.array(self.size))
+
     def linear_static_analysis(
         self,
         *args,
@@ -227,7 +234,13 @@ class NavierPlate(NavierProblem):
 
         result = DeepDict()
         for i, addr in enumerate(addresses):
-            result[addr] = self._postproc_linstat_load_case_result(res[0, i, :, :])
+            result[addr] = self._postproc_linstat_load_case_result(
+                res[0, i, :, :],
+                points=points,
+                evaluator=self._load_case_evaluator(
+                    coeffs[:, i : i + 1], rhs[i : i + 1], rhs0[i : i + 1]
+                ),
+            )
         result.lock()
 
         return result

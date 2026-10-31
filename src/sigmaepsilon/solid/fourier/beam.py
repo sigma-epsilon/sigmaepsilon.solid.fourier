@@ -1,4 +1,5 @@
-from collections.abc import Hashable, Iterable
+from collections.abc import Callable, Hashable, Iterable
+from functools import partial
 from types import NoneType
 
 import numpy as np
@@ -15,6 +16,24 @@ from .result import BeamLoadCaseResultLinStat
 from .utils import check_points_in_domain, to_positive_float, to_positive_int
 
 __all__ = ["NavierBeam"]
+
+
+def _check_beam_points(
+    points: float | Iterable | NoneType, length: float
+) -> np.ndarray:
+    """
+    Returns the points of evaluation of a beam as an 1d float array, or raises
+    an error if they are missing, have an invalid shape or are outside the span.
+    """
+    if points is None:
+        raise ValueError("The points of evaluation must be provided.")
+    points = atleast1d(np.asarray(points, dtype=float))
+    if points.ndim != 1:
+        raise ValueError(
+            f"The points must be a scalar or an 1d iterable, got shape {points.shape}."
+        )
+    check_points_in_domain(points, length)
+    return points
 
 
 class NavierBeam(NavierProblem):
@@ -142,15 +161,13 @@ class NavierBeam(NavierProblem):
             return MechanicalModelType.TIMOSHENKO_BEAM
 
     def _check_points(self, points: float | Iterable | NoneType) -> np.ndarray:
-        if points is None:
-            raise ValueError("The points of evaluation must be provided.")
-        points = atleast1d(np.asarray(points, dtype=float))
-        if points.ndim != 1:
-            raise ValueError(
-                f"The points must be a scalar or an 1d iterable, got shape {points.shape}."
-            )
-        check_points_in_domain(points, self.length)
-        return points
+        return _check_beam_points(points, self.length)
+
+    def _stiffness(self) -> tuple:
+        return self.EI, self.GA
+
+    def _points_checker(self) -> Callable[[Iterable], np.ndarray]:
+        return partial(_check_beam_points, length=self.length)
 
     def linear_static_analysis(
         self,
@@ -242,7 +259,13 @@ class NavierBeam(NavierProblem):
 
         result = DeepDict()
         for i, addr in enumerate(addresses):
-            result[addr] = self._postproc_linstat_load_case_result(res[0, i, :, :])
+            result[addr] = self._postproc_linstat_load_case_result(
+                res[0, i, :, :],
+                points=points,
+                evaluator=self._load_case_evaluator(
+                    coeffs[:, i : i + 1], rhs[i : i + 1], rhs0[i : i + 1]
+                ),
+            )
         result.lock()
 
         return result
