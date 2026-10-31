@@ -188,6 +188,8 @@ html_theme_options = {
         # Because the logo is also a homepage link, including "home" in the alt text is good practice
         "text": "SigmaEpsilon.Solid.Fourier",
     },
+    "pygments_light_style": "igor",
+    "pygments_dark_style": "paraiso-dark"
 }
 html_js_files = [
     "require.min.js",
