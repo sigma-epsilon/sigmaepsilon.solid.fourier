@@ -7,7 +7,7 @@
 [![Documentation Status](https://readthedocs.org/projects/sigmaepsilonsolidfourier/badge/?version=latest)](https://sigmaepsilonsolidfourier.readthedocs.io/en/latest/?badge=latest)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PyPI - Version](https://img.shields.io/pypi/v/sigmaepsilon.solid.fourier)](https://pypi.org/project/sigmaepsilon.solid.fourier/)
-[![Python](https://img.shields.io/badge/python-3.10|3.11|3.12-blue)](https://www.python.org)
+[![Python](https://img.shields.io/badge/python-3.10|3.11|3.12|3.13-blue)](https://www.python.org)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/1cfaba0f5c0e41d786ee4ca9ce7f1707)](https://app.codacy.com/gh/sigma-epsilon/sigmaepsilon.solid.fourier/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 

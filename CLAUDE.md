@@ -12,7 +12,7 @@ Never add "Co-Authored-By: Claude..." or similar AI contributor lines to commit 
 
 ## Project
 
-`sigmaepsilon.solid.fourier` computes semi-analytic Navier (Fourier series) solutions for simply supported beams (Euler-Bernoulli, Timoshenko) and rectangular plates (Kirchhoff-Love, Uflyand-Mindlin). It is part of the `sigmaepsilon.*` namespace package family and depends heavily on `sigmaepsilon.deepdict`, `sigmaepsilon.math`, `sigmaepsilon.mesh` and `sigmaepsilon.solid.material`. Python 3.10–3.12, managed with uv (hatchling build backend). Source lives under `src/sigmaepsilon/solid/fourier/` (namespace package, no `__init__.py` above `fourier/`).
+`sigmaepsilon.solid.fourier` computes semi-analytic Navier (Fourier series) solutions for simply supported beams (Euler-Bernoulli, Timoshenko) and rectangular plates (Kirchhoff-Love, Uflyand-Mindlin). It is part of the `sigmaepsilon.*` namespace package family and depends heavily on `sigmaepsilon.deepdict`, `sigmaepsilon.math`, `sigmaepsilon.mesh` and `sigmaepsilon.solid.material`. Python 3.10+ (tested on 3.10, 3.12 and 3.13), managed with uv (hatchling build backend). Source lives under `src/sigmaepsilon/solid/fourier/` (namespace package, no `__init__.py` above `fourier/`).
 
 ## Commands
 
@@ -28,7 +28,7 @@ cd docs && make html                          # Sphinx docs (needs the docs grou
 - Formatting: `black` (in the dev group). No linter is configured.
 - `NUMBA_DISABLE_JIT=1` is also useful when debugging inside jitted functions. The default `.coveragerc` excludes `@njit` code from coverage.
 - To work against sibling `sigmaepsilon.*` checkouts in editable mode: `uv pip install -e ../sigmaepsilon.<pkg>` (undone by the next `uv sync`).
-- CI (CircleCI) runs tests on Python 3.12; pushes to `main` publish to PyPI and pushes to `test` publish to TestPyPI, so the version in `pyproject.toml` matters on those branches.
+- CI (CircleCI) runs tests on Python 3.10, 3.12 and 3.13 with the locked versions, and on 3.10 with the lowest direct dependencies (`uv sync --resolution lowest-direct`), so the minimums in `pyproject.toml` must stay installable and passing; pushes to `main` publish to PyPI and pushes to `test` publish to TestPyPI, so the version in `pyproject.toml` matters on those branches.
 
 ## Architecture
 
