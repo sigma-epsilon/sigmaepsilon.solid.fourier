@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-10-31
+
+### Added
+
+- Results can be read by location. The results of a load case know the points they were evaluated at (`points`), and `at(points)` evaluates the solution of the load case exactly at any further points of the domain, without interpolation, returning the results in the same form.
+- Components can be accessed by their names, e.g. `result["UZ"]` or `result[["MX", "MY"]]`.
+- The coordinates of the points are attached to the `xarray` representations as `x` (and `y`) coordinates. For beams, `x` is indexed if the points are monotonic, so that `to_xarray().sel(x=..., method="nearest")` works. For plates, `to_xarray(grid=True)` returns an array with the dimensions `x`, `y` and `component` if the points form a full rectangular grid, in any order.
+- `to_pandas(coords=True)` adds the coordinates of the points as columns.
+
 ## [2.3.0] - 2026-10-31
 
 ### Changed
