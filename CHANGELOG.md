@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-10-31
+
 ### Changed
 
+- Relaxed the dependency bounds, so that the package installs next to preinstalled packages (e.g. on Databricks): no upper caps, and the minimums are the oldest versions the test suite passes with (checked by a lowest-direct CI job). NumPy 2 is supported, which no earlier version could be installed with.
+- Python 3.13 is supported, and `requires-python` is `>=3.10` without an upper bound.
+- Requires `sigmaepsilon.deepdict>=3.1.0`, `sigmaepsilon.math>=2.6.0`, `sigmaepsilon.mesh>=3.3.0` and `sigmaepsilon.solid.material>=1.2.0`. The directly imported NumPy and Numba are declared as dependencies.
+- `sigmaepsilon.solid.material` 1.2.0 uses the plane stress reduced stiffness for plates, so stiffness matrices of plate sections built with it are smaller than before (by 18% for an isotropic material with a Poisson's ratio of 0.3), and so are the results that depend on them.
 - Plates are postprocessed with dense matrix products (BLAS) instead of the Numba kernels, about 2× faster on scattered points. If the points form a full or partial tensor-product grid, in any order, the results are evaluated on the grid, which is 20× faster or more. The Numba kernels remain available with `Config.POSTPROC_METHOD = "numba"`.
 
 ### Added

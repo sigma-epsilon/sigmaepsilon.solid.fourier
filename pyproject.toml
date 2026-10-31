@@ -4,10 +4,10 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sigmaepsilon.solid.fourier"
-version = "2.2.0"
+version = "2.3.0"
 description = "Fourier solutions of some plate and beam bending problems in Python"
 readme = "README.md"
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.10"
 license = "MIT"
 authors = [{ name = "Bence Balogh", email = "bencebalogh@sigmaepsilon.com" }]
 maintainers = [{ name = "Bence Balogh", email = "bencebalogh@sigmaepsilon.com" }]
@@ -16,6 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3 :: Only",
     "Operating System :: OS Independent",
 ]
@@ -26,16 +27,19 @@ keywords = [
     "programming", "Python"
 ]
 dependencies = [
-    "sigmaepsilon-deepdict>=2.0.0,<3",
-    "sigmaepsilon-mesh>=3.0.2,<4",
-    "sigmaepsilon-solid-material>=1.0.2,<2",
-    "pydantic>=2,<3",
+    "sigmaepsilon-deepdict>=3.1.0",
+    "sigmaepsilon-math>=2.6.0",
+    "sigmaepsilon-mesh>=3.3.0",
+    "sigmaepsilon-solid-material>=1.2.0",
+    "numpy>=1.24",
+    "numba>=0.57",
+    "pydantic>=2",
 ]
 
 [project.urls]
 Homepage = "https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier"
 Repository = "https://github.com/sigma-epsilon/sigmaepsilon.solid.fourier"
-Documentation = "https://sigmaepsilonsolidfourier.readthedocs.io/en/latest/?badge=latest"
+Documentation = "https://sigmaepsilonsolidfourier.readthedocs.io/en/latest/"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/sigmaepsilon"]
@@ -46,27 +50,30 @@ include = ["src/sigmaepsilon", "README.md", "LICENSE"]
 [tool.uv]
 # Poetry groups were opt-in; keep it that way (`uv sync --group <name>`).
 default-groups = []
+# Lock-only constraint, it does not end up in the package metadata. The Linux wheels
+# of cytriangle>=2 need glibc 2.39, which Ubuntu 22.04 (CircleCI) lacks.
+constraint-dependencies = ["cytriangle<2; sys_platform == 'linux'"]
 
 [dependency-groups]
 dev = [
-    "matplotlib>=3.8.3,<4",
-    "texttable>=1.7.0,<2",
-    "pandas>=2.2.0,<3",
-    "pyyaml>=6.0.1,<7",
-    "ipykernel>=6.29.5,<7",
-    "black>=24.8.0,<25",
-    "xarray>=2024.6.0,<2025",
+    "matplotlib>=3.8.3",
+    "texttable>=1.7.0",
+    "pandas>=2.2.0",
+    "pyyaml>=6.0.1",
+    "ipykernel>=6.29.5",
+    "black>=24.8.0",
+    "xarray>=2024.6.0",
 ]
 test = [
-    "coverage>=7.4.1,<8",
-    "pytest>=8.0.1,<9",
-    "pytest-cov>=4.1.0,<5",
-    "pyyaml>=6.0.1,<7",
-    "xarray>=2024.6.0,<2025",
+    "coverage>=7.4.1",
+    "pytest>=8.0.1",
+    "pytest-cov>=4.1.0",
+    "pyyaml>=6.0.1",
+    "xarray>=2024.6.0",
 ]
 dist = [
-    "dask>=2024.2.0,<2025",
-    "distributed>=2024.2.0,<2025",
+    "dask>=2024.2.0",
+    "distributed>=2024.2.0",
 ]
 docs = [
     "ipython>=8.21.0,<9",
