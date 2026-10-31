@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sigmaepsilon.solid.fourier"
-version = "2.3.0"
+version = "2.4.0"
 description = "Fourier solutions of some plate and beam bending problems in Python"
 readme = "README.md"
 requires-python = ">=3.10"
