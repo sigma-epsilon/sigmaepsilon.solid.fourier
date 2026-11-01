@@ -1,3 +1,9 @@
+---
+myst:
+  html_meta:
+    description: "Coordinate systems and sign conventions for the loads, displacements and internal forces of beams and plates in sigmaepsilon.solid.fourier."
+---
+
 (sign_conventions)=
 # Notions, Coordinate-Systems and Sign Conventions
 
@@ -70,13 +76,13 @@ Sign conventions for loads and displacement of plates.
 The internal forces for a plate of constant thickness $t$ are defined as:
 
 ```{math}
-\begin{align*}
+\begin{aligned}
 m_x(x,y) &= \int_{-t/2}^{t/2} z \, \sigma_x(x,y,z) \, dz, \\
 m_y(x,y) &= \int_{-t/2}^{t/2} z \, \sigma_y(x,y,z) \, dz, \\
 m_{xy}(x,y) &= \int_{-t/2}^{t/2} z \, \tau_{xy}(x,y,z) \, dz, \\
 v_x(x,y) &= \int_{-t/2}^{t/2} \tau_{xz}(x,y,z) \, dz, \\
 v_y(x,y) &= \int_{-t/2}^{t/2} \tau_{yz}(x,y,z) \, dz.
-\end{align*}
+\end{aligned}
 ```
 
 ```{figure} ../_static/sign_plate_bending_xy.png
