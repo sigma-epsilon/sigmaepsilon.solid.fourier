@@ -9,6 +9,24 @@ executors:
     docker:
       - image: cimg/python:3.12
 
+commands:
+  skip_if_published:
+    description: >
+      Ends the job successfully if the version in pyproject.toml is already on the
+      index, so merges that only update the documentation don't fail the deploy.
+    parameters:
+      index_url:
+        type: string
+    steps:
+      - run:
+          name: Skip if the version is already published
+          command: |
+            VERSION=$(uv version --short)
+            if curl -sfo /dev/null "<< parameters.index_url >>/pypi/sigmaepsilon.solid.fourier/$VERSION/json"; then
+              echo "Version $VERSION is already published, skipping the deploy."
+              circleci-agent step halt
+            fi
+
 jobs:
   run_tests:
     executor: my-executor
@@ -66,6 +84,8 @@ jobs:
       - run:
           name: Install uv
           command: pip install uv
+      - skip_if_published:
+          index_url: https://test.pypi.org
       - run:
           name: Build project
           command: |
@@ -82,6 +102,8 @@ jobs:
       - run:
           name: Install uv
           command: pip install uv
+      - skip_if_published:
+          index_url: https://pypi.org
       - run:
           name: Build project
           command: |
