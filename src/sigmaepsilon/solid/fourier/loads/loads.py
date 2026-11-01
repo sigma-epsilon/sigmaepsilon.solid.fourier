@@ -16,13 +16,20 @@ from ..utils import RNGType, to_positive_int
 __all__ = ["LoadCase", "LoadGroup"]
 
 
+#: A sequence of floats, like the coordinates of a point or the components of a load.
 Float1d: TypeAlias = Iterable[float]
+#: A sequence of sequences of floats, like the coordinates of the corners of a rectangle.
 Float2d: TypeAlias = Iterable[Float1d]
 
 Int1d: TypeAlias = Iterable[int]
 Int2d: TypeAlias = Iterable[Int1d]
 
+#: The type of the domain of a load case, e.g. ``float | Float1d`` (the location) for
+#: a :class:`~sigmaepsilon.solid.fourier.loads.PointLoad` or ``Float2d`` (the corners)
+#: for a :class:`~sigmaepsilon.solid.fourier.loads.RectangleLoad`.
 LoadDomainType = TypeVar("LoadDomainType")
+#: The type of the value of a load case, e.g. ``Float1d`` (the load components) for a
+#: :class:`~sigmaepsilon.solid.fourier.loads.PointLoad`.
 LoadValueType = TypeVar("LoadValueType")
 
 

@@ -1,3 +1,5 @@
+"""Protocols of the problems, load cases and load groups of the library."""
+
 from typing import Protocol, runtime_checkable, Iterable, Hashable, ClassVar
 from numpy import ndarray
 

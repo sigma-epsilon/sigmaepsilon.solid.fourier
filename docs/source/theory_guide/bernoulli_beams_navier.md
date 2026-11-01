@@ -1,3 +1,9 @@
+---
+myst:
+  html_meta:
+    description: "Derivation of Navier's Fourier series solution for simply supported Euler-Bernoulli beams, including the load coefficients for common load types."
+---
+
 # Navier's Solution of Simply-Supported Euler-Bernoulli Beams
 
 At the core of all solutions provided in this package lies Navier's classical approach for simply supported Euler-Bernoulli beams {cite:p}`navier1826resume`. This method forms the foundation for analyzing beam deflections and internal forces under various loading conditions. By leveraging the power of Fourier series expansions, Navier's solution enables the representation of arbitrary load distributions and corresponding beam responses in a systematic and mathematically rigorous way. This framework not only simplifies the solution process for simply supported beams but also serves as a stepping stone for more advanced structural analysis techniques.
@@ -104,16 +110,16 @@ where $\sigma_x$ denotes normal stresses along $x$, and $E$ is Young's modulus o
 
 ```{math}
 :label: eq_bernoulli_beamXY_total_1
-\begin{align*}
+\begin{aligned}
 M_z(x)
 &= - \int_A y \, \sigma_x (x) \, dA \\
 &= - \int_A y \, E \varepsilon_x (x) \, dA \\
 &=  \int_A y^2 \, E \, \left. \frac{d \vartheta_z}{dx} \right|_{x} \, dA \\
 &= E I_z \kappa_x(x),
-\end{align*}
+\end{aligned}
 ```
 
-where $I_z = \int_A y^2 \\, dA$ is the second moment of inertia about $z$ and $\kappa_x(x)=\left. \frac{d \vartheta_z}{dx}\right|_{x}$ is the curvature about $z$.
+where $I_z = \int_A y^2 \, dA$ is the second moment of inertia about $z$ and $\kappa_x(x)=\left. \frac{d \vartheta_z}{dx}\right|_{x}$ is the curvature about $z$.
 
 ### Putting it all together
 
@@ -160,7 +166,7 @@ where $q_k$ are coefficients we can calculate for any kind of load. If we substi
 \sum F_y: \, E I_z \sum_{k=1}^{n} v_k \left( \frac{\pi k}{L} \right)^4 \sin \left( \frac{\pi k x}{L} \right) = \sum_{k=1}^{n} q_k \, \sin \left( \frac{\pi k x}{L} \right),
 ```
 
-and this is where the genious of Navier truly reveals itself. If we now multiply this by $\sin \left( \frac{\pi j x}{L} \right)$ for an arbitrary $j \in \\{ 1, \ldots, n \\}$ and make use of some trigonometric identities, the equations decouple:
+and this is where the genious of Navier truly reveals itself. If we now multiply this by $\sin \left( \frac{\pi j x}{L} \right)$ for an arbitrary $j \in \{ 1, \ldots, n \}$ and make use of some trigonometric identities, the equations decouple:
 
 ```{math}
 v_j E I_z \left( \frac{\pi j}{L} \right)^4 \sin \left( \frac{\pi j x}{L} \right) = q_j \, \sin \left( \frac{\pi j x}{L} \right),
@@ -172,12 +178,12 @@ and we can calculate the coefficient of the $j^{th}$ displacement mode as
 v_j = q_j \frac{L^4}{\pi^4 j^4 E I_z}.
 ```
 
-Repeating this simple calculation for all $j \in \\{ 1, \ldots, n \\}$, yields the approximation of the solution in the form of {eq}`eq_bernoulli_beamXY_v_sine_series_expansion`.
+Repeating this simple calculation for all $j \in \{ 1, \ldots, n \}$, yields the approximation of the solution in the form of {eq}`eq_bernoulli_beamXY_v_sine_series_expansion`.
 
 To extend this for distributed moment loads, all we have to do is to take a look at equation {eq}`eq_bernoulli_beamXY_final`, which suggests that the moment load $p_{zz}$ needs to be expressed as
 
 ```{math}
-:label: eq_bernoulli_beamXY_q_sine_series_expansion
+:label: eq_bernoulli_beamXY_pzz_cosine_series_expansion
 p_{zz}(x) \approx \overline{p}_{zz}(x) = \sum_{k=1}^{n} r_k \, \cos \left( \frac{\pi k x}{L} \right),
 ```
 
@@ -192,13 +198,13 @@ If all $v_j$ are calculated, we can compute all quantities of interest:
 
 ```{math}
 :label: eq_bernoulli_beamXY_summary
-\begin{align*}
+\begin{aligned}
 v(x) \approx \overline{v}(x) &= \sum_{k=1}^{n} v_k \, \sin \left( \frac{\pi k x}{L} \right) \\
 \vartheta_z(x) \approx \overline{\vartheta}_z(x) &= \sum_{k=1}^{n} v_k \, \frac{\pi k}{L} \, \cos \left( \frac{\pi k x}{L} \right) \\
 \kappa_z(x) \approx \overline{\kappa}_z(x) &= \sum_{k=1}^{n} -v_k \, \left( \frac{\pi k}{L} \right)^2 \sin \left( \frac{\pi k x}{L} \right) \\
 M_z(x) \approx \overline{M}_z(x) &= \sum_{k=1}^{n} -v_k \, EI_z \, \left( \frac{\pi k}{L} \right)^2 \sin \left( \frac{\pi k x}{L} \right) \\
 V_y(x) \approx \overline{V}_y(x) &= \sum_{k=1}^{n} \left[ v_k \, EI_z \, \left( \frac{\pi k}{L} \right)^3 - r_k \right] \cos \left( \frac{\pi k x}{L} \right)
-\end{align*}
+\end{aligned}
 ```
 
 The cosine series of $p_{zz}$ is complete only if it includes the constant term
@@ -235,7 +241,7 @@ We have $n$ number of coefficients to determine, so we need $n$ independent expe
 \int_0^L q(x) \phi_{i}(x) dx = \int_0^L \overline{q}(x) \phi_{i}(x) dx
 ```
 
-for all $i \in \\{ 1, \ldots, n \\}$, where $\phi_{i}(x)= \sin \left( \frac{\pi i x}{L} \right)$. Utilizing some trigonometric identities again, for the $i^{th}$ equation this gives
+for all $i \in \{ 1, \ldots, n \}$, where $\phi_{i}(x)= \sin \left( \frac{\pi i x}{L} \right)$. Utilizing some trigonometric identities again, for the $i^{th}$ equation this gives
 
 ```{math}
 :label: eq_bernoulli_beamXY_q_coefficient_formula
@@ -273,7 +279,7 @@ q_i = \frac{2}{L} F \sin \left( \frac{\pi i}{L} x_F \right).
 
 #### Distributed vertical load of constant intensity
 
-Take a uniformly distributed vertical load now, with an intensity of $\hat{q}$, applied over the interval $\[a, b\]$:
+Take a uniformly distributed vertical load now, with an intensity of $\hat{q}$, applied over the interval $[a, b]$:
 
 ```{math}
 q(x) =
