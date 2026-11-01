@@ -1,3 +1,9 @@
+---
+myst:
+  html_meta:
+    description: "Derivation of Navier's double Fourier series solution for simply supported Mindlin-Reissner (Uflyand-Mindlin) plates with shear deformation."
+---
+
 # Navier's Solution of Simply-Supported Mindlin-Reissner Plates
 
 ## Behavior of Mindlin-Reissner Plates Under Static Loads
@@ -24,24 +30,24 @@ The equilibrium equations for an infinitesimally small section of the plate are:
 
 ```{math}
 :label: eq_equilibrium_equations_mindlin
-\begin{align*}
+\begin{aligned}
 \sum F_z:& \quad p_{z}(x,y) + \left. \frac{\partial v_x}{\partial x}\right|_{(x,y)} + \left.\frac{\partial v_y}{\partial y}\right|_{(x,y)} &= 0, \\
 \sum M_x:& \quad p_{xx}(x,y) - \left.\frac{\partial m_y}{\partial y}\right|_{(x,y)} - \left.\frac{\partial m_{xy}}{\partial x}\right|_{(x,y)} + v_y(x,y) &= 0, \\
 \sum M_y:& \quad p_{yy}(x,y) + \left.\frac{\partial m_x}{\partial x}\right|_{(x,y)} + \left.\frac{\partial m_{xy}}{\partial y}\right|_{(x,y)} - v_x(x,y) &= 0,
-\end{align*}
+\end{aligned}
 ```
 
 where the internal forces for a plate of constant thickness $t$ are defined as:
 
 ```{math}
 :label: eq_internal_forces_mindlin
-\begin{align*}
+\begin{aligned}
 m_x(x,y) &= \int_{-t/2}^{t/2} z \, \sigma_x(x,y,z) dz, \\
 m_y(x,y) &= \int_{-t/2}^{t/2} z \, \sigma_y(x,y,z) dz, \\
 m_{xy}(x,y) &= \int_{-t/2}^{t/2} z \, \tau_{xy}(x,y,z) dz, \\
 v_x(x,y) &= \int_{-t/2}^{t/2} \tau_{xz}(x,y,z) dz, \\
 v_y(x,y) &= \int_{-t/2}^{t/2} \tau_{yz}(x,y,z) dz.
-\end{align*}
+\end{aligned}
 ```
 
 These equations can be summarized using the following matrix notation:
@@ -91,24 +97,24 @@ The displacement field is described by:
 
 ```{math}
 :label: eq_displacement_field_mindlin
-\begin{align*}
+\begin{aligned}
 u(x,y,z) &= z \, \vartheta_y(x,y), \\
 v(x,y,z) &= -z \, \vartheta_x(x,y), \\
 w(x,y,z) &= w(x,y),
-\end{align*}
+\end{aligned}
 ```
 
 where $w(x,y)$, $\vartheta_y(x,y)$, and $\vartheta_x(x,y)$ are the reduced displacement functions. The relationship between the components of the small-strain tensor and the reduced displacement field is:
 
 ```{math}
 :label: eq_strain_displacement_equations_mindlin
-\begin{align*}
+\begin{aligned}
 \varepsilon_x(x,y,z) &= \left. \frac{\partial u}{\partial x} \right|_{(x,y)} = z \, \left. \frac{\partial \vartheta_y}{\partial x} \right|_{(x,y)} = z \, \kappa_{x}(x,y), \\
 \varepsilon_y(x,y,z) &= \left. \frac{\partial v}{\partial y} \right|_{(x,y)} = -z \, \left. \frac{\partial \vartheta_x}{\partial y} \right|_{(x,y)} = z \, \kappa_{y}(x,y), \\
 \gamma_{xy}(x,y,z) &= \left. \frac{\partial u}{\partial y} \right|_{(x,y)} + \left. \frac{\partial v}{\partial x} \right|_{(x,y)} = z \, \left. \left( \frac{\partial \vartheta_y}{\partial y} - \frac{\partial \vartheta_x}{\partial x} \right) \right|_{(x,y)} = z \, \kappa_{xy}(x,y), \\
 \gamma_{xz}(x,y,z) &= \left. \frac{\partial u}{\partial z} \right|_{(x,y)} + \left. \frac{\partial w}{\partial x} \right|_{(x,y)} = \vartheta_y(x,y) + \left. \frac{\partial w}{\partial x} \right|_{(x,y)}, \\
 \gamma_{yz}(x,y,z) &= \left. \frac{\partial v}{\partial z} \right|_{(x,y)} + \left. \frac{\partial w}{\partial x} \right|_{(x,y)} = -\vartheta_x(x,y) + \left. \frac{\partial w}{\partial y} \right|_{(x,y)}.
-\end{align*}
+\end{aligned}
 ```
 
 ```{note}
@@ -217,9 +223,8 @@ where $E$ is Young's modulus, $\nu$ is Poisson's ratio, $G$ is the shear modulus
 Combining the equilibrium equations {eq}`eq_equilibrium_equations_mindlin` with the geometric and material relationships {eq}`eq_strain_displacement_equations_mindlin` and {eq}`eq_reduced_material_equations_mindlin`, we obtain the following partial differential equations:
 
 ```{math}
-:nowrap:
 :label: eq_PDE_mindlin
-\begin{align*}
+\begin{aligned}
 \sum F_z:& \qquad 
 &S_{44}\, \left( \frac{\partial \vartheta_x}{\partial y}
 - \frac{\partial^2 w}{\partial y^2} \right)
@@ -235,7 +240,7 @@ Combining the equilibrium equations {eq}`eq_equilibrium_equations_mindlin` with 
 + D_{12}\,\frac{\partial^2 \vartheta_x}{\partial x\,\partial y}
 + D_{66}\,\left( \frac{\partial^2 \vartheta_x}{\partial x\,\partial y} - \frac{\partial^2 \vartheta_y}{\partial y^2} \right) & \\
 && + S_{55}\, \left( \vartheta_y + \frac{\partial w}{\partial x} \right) &= p_{yy}.
-\end{align*}
+\end{aligned}
 ```
 
 These PDEs, together with the appropriate boundary conditions, defines the boundary-value problem (BVP) for a Mindlin-Reissner plate.
@@ -246,12 +251,12 @@ The boundary conditions for a simply-supported Mindlin-Reissner plate are:
 
 ```{math}
 :label: eq_BC_mindlin
-\begin{align*}
+\begin{aligned}
 w(x, 0) &= w(x, L_y) = 0 \qquad &\forall x \in (0, L_x), \\
 w(0, y) &= w(L_x, y) = 0 \qquad &\forall y \in (0, L_y), \\
 m_x(0, y) &= m_x(L_x, y) = 0 \qquad &\forall y \in (0, L_y), \\
 m_y(x, 0) &= m_y(x, L_y) = 0 \qquad &\forall x \in (0, L_x).
-\end{align*}
+\end{aligned}
 ```
 
 Equations {eq}`eq_PDE_mindlin` and {eq}`eq_BC_mindlin` together constitute the BVP for a simply-supported Mindlin-Reissner plate.
@@ -262,26 +267,26 @@ To simplify further expressions, we introduce the following notation:
 
 ```{math}
 :label: eq_Si_Sj_notation_mindlin
-\begin{align*}
+\begin{aligned}
 &S_i(x) = \sin \left(\frac{\pi \,i \,x}{Lx}\right), \qquad
 &S_j(y) = \sin \left(\frac{\pi \,j \,y}{Ly}\right), \\
 &C_i(x) = \cos \left(\frac{\pi \,i \,x}{Lx}\right), \qquad
 &C_j(y) = \cos \left(\frac{\pi \,j \,y}{Ly}\right).
-\end{align*}
+\end{aligned}
 ```
 
 The displacements and loads are approximated as:
 
 ```{math}
 :label: eq_approx_mindlin
-\begin{align*}
+\begin{aligned}
 w(x, y) \approx \overline{w}(x, y) &= \sum_{i=1}^m \sum_{j=1}^n w^{(ij)} \, S_i(x) \, S_j(y), \\
 \vartheta_x(x, y) \approx \overline{\vartheta}_x(x, y) &= \sum_{i=1}^m \sum_{j=1}^n \vartheta_x^{(ij)} \, S_i(x) \, C_j(y), \\
 \vartheta_y(x, y) \approx \overline{\vartheta}_y(x, y) &= \sum_{i=1}^m \sum_{j=1}^n \vartheta_y^{(ij)} \, C_i(x) \, S_j(y), \\
 p_z(x, y) \approx \overline{p}_z(x, y) &= \sum_{i=1}^m \sum_{j=1}^n p_z^{(ij)} \, S_i(x) \, S_j(y), \\
 p_{xx}(x, y) \approx \overline{p}_{xx}(x, y) &= \sum_{i=1}^m \sum_{j=1}^n p_{xx}^{(ij)} \, S_i(x) \, C_j(y), \\
 p_{yy}(x, y) \approx \overline{p}_{yy}(x, y) &= \sum_{i=1}^m \sum_{j=1}^n p_{yy}^{(ij)} \, C_i(x) \, S_j(y).
-\end{align*}
+\end{aligned}
 ```
 
 Substituting the approximations from {eq}`eq_approx_mindlin` into {eq}`eq_PDE_mindlin`, using trigonometric identities and rearranging, we find that the solution for the unknown coefficients $w^{(ij)}$, $\vartheta_x^{(ij)}$ and $\vartheta_y^{(ij)}$ can be obtained from
@@ -310,11 +315,11 @@ and load coefficients
 
 ```{math}
 :label: eq_load_coeff_expressions_mindlin
-\begin{align*}
+\begin{aligned}
 p_z^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_z(x,y) \, S_i(x) \, S_j(y) \, dxdy, \\
 p_{xx}^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_{xx}(x,y) \, S_i(x) \, C_j(y) \, dxdy, \\
 p_{yy}^{(ij)} &= \frac{4}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_{yy}(x,y) \, C_i(x) \, S_j(y) \, dxdy.
-\end{align*}
+\end{aligned}
 ```
 
 ### Zero-order terms of moment loads
@@ -323,10 +328,10 @@ The series of $p_{xx}$ and $p_{yy}$ in {eq}`eq_approx_mindlin` are cosine series
 
 ```{math}
 :label: eq_zero_order_load_coeff_expressions_mindlin
-\begin{align*}
+\begin{aligned}
 p_{xx}^{(i0)} &= \frac{2}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_{xx}(x,y) \, S_i(x) \, dxdy, \\
 p_{yy}^{(0j)} &= \frac{2}{L_x \, L_y} \int_0^{L_y} \int_0^{L_x} p_{yy}(x,y) \, S_j(y) \, dxdy.
-\end{align*}
+\end{aligned}
 ```
 
 For the harmonics $(i, 0)$, the basis functions of $w$ and $\vartheta_y$ vanish identically, and the second row of {eq}`eq_solution_ij_mindlin` decouples into

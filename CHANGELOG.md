@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The documentation is written in MyST Markdown instead of reStructuredText, and the notebooks are rendered with MyST-NB instead of nbsphinx.
+- The user guide is split into separate pages for setting up the domains, specifying boundary conditions and linear static analysis, all of it living in the `user_guide` folder.
+- The API reference uses `autosummary`, with a separate page for every class, and type hints are shown in the descriptions of the parameters (#17).
+- The enumerations (`MechanicalModelType`, `IntegrationMethod`, `PostprocMethod`) are part of the API reference, and the documentation builds without warnings.
+
+### Added
+
+- LLM-friendly documentation with `sphinx-llm`: `llms.txt`, `llms-full.txt` and a Markdown version of every page, with a page on using the library with LLMs. To keep LLM contexts small, the index and the bundle only contain the pages that show the usage of the library and the API reference.
+- The type aliases `Float1d` and `Float2d` and the type variables `LoadDomainType` and `LoadValueType` are exported from `sigmaepsilon.solid.fourier.loads`, and documented.
+
 ## [2.4.0] - 2026-10-31
 
 ### Added

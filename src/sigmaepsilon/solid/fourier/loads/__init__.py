@@ -1,4 +1,4 @@
-from .loads import LoadCase, LoadGroup
+from .loads import LoadCase, LoadGroup, Float1d, Float2d, LoadDomainType, LoadValueType
 from .lineload import LineLoad
 from .pointload import PointLoad
 from .rectangleload import RectangleLoad
@@ -11,4 +11,8 @@ __all__ = [
     "PointLoad",
     "RectangleLoad",
     "DiskLoad",
+    "Float1d",
+    "Float2d",
+    "LoadDomainType",
+    "LoadValueType",
 ]

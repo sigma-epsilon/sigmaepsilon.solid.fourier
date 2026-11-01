@@ -1,4 +1,3 @@
-
 * Provides semi-analytical solutions for beam and plate problems.
 * Features an intuitive, high-level interface for defining various load types.
 * Supports arbitrary load definitions, with coefficients calculated by Gauss-Legendre quadrature or, optionally, Monte Carlo integration.

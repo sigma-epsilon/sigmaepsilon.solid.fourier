@@ -1,3 +1,9 @@
+---
+myst:
+  html_meta:
+    description: "Derivation of Navier's Fourier series solution for simply supported Timoshenko-Ehrenfest beams, which account for shear deformation."
+---
+
 
 # Navier's Solution for Simply-Supported Timoshenko-Ehrenfest Beams
 
@@ -90,23 +96,23 @@ Assuming a linear elastic material without initial stresses (the undeformed conf
 
 ```{math}
 :label: eq_mat_timoshenko_beamXY
-\begin{align*}
+\begin{aligned}
 \varepsilon_x (x,y,z) &= E \, \sigma_x (x,y,z), \\
 \gamma_{xy} (x,y,z) &= \overline{G} \, \tau_{xy} (x,y,z)
-\end{align*}
+\end{aligned}
 ```
 
 where $E$ is Young's modulus of elasticity and $\overline{G}$ is the shear modulus, with the effect of the appropriate shear correction factor included. If we combine {eq}`eq_def_Mz_beamXY_timoshenko`, {eq}`eq_def_Vy_beamXY_timoshenko` with the material equations {eq}`eq_mat_timoshenko_beamXY` and the geometric relationships {eq}`eq_geom_epsxx_timoshenko_beamXY` and {eq}`eq_geom_epsxy_timoshenko_beamXY`, we obtain the relationships between the generalized internal dynams $M_z$ and $V_y$ and the generalized strain components $\kappa_x$ and $\gamma_{xy}$:
 
 ```{math}
 :label: eq_timoshenko_beamXY_generalized
-\begin{align*}
+\begin{aligned}
 M_z(x) = E I_z \kappa_x(x), \\
 V_y(x) = \overline{G} A \gamma_{xy}
-\end{align*}
+\end{aligned}
 ```
 
-where $I_z = \int_A y^2 \\, dA$ is the second moment of inertia about $z$ and $\kappa_x(x)=\frac{d \vartheta_z(x)}{dx}$ is the curvature about $z$.
+where $I_z = \int_A y^2 \, dA$ is the second moment of inertia about $z$ and $\kappa_x(x)=\frac{d \vartheta_z(x)}{dx}$ is the curvature about $z$.
 
 ### Putting it all together
 
@@ -114,10 +120,10 @@ If we take the first derivatives of the equations of {eq}`eq_timoshenko_beamXY_g
 
 ```{math}
 :label: eq_timoshenko_beamXY_final
-\begin{align*}
+\begin{aligned}
 \sum F_y&: \quad \overline{G} A \left( \frac{d^2 v(x)}{dx^2} - \frac{d \vartheta_z(x)}{dx} \right) + p_{y}(x) &= 0, \\
 \sum M_z&: \quad  E I_z \frac{d^2 \vartheta_z(x)}{dx^2} + \overline{G} A \left( \frac{d v(x)}{dx} - \vartheta_z(x) \right)  + p_{zz}(x) &= 0.
-\end{align*}
+\end{aligned}
 ```
 
 These DEs alongside with the sufficient number of boundary conditions, completes the boundary-value problem (BVP) of a Timoshenko-Ehrenfest beam.
@@ -139,20 +145,20 @@ The solution is identical in approach to the one for Euler-Bernoulli beams descr
 
 ```{math}
 :label: eq_timoshenko_beamXY_displacement_series_expansion
-\begin{align*}
+\begin{aligned}
 v(x) \approx \overline{v}(x) &= \sum_{k=1}^{n} v^{(k)} \, \sin \left( \frac{\pi k x}{L} \right), \\
 \vartheta_z(x) \approx \overline{\vartheta}_z(x) &= \sum_{k=1}^{n} \vartheta_z^{(k)} \, \cos \left( \frac{\pi k x}{L} \right)
-\end{align*}
+\end{aligned}
 ```
 
 for the displacements and
 
 ```{math}
 :label: eq_timoshenko_beamXY_load_series_expansion
-\begin{align*}
+\begin{aligned}
 q(x) \approx \overline{q}(x) &= \sum_{k=1}^{n} q^{(k)} \, \sin \left( \frac{\pi k x}{L} \right), \\
 p_{zz}(x) \approx \overline{p}_{zz}(x) &= \sum_{k=1}^{n} p_{zz}^{(k)} \, \cos \left( \frac{\pi k x}{L} \right)
-\end{align*}
+\end{aligned}
 ```
 
 for the distributed forces. Upon substitution of {eq}`eq_timoshenko_beamXY_displacement_series_expansion` and {eq}`eq_timoshenko_beamXY_load_series_expansion` into {eq}`eq_timoshenko_beamXY_final` and utilizing a few trigonometric identities, the solutions for the different modes decouple. The solution for the unknowns of mode $k$ comes down to the solution of the following linear system:
@@ -177,14 +183,14 @@ If all $v^{(k)}$ and $\vartheta_z^{(k)}$ has been calculated, we can compute all
 
 ```{math}
 :label: eq_timoshenko_beamXY_summary
-\begin{align*}
+\begin{aligned}
 v(x) \approx \overline{v}(x) &= \sum_{k=1}^{n} v^{(k)} \, \sin \left( \frac{\pi k x}{L} \right) \\
 \vartheta_z(x) \approx \overline{\vartheta}_z(x) &= \sum_{k=1}^{n} \vartheta_z^{(k)} \, \cos \left( \frac{\pi k x}{L} \right) \\
 \kappa_z(x) \approx \overline{\kappa}_z(x) &= - \sum_{k=1}^{n} \vartheta_z^{(k)} \, \frac{\pi k}{L} \, \sin \left( \frac{\pi k x}{L} \right) \\
 \gamma_{xy}(x) \approx \overline{\gamma}_{xy}(x) &= \sum_{k=1}^{n} \left( v^{(k)} \frac{\pi k}{L} - \vartheta_z^{(k)}\right) \, \cos \left( \frac{\pi k x}{L} \right) \\
 M_z(x) \approx \overline{M}_z(x) &= - \sum_{k=1}^{n} EI_z \vartheta_z^{(k)} \, \frac{\pi k}{L} \, \sin \left( \frac{\pi k x}{L} \right) \\
 V_y(x) \approx \overline{V}_y(x) &= \sum_{k=1}^{n} \overline{G} A \left( v^{(k)} \frac{\pi k}{L} - \vartheta_z^{(k)}\right) \, \cos \left( \frac{\pi k x}{L} \right)
-\end{align*}
+\end{aligned}
 ```
 
 The cosine series of $p_{zz}$ is complete only if it includes the constant term $p_{zz}^{(0)} = \frac{1}{L} \int_0^L p_{zz}(x) dx$, the mean of the moment load. For $k=0$, the basis function of $v$ vanishes, and the second row of the linear system above gives $\vartheta_z^{(0)} = p_{zz}^{(0)} / \overline{G} A$. Hence, the mean of the moment load adds a constant rotation $\vartheta_z^{(0)}$, a constant shear strain $-\vartheta_z^{(0)}$ and a constant shear force $-p_{zz}^{(0)}$ to the results, but no deflection or bending moment.
